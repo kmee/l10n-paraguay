@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Departamentos de Paraguay usando res.country.state -->
+        <record id="state_py_concepcion" model="res.country.state">
+            <field name="name">Concepción</field>
+            <field name="code">PY-1</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">1</field>
+        </record>
+        <record id="state_py_san_pedro" model="res.country.state">
+            <field name="name">San Pedro</field>
+            <field name="code">PY-2</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">2</field>
+        </record>
+        <record id="state_py_cordillera" model="res.country.state">
+            <field name="name">Cordillera</field>
+            <field name="code">PY-3</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">3</field>
+        </record>
+        <record id="state_py_guaira" model="res.country.state">
+            <field name="name">Guairá</field>
+            <field name="code">PY-4</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">4</field>
+        </record>
+        <record id="state_py_caaguazu" model="res.country.state">
+            <field name="name">Caaguazú</field>
+            <field name="code">PY-5</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">5</field>
+        </record>
+        <record id="state_py_caazapa" model="res.country.state">
+            <field name="name">Caazapá</field>
+            <field name="code">PY-6</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">6</field>
+        </record>
+        <record id="state_py_itapua" model="res.country.state">
+            <field name="name">Itapúa</field>
+            <field name="code">PY-7</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">7</field>
+        </record>
+        <record id="state_py_misiones" model="res.country.state">
+            <field name="name">Misiones</field>
+            <field name="code">PY-8</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">8</field>
+        </record>
+        <record id="state_py_paraguari" model="res.country.state">
+            <field name="name">Paraguarí</field>
+            <field name="code">PY-9</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">9</field>
+        </record>
+        <record id="state_py_alto_parana" model="res.country.state">
+            <field name="name">Alto Paraná</field>
+            <field name="code">PY-10</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">10</field>
+        </record>
+        <record id="state_py_central" model="res.country.state">
+            <field name="name">Central</field>
+            <field name="code">PY-11</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">11</field>
+        </record>
+        <record id="state_py_neembucu" model="res.country.state">
+            <field name="name">Ñeembucú</field>
+            <field name="code">PY-12</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">12</field>
+        </record>
+        <record id="state_py_amambay" model="res.country.state">
+            <field name="name">Amambay</field>
+            <field name="code">PY-13</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">13</field>
+        </record>
+        <record id="state_py_canindeyu" model="res.country.state">
+            <field name="name">Canindeyú</field>
+            <field name="code">PY-14</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">14</field>
+        </record>
+        <record id="state_py_presidente_hayes" model="res.country.state">
+            <field name="name">Presidente Hayes</field>
+            <field name="code">PY-15</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">15</field>
+        </record>
+        <record id="state_py_boqueron" model="res.country.state">
+            <field name="name">Boquerón</field>
+            <field name="code">PY-16</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">16</field>
+        </record>
+        <record id="state_py_alto_paraguay" model="res.country.state">
+            <field name="name">Alto Paraguay</field>
+            <field name="code">PY-17</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">17</field>
+        </record>
+        <!-- Asunción como distrito especial -->
+        <record id="state_py_asuncion" model="res.country.state">
+            <field name="name">Asunción</field>
+            <field name="code">PY-ASU</field>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">11</field> <!-- Mismo código que Central -->
+        </record>
+    </data>
+</odoo>

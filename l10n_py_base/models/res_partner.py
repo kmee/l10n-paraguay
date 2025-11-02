@@ -60,37 +60,36 @@ class ResPartner(models.Model):
 
     # ============== CAMPOS DE UBICACIÓN ==============
 
+    l10n_py_district_id = fields.Many2one(
+        'l10n_py.district',
+        string='Distrito',
+        domain="[('state_id', '=', state_id)]",
+        help='Distrito de Paraguay (nivel intermedio entre departamento y ciudad)'
+    )
+
+    # Campos computados de solo lectura para códigos SET
     l10n_py_department_code = fields.Integer(
-        string='Código Departamento',
+        string='Código Departamento SET',
+        related='state_id.l10n_py_code',
+        store=True,
+        readonly=True,
         help='Código del departamento según SET'
     )
 
-    l10n_py_department_name = fields.Char(
-        string='Departamento',
-        compute='_compute_location_names',
-        store=True
-    )
-
     l10n_py_district_code = fields.Integer(
-        string='Código Distrito',
+        string='Código Distrito SET',
+        related='l10n_py_district_id.code',
+        store=True,
+        readonly=True,
         help='Código del distrito según SET'
     )
 
-    l10n_py_district_name = fields.Char(
-        string='Distrito',
-        compute='_compute_location_names',
-        store=True
-    )
-
     l10n_py_city_code = fields.Integer(
-        string='Código Ciudad',
+        string='Código Ciudad SET',
+        related='city_id.l10n_py_code',
+        store=True,
+        readonly=True,
         help='Código de la ciudad según SET'
-    )
-
-    l10n_py_city_name = fields.Char(
-        string='Ciudad',
-        compute='_compute_location_names',
-        store=True
     )
 
     # ============== CAMPOS ADICIONALES ==============
@@ -141,34 +140,32 @@ class ResPartner(models.Model):
             else:
                 partner.l10n_py_ruc_full = False
 
-    @api.depends('l10n_py_department_code', 'l10n_py_district_code', 'l10n_py_city_code')
-    def _compute_location_names(self):
-        """Obtener nombres de ubicaciones desde los códigos"""
-        Department = self.env['l10n_py.department']
-        District = self.env['l10n_py.district']
-        City = self.env['l10n_py.city']
+    @api.onchange('state_id')
+    def _onchange_state_id(self):
+        """Limpiar distrito y ciudad cuando cambia el departamento"""
+        if self.state_id and self.l10n_py_district_id and self.l10n_py_district_id.state_id != self.state_id:
+            self.l10n_py_district_id = False
+        if self.state_id and self.city_id and self.city_id.state_id != self.state_id:
+            self.city_id = False
 
-        for partner in self:
-            # Departamento
-            if partner.l10n_py_department_code:
-                dept = Department.search([('code', '=', partner.l10n_py_department_code)], limit=1)
-                partner.l10n_py_department_name = dept.name if dept else (partner.state_id.name if partner.state_id else '')
-            else:
-                partner.l10n_py_department_name = partner.state_id.name if partner.state_id else ''
+    @api.onchange('l10n_py_district_id')
+    def _onchange_district_id(self):
+        """Filtrar ciudades por distrito"""
+        if self.l10n_py_district_id:
+            if self.city_id and self.city_id.l10n_py_district_id != self.l10n_py_district_id:
+                self.city_id = False
+            # Actualizar state_id si no está definido
+            if not self.state_id and self.l10n_py_district_id.state_id:
+                self.state_id = self.l10n_py_district_id.state_id
 
-            # Distrito
-            if partner.l10n_py_district_code:
-                dist = District.search([('code', '=', partner.l10n_py_district_code)], limit=1)
-                partner.l10n_py_district_name = dist.name if dist else ''
-            else:
-                partner.l10n_py_district_name = ''
-
-            # Ciudad
-            if partner.l10n_py_city_code:
-                city = City.search([('code', '=', partner.l10n_py_city_code)], limit=1)
-                partner.l10n_py_city_name = city.name if city else (partner.city or '')
-            else:
-                partner.l10n_py_city_name = partner.city or ''
+    @api.onchange('city_id')
+    def _onchange_city_id(self):
+        """Actualizar distrito y departamento desde ciudad"""
+        if self.city_id:
+            if self.city_id.l10n_py_district_id and not self.l10n_py_district_id:
+                self.l10n_py_district_id = self.city_id.l10n_py_district_id
+            if self.city_id.state_id and not self.state_id:
+                self.state_id = self.city_id.state_id
 
     # ============== PRIVATE METHODS ==============
 
@@ -339,7 +336,7 @@ class ResPartner(models.Model):
 
         # Validar ubicación
         if self.country_id and self.country_id.code == 'PY':
-            if not self.l10n_py_department_code:
+            if not self.state_id:
                 errors.append(_('El departamento es obligatorio para clientes paraguayos'))
 
         if errors:

@@ -23,14 +23,25 @@
                             <field name="l10n_py_dncp"/>
                         </group>
                     </group>
-                    <group string="Ubicación">
-                        <field name="l10n_py_department_code"/>
-                        <field name="l10n_py_department_name" readonly="1"/>
-                        <field name="l10n_py_district_code"/>
-                        <field name="l10n_py_district_name" readonly="1"/>
-                        <field name="l10n_py_city_code"/>
-                        <field name="l10n_py_city_name" readonly="1"/>
-                        <field name="street_number"/>
+                    <group string="Ubicación" col="4">
+                        <group string="Ubicación Principal" colspan="2">
+                            <field name="state_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('country_id', '=', country_id)]"/>
+                            <field name="l10n_py_district_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"/>
+                            <field name="city_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   domain="[('state_id', '=', state_id)]"/>
+                            <field name="street_number"/>
+                        </group>
+                        <group string="Códigos SET (Solo lectura)" colspan="2">
+                            <field name="l10n_py_department_code" readonly="1"/>
+                            <field name="l10n_py_district_code" readonly="1" 
+                                   attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"/>
+                            <field name="l10n_py_city_code" readonly="1"/>
+                        </group>
                     </group>
                     <group>
                         <button name="validate_fiscal_data" string="Validar Datos Fiscales" type="object" class="oe_highlight"/>

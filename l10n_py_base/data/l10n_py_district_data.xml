@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Distritos de Paraguay - Departamento Central (código 11) -->
+        <record id="district_asuncion" model="l10n_py.district">
+            <field name="code">1101</field>
+            <field name="name">Asunción</field>
+            <field name="state_id" ref="state_py_central"/>
+        </record>
+        <record id="district_san_lorenzo" model="l10n_py.district">
+            <field name="code">1102</field>
+            <field name="name">San Lorenzo</field>
+            <field name="state_id" ref="state_py_central"/>
+        </record>
+        <record id="district_fernando_mora" model="l10n_py.district">
+            <field name="code">1103</field>
+            <field name="name">Fernando de la Mora</field>
+            <field name="state_id" ref="state_py_central"/>
+        </record>
+        <record id="district_lambare" model="l10n_py.district">
+            <field name="code">1104</field>
+            <field name="name">Lambaré</field>
+            <field name="state_id" ref="state_py_central"/>
+        </record>
+        <record id="district_luque" model="l10n_py.district">
+            <field name="code">1105</field>
+            <field name="name">Luque</field>
+            <field name="state_id" ref="state_py_central"/>
+        </record>
+        <!-- Agregar más distritos según necesidad -->
+    </data>
+</odoo>

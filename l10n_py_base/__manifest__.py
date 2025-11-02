@@ -24,15 +24,16 @@ This is a base module required by other Paraguayan localization modules.
     'license': 'LGPL-3',
     'depends': [
         'base',
+        'base_address_extended',
     ],
     'data': [
         # Security
         'security/ir.model.access.csv',
 
-        # Data
-        'data/l10n_py_departments.xml',
-        'data/l10n_py_districts.xml',
-        'data/l10n_py_cities.xml',
+        # Data - Orden importante: primero states, luego districts, luego cities
+        'data/res_country_state_data.xml',
+        'data/l10n_py_district_data.xml',
+        'data/res_city_data.xml',
 
         # Views
         'views/res_partner_views.xml',

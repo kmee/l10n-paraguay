@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Ciudades de Paraguay usando res.city -->
+        
+        <!-- Asunción -->
+        <record id="city_asuncion" model="res.city">
+            <field name="name">Asunción</field>
+            <field name="state_id" ref="state_py_central"/>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">110101</field>
+            <field name="l10n_py_district_id" ref="district_asuncion"/>
+        </record>
+        
+        <!-- San Lorenzo -->
+        <record id="city_san_lorenzo" model="res.city">
+            <field name="name">San Lorenzo</field>
+            <field name="state_id" ref="state_py_central"/>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">110201</field>
+            <field name="l10n_py_district_id" ref="district_san_lorenzo"/>
+        </record>
+        
+        <!-- Fernando de la Mora -->
+        <record id="city_fernando_mora" model="res.city">
+            <field name="name">Fernando de la Mora</field>
+            <field name="state_id" ref="state_py_central"/>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">110301</field>
+            <field name="l10n_py_district_id" ref="district_fernando_mora"/>
+        </record>
+        
+        <!-- Lambaré -->
+        <record id="city_lambare" model="res.city">
+            <field name="name">Lambaré</field>
+            <field name="state_id" ref="state_py_central"/>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">110401</field>
+            <field name="l10n_py_district_id" ref="district_lambare"/>
+        </record>
+        
+        <!-- Luque -->
+        <record id="city_luque" model="res.city">
+            <field name="name">Luque</field>
+            <field name="state_id" ref="state_py_central"/>
+            <field name="country_id" ref="base.py"/>
+            <field name="l10n_py_code">110501</field>
+            <field name="l10n_py_district_id" ref="district_luque"/>
+        </record>
+        
+        <!-- Agregar más ciudades según necesidad -->
+    </data>
+</odoo>

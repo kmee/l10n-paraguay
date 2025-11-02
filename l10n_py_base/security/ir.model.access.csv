@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_l10n_py_department_user,l10n_py.department user,model_l10n_py_department,,1,0,0,0
+access_l10n_py_department_manager,l10n_py.department manager,model_l10n_py_department,base.group_system,1,1,1,1
+access_l10n_py_district_user,l10n_py.district user,model_l10n_py_district,,1,0,0,0
+access_l10n_py_district_manager,l10n_py.district manager,model_l10n_py_district,base.group_system,1,1,1,1
+access_l10n_py_city_user,l10n_py.city user,model_l10n_py_city,,1,0,0,0
+access_l10n_py_city_manager,l10n_py.city manager,model_l10n_py_city,base.group_system,1,1,1,1

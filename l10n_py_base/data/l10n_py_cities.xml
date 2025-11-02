@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Ejemplos de ciudades principales - completar según necesidad -->
+        <record id="l10n_py_city_110101" model="l10n_py.city">
+            <field name="code">110101</field>
+            <field name="name">Asunción</field>
+            <field name="district_id" ref="l10n_py_dist_1101"/>
+        </record>
+        <!-- Agregar más ciudades según necesidad -->
+    </data>
+</odoo>

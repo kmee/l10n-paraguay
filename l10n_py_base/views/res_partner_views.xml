@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_py_base" model="ir.ui.view">
+        <field name="name">res.partner.form.py.base</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='contact_addresses']" position="after">
+                <page string="Datos Fiscales Paraguay" name="l10n_py_fiscal">
+                    <group>
+                        <group string="Identificación">
+                            <field name="l10n_py_taxpayer_type"/>
+                            <field name="l10n_py_ruc"/>
+                            <field name="l10n_py_dv" readonly="1"/>
+                            <field name="l10n_py_ruc_full" readonly="1"/>
+                            <field name="l10n_py_document_type"/>
+                            <field name="l10n_py_document_number"/>
+                        </group>
+                        <group string="Información Adicional">
+                            <field name="l10n_py_trade_name"/>
+                            <field name="l10n_py_economic_activity"/>
+                            <field name="l10n_py_is_diplomatic"/>
+                            <field name="l10n_py_dncp"/>
+                        </group>
+                    </group>
+                    <group string="Ubicación">
+                        <field name="l10n_py_department_code"/>
+                        <field name="l10n_py_department_name" readonly="1"/>
+                        <field name="l10n_py_district_code"/>
+                        <field name="l10n_py_district_name" readonly="1"/>
+                        <field name="l10n_py_city_code"/>
+                        <field name="l10n_py_city_name" readonly="1"/>
+                        <field name="street_number"/>
+                    </group>
+                    <group>
+                        <button name="validate_fiscal_data" string="Validar Datos Fiscales" type="object" class="oe_highlight"/>
+                        <button name="action_validate_with_set" string="Validar con SET" type="object"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

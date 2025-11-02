@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Ejemplos de distritos principales - completar según necesidad -->
+        <record id="l10n_py_dist_1101" model="l10n_py.district">
+            <field name="code">1101</field>
+            <field name="name">Asunción</field>
+            <field name="department_id" ref="l10n_py_dept_11"/>
+        </record>
+        <record id="l10n_py_dist_1102" model="l10n_py.district">
+            <field name="code">1102</field>
+            <field name="name">San Lorenzo</field>
+            <field name="department_id" ref="l10n_py_dept_11"/>
+        </record>
+        <record id="l10n_py_dist_1103" model="l10n_py.district">
+            <field name="code">1103</field>
+            <field name="name">Fernando de la Mora</field>
+            <field name="department_id" ref="l10n_py_dept_11"/>
+        </record>
+        <!-- Agregar más distritos según necesidad -->
+    </data>
+</odoo>

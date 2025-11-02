@@ -1,3 +1,1 @@
-from . import account_move
-from . import account_authorization
-from . import res_partner
+# No models in this module - only chart of accounts data

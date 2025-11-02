@@ -5,33 +5,25 @@
     'category': 'Accounting/Localizations/Account Charts',
     'summary': 'Localización contable para Paraguay',
     'description': """
-Localización Paraguaya - Contabilidad
-======================================
+Paraguay Chart of Accounts
+==========================
 
-Este módulo incluye:
---------------------
-    * Plan de cuentas estándar para Paraguay
-    * Configuración de impuestos (IVA 10%, IVA 5%, Exento)
-    * Gestión de timbrados (autorizaciones de facturación)
-    * Campos específicos para facturas paraguayas
-    * Validación de RUC (Registro Único de Contribuyentes)
-    * Cálculo automático de IVA discriminado
-    * Reportes de facturas según normativa paraguaya
+This module provides the Paraguayan chart of accounts and tax configuration:
 
-Características principales:
-----------------------------
-    * Control de timbrados con fechas de vigencia
-    * Numeración autorizada de facturas
-    * Discriminación automática de IVA 5%, 10% y exento
-    * Campo RUC en clientes y proveedores
-    * Conversión de montos a letras (guaraníes)
+* Standard chart of accounts for Paraguay
+* Tax configuration (IVA 10%, IVA 5%, Exempt)
+* Tax groups and fiscal positions
+
+This is the base accounting module. For additional features, install:
+- l10n_py_account: Accounting extensions (journals, authorizations)
+- l10n_py_edi_base: Electronic invoicing base functionality
     """,
     'author': 'KMEE',
     'website': 'https://github.com/kmee',
     'license': 'LGPL-3',
     'depends': [
         'account',
-        'base',
+        'l10n_py_base',
     ],
     'data': [
         # Security
@@ -42,13 +34,8 @@ Características principales:
         'data/account_chart_template_data.xml',
 
         # Views
-        'views/account_authorization_views.xml',
-        'views/account_move_views.xml',
-        'views/res_partner_views.xml',
     ],
     'demo': [
-        'demo/account_authorization_demo.xml',
-        'demo/res_partner_demo.xml',
     ],
     'installable': True,
     'application': False,

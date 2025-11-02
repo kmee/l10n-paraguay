@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# l10n_py_account/models/account_authorization.py
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from datetime import date

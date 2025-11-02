@@ -1,22 +1,9 @@
 {
     "name": "Paraguay - Accounting Extensions",
-    "version": "17.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Accounting/Localizations",
     "summary": "Accounting extensions for Paraguay localization",
-    "description": """
-Paraguay Accounting Extensions
-==============================
-
-This module provides accounting-specific functionality for Paraguay:
-
-* Account journal extensions (establishment, point of sale, timbrado)
-* Account authorization management (timbrados)
-* Account move extensions for Paraguayan requirements
-* Fiscal validations for accounting documents
-
-This module extends the basic Paraguayan localization with accounting features.
-    """,
-    "author": "KMEE",
+    "author": "KMEE, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-paraguay",
     "license": "LGPL-3",
     "depends": [

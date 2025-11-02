@@ -1,24 +1,9 @@
 {
     "name": "Paraguay - Base Localization",
-    "version": "17.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Localization",
     "summary": "Base localization data for Paraguay",
-    "description": """
-Paraguay Base Localization
-==========================
-
-This module provides the basic localization data for Paraguay:
-
-* RUC (Registro Único del Contribuyente) fields and validation
-* Document types (Cédula, Passport, etc.)
-* Taxpayer types (Contribuyente, No Contribuyente)
-* Location data (Departments, Districts, Cities)
-* Fiscal validation methods
-* Partner fiscal data extensions
-
-This is a base module required by other Paraguayan localization modules.
-    """,
-    "author": "KMEE",
+    "author": "KMEE, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-paraguay",
     "license": "LGPL-3",
     "depends": [

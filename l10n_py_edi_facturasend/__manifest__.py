@@ -1,35 +1,9 @@
 {
     "name": "Paraguay - FacturaSend EDI Connector",
-    "version": "17.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "FacturaSend connector for Electronic Invoicing in Paraguay",
-    "description": """
-FacturaSend EDI Connector for Paraguay
-======================================
-
-This module provides integration with FacturaSend service for electronic invoicing
-in Paraguay, compliant with SET (Subsecretaría de Estado de Tributación) requirements.
-
-Features:
----------
-* Integration with FacturaSend API
-* Document sending and status checking
-* Document cancellation
-* PDF and XML download
-* Automatic error handling and logging
-
-Requirements:
--------------
-* l10n_py_edi_base module must be installed
-* FacturaSend account credentials (API Key and Tenant ID)
-
-Configuration:
---------------
-1. Go to Settings > Technical > System Parameters
-2. Set l10n_py.edi_provider = 'facturasend'
-3. Configure connector in Facturación Electrónica > Connectors
-    """,
-    "author": "KMEE",
+    "author": "KMEE, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-paraguay",
     "license": "LGPL-3",
     "depends": [

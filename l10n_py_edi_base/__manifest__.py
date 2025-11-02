@@ -1,40 +1,9 @@
 {
     "name": "Paraguay - Electronic Invoicing Base",
-    "version": "17.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "Base module for Electronic Invoicing in Paraguay",
-    "description": """
-Paraguay Electronic Invoicing Base Module
-==========================================
-
-This module provides the base functionality for electronic invoicing in Paraguay,
-compliant with SET (Subsecretaría de Estado de Tributación) requirements.
-
-Features:
----------
-* Data models for electronic documents
-* Field extensions for account.move, res.partner, res.company
-* Validation of fiscal data (RUC, DV)
-* JSON builder for electronic documents
-* Support for multiple document types:
-  - Factura Electrónica
-  - Nota de Crédito Electrónica
-  - Nota de Débito Electrónica
-  - Nota de Remisión Electrónica
-  - Autofactura Electrónica
-
-Technical Information:
-----------------------
-* Compatible with SIFEN (Sistema Integrado de Facturación Electrónica Nacional)
-* Prepared for integration with multiple EDI providers
-* Support for contingency mode
-* QR code and KUDE generation ready
-
-This is the base module. You need to install a connector module:
-- l10n_py_edi_factpy: For FactPy integration
-- l10n_py_edi_facturasend: For FacturaSend integration
-    """,
-    "author": "KMEE",
+    "author": "KMEE, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-paraguay",
     "license": "LGPL-3",
     "depends": [

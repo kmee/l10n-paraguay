@@ -40,24 +40,30 @@ class ResCompany(models.Model):
         help='Código de actividad económica principal'
     )
     
+    # ============== CAMPOS DE UBICACIÓN (RELACIONADOS) ==============
+    # Los campos de ubicación se heredan del partner de la compañía
+    
     l10n_py_department_code = fields.Integer(
-        string='Código Departamento',
+        string='Código Departamento SET',
+        related='partner_id.l10n_py_department_code',
+        store=True,
+        readonly=True,
         help='Código del departamento según SET'
     )
     
-    l10n_py_department_name = fields.Char(
-        string='Departamento',
-        related='partner_id.state_id.name',
-        store=True
-    )
-    
     l10n_py_district_code = fields.Integer(
-        string='Código Distrito',
+        string='Código Distrito SET',
+        related='partner_id.l10n_py_district_code',
+        store=True,
+        readonly=True,
         help='Código del distrito según SET'
     )
     
     l10n_py_city_code = fields.Integer(
-        string='Código Ciudad',
+        string='Código Ciudad SET',
+        related='partner_id.l10n_py_city_code',
+        store=True,
+        readonly=True,
         help='Código de la ciudad según SET'
     )
     

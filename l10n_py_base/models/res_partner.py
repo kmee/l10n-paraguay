@@ -6,6 +6,8 @@ from odoo.exceptions import ValidationError
 import re
 import logging
 
+from ..validators.ruc_validator import RUCValidator
+
 _logger = logging.getLogger(__name__)
 
 
@@ -123,10 +125,10 @@ class ResPartner(models.Model):
 
     @api.depends('l10n_py_ruc')
     def _compute_dv(self):
-        """Calcular dígito verificador del RUC"""
+        """Calcular dígito verificador del RUC usando RUCValidator"""
         for partner in self:
             if partner.l10n_py_ruc:
-                partner.l10n_py_dv = self._calculate_dv(partner.l10n_py_ruc)
+                partner.l10n_py_dv = RUCValidator.get_check_digit(partner.l10n_py_ruc)
             else:
                 partner.l10n_py_dv = False
 
@@ -228,13 +230,14 @@ class ResPartner(models.Model):
 
     @api.constrains('l10n_py_ruc')
     def _check_ruc_format(self):
-        """Validar formato del RUC"""
+        """Validar formato del RUC usando RUCValidator"""
         for partner in self:
-            if partner.l10n_py_ruc and not self._validate_ruc_format(partner.l10n_py_ruc):
-                raise ValidationError(
-                    _('El RUC debe contener entre 6 y 8 dígitos numéricos. '
-                      'Formato inválido: %s') % partner.l10n_py_ruc
-                )
+            if partner.l10n_py_ruc:
+                is_valid, error_msg = RUCValidator.validate(partner.l10n_py_ruc)
+                if not is_valid:
+                    raise ValidationError(
+                        _('RUC inválido para %s: %s') % (partner.name or 'Partner', error_msg)
+                    )
 
     @api.constrains('l10n_py_document_type', 'l10n_py_document_number')
     def _check_document_number(self):
@@ -261,13 +264,15 @@ class ResPartner(models.Model):
 
     @api.onchange('l10n_py_ruc')
     def _onchange_ruc(self):
-        """Validar RUC al cambiar"""
+        """Validar y formatear RUC al cambiar"""
         if self.l10n_py_ruc:
-            # Limpiar formato
-            self.l10n_py_ruc = self.l10n_py_ruc.replace('-', '').replace(' ', '').strip()
+            # Normalizar RUC usando RUCValidator
+            ruc_number = RUCValidator.get_ruc_number(self.l10n_py_ruc)
+            self.l10n_py_ruc = ruc_number
 
             # Si es RUC válido, marcar como contribuyente
-            if self._validate_ruc_format(self.l10n_py_ruc):
+            is_valid, _ = RUCValidator.validate(self.l10n_py_ruc)
+            if is_valid:
                 self.l10n_py_taxpayer_type = '1'
 
     @api.onchange('country_id')
@@ -308,13 +313,18 @@ class ResPartner(models.Model):
             if not self.l10n_py_ruc:
                 errors.append(_('RUC es obligatorio para contribuyentes'))
             else:
-                # Validar DV
-                calculated_dv = self._calculate_dv(self.l10n_py_ruc)
-                if calculated_dv != self.l10n_py_dv:
-                    errors.append(
-                        _('El dígito verificador del RUC es incorrecto. '
-                          'Debería ser: %s') % calculated_dv
-                    )
+                # Validar RUC completo usando RUCValidator
+                is_valid, error_msg = RUCValidator.validate(self.l10n_py_ruc)
+                if not is_valid:
+                    errors.append(_('RUC inválido: %s') % error_msg)
+                else:
+                    # Validar DV
+                    calculated_dv = RUCValidator.get_check_digit(self.l10n_py_ruc)
+                    if calculated_dv != self.l10n_py_dv:
+                        errors.append(
+                            _('El dígito verificador del RUC es incorrecto. '
+                              'Debería ser: %s') % calculated_dv
+                        )
 
         # Validar documento
         if not self.l10n_py_document_type and not self.is_company:

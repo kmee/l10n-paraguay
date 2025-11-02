@@ -1,18 +1,19 @@
 # 🚀 GUIA RÁPIDO
+
 ## Melhorias Implementadas - Localização Paraguaia
 
 ---
 
 ## 📚 ÍNDICE DE DOCUMENTAÇÃO
 
-| Documento | Descrição |
-|-----------|-----------|
-| `GUIA_RAPIDO.md` | ⭐ Este arquivo - Referência rápida |
-| `RESUMO_IMPLEMENTACAO.md` | 📋 Resumo executivo das implementações |
-| `MELHORIAS_IMPLEMENTADAS.md` | 📖 Documentação técnica completa |
-| `PLAN/v2/analise.md` | 🔍 Análise original e propostas |
-| `PLAN/v2/guia_tecnico_implementacao.py` | 💻 Exemplos de código |
-| `PLAN/v2/roadmap_detalhado_implementacao.md` | 🗺️ Roadmap completo |
+| Documento                                    | Descrição                              |
+| -------------------------------------------- | -------------------------------------- |
+| `GUIA_RAPIDO.md`                             | ⭐ Este arquivo - Referência rápida    |
+| `RESUMO_IMPLEMENTACAO.md`                    | 📋 Resumo executivo das implementações |
+| `MELHORIAS_IMPLEMENTADAS.md`                 | 📖 Documentação técnica completa       |
+| `PLAN/v2/analise.md`                         | 🔍 Análise original e propostas        |
+| `PLAN/v2/guia_tecnico_implementacao.py`      | 💻 Exemplos de código                  |
+| `PLAN/v2/roadmap_detalhado_implementacao.md` | 🗺️ Roadmap completo                    |
 
 ---
 
@@ -169,13 +170,13 @@ self._log_error(...)                        # → log_record
 
 ## 📊 TIPOS DE DOCUMENTO
 
-| Código | Tipo |
-|--------|------|
-| 1 | Factura Electrónica |
-| 4 | Autofactura Electrónica |
-| 5 | Nota de Crédito Electrónica |
-| 6 | Nota de Débito Electrónica |
-| 7 | Nota de Remisión Electrónica |
+| Código | Tipo                         |
+| ------ | ---------------------------- |
+| 1      | Factura Electrónica          |
+| 4      | Autofactura Electrónica      |
+| 5      | Nota de Crédito Electrónica  |
+| 6      | Nota de Débito Electrónica   |
+| 7      | Nota de Remisión Electrónica |
 
 ---
 
@@ -198,18 +199,21 @@ Posição   Tamanho  Descrição
 ## ✅ CHECKLIST DE USO
 
 ### Para Validação de RUC
+
 - [ ] Importar `RUCValidator`
 - [ ] Chamar `validate()` antes de usar RUC
 - [ ] Usar `format_ruc()` para exibição
 - [ ] Tratar erros com mensagens retornadas
 
 ### Para Geração de CDC
+
 - [ ] Importar `CDCGenerator`
 - [ ] Validar todos os parâmetros
 - [ ] Armazenar CDC no campo apropriado
 - [ ] Validar CDC antes de enviar para SET
 
 ### Para Logging EDI
+
 - [ ] Herdar de `EDILoggingMixin` se necessário
 - [ ] Usar context manager para operações
 - [ ] Incluir dados de request/response
@@ -220,17 +224,20 @@ Posição   Tamanho  Descrição
 ## 🐛 TROUBLESHOOTING
 
 ### Erro: "RUC inválido"
+
 - Verificar formato (6-8 dígitos + hífen + DV)
 - Validar dígito verificador
 - Usar `RUCValidator.validate()` para detalhes
 
 ### Erro: "CDC deve ter 43 dígitos"
+
 - Verificar todos os parâmetros obrigatórios
 - RUC deve ter 6-8 dígitos
 - Estabelecimento e ponto expedição devem ter 3 dígitos
 - Sequência deve ser entre 1 e 9999999
 
 ### Erro ao importar validadores
+
 - Verificar instalação do módulo
 - Confirmar estrutura de diretórios
 - Atualizar lista de módulos
@@ -239,12 +246,12 @@ Posição   Tamanho  Descrição
 
 ## 📈 MÉTRICAS DE PERFORMANCE
 
-| Operação | Tempo Médio |
-|----------|-------------|
-| Validação de RUC | < 1ms |
-| Geração de CDC | < 5ms |
-| Logging de operação | < 10ms |
-| Parsing de CDC | < 2ms |
+| Operação            | Tempo Médio |
+| ------------------- | ----------- |
+| Validação de RUC    | < 1ms       |
+| Geração de CDC      | < 5ms       |
+| Logging de operação | < 10ms      |
+| Parsing de CDC      | < 2ms       |
 
 ---
 
@@ -260,6 +267,7 @@ Posição   Tamanho  Descrição
 ## 📞 SUPORTE
 
 Para questões técnicas:
+
 1. Consultar `MELHORIAS_IMPLEMENTADAS.md`
 2. Ver exemplos em `guia_tecnico_implementacao.py`
 3. Verificar testes em `/tests/`
@@ -270,6 +278,7 @@ Para questões técnicas:
 ## ⚠️ IMPORTANTE
 
 ### Antes de Deploy
+
 - [ ] Executar todos os testes
 - [ ] Verificar conformidade SIFEN
 - [ ] Validar com dados reais (homologação)
@@ -277,6 +286,7 @@ Para questões técnicas:
 - [ ] Documentar customizações
 
 ### Manutenção
+
 - [ ] Monitorar logs EDI
 - [ ] Revisar performance periodicamente
 - [ ] Atualizar conforme mudanças SET
@@ -324,13 +334,13 @@ def send_to_edi(self, document):
         # Preparar dados
         data = self._prepare_edi_data(document)
         log['request_data'] = data
-        
+
         # Enviar
         response = requests.post(self.endpoint, json=data)
         log['response_data'] = response.json()
         log['status_code'] = response.status_code
         log['endpoint'] = self.endpoint
-        
+
         # Processar resposta
         if response.status_code == 200:
             return response.json()
@@ -340,7 +350,4 @@ def send_to_edi(self, document):
 
 ---
 
-**Última Atualização:** 02/11/2025  
-**Versão:** 1.0  
-**Status:** ✅ Pronto para Uso
-
+**Última Atualização:** 02/11/2025 **Versão:** 1.0 **Status:** ✅ Pronto para Uso

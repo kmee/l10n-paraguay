@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
     <!-- Vista de formulario para account.authorization -->
@@ -8,43 +8,56 @@
         <field name="arch" type="xml">
             <form string="Timbrado">
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="valid,to_expire,expired"/>
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="valid,to_expire,expired"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="check_validity" type="object" string="Verificar Validez" class="oe_stat_button" icon="fa-check-circle"/>
+                        <button
+                            name="check_validity"
+                            type="object"
+                            string="Verificar Validez"
+                            class="oe_stat_button"
+                            icon="fa-check-circle"
+                        />
                     </div>
                     <div class="oe_title">
-                        <label for="name" string="Número de Timbrado"/>
+                        <label for="name" string="Número de Timbrado" />
                         <h1>
-                            <field name="name" placeholder="ej: 12345678"/>
+                            <field name="name" placeholder="ej: 12345678" />
                         </h1>
                     </div>
                     <group>
                         <group name="main_info">
-                            <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="document_type"/>
-                            <field name="active"/>
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                            <field name="document_type" />
+                            <field name="active" />
                         </group>
                         <group name="dates">
-                            <field name="date_from"/>
-                            <field name="date_to"/>
+                            <field name="date_from" />
+                            <field name="date_to" />
                         </group>
                     </group>
                     <group string="Numeración Autorizada">
                         <group>
-                            <field name="establishment"/>
-                            <field name="expedition_point"/>
+                            <field name="establishment" />
+                            <field name="expedition_point" />
                         </group>
                         <group>
-                            <field name="invoice_number_from"/>
-                            <field name="invoice_number_to"/>
+                            <field name="invoice_number_from" />
+                            <field name="invoice_number_to" />
                         </group>
                     </group>
                     <group string="Estadísticas" col="4">
-                        <field name="next_number"/>
-                        <field name="used_numbers"/>
-                        <field name="remaining_numbers"/>
+                        <field name="next_number" />
+                        <field name="used_numbers" />
+                        <field name="remaining_numbers" />
                     </group>
                 </sheet>
             </form>
@@ -56,22 +69,30 @@
         <field name="name">account.authorization.tree</field>
         <field name="model">account.authorization</field>
         <field name="arch" type="xml">
-            <tree string="Timbrados" decoration-danger="state=='expired'"
-                  decoration-warning="state=='to_expire'"
-                  decoration-success="state=='valid'">
-                <field name="name"/>
-                <field name="establishment"/>
-                <field name="expedition_point"/>
-                <field name="document_type"/>
-                <field name="date_from"/>
-                <field name="date_to"/>
-                <field name="invoice_number_from"/>
-                <field name="invoice_number_to"/>
-                <field name="next_number"/>
-                <field name="remaining_numbers"/>
-                <field name="state" widget="badge" decoration-danger="state=='expired'"
-                       decoration-warning="state=='to_expire'" decoration-success="state=='valid'"/>
-                <field name="active" widget="boolean_toggle"/>
+            <tree
+                string="Timbrados"
+                decoration-danger="state=='expired'"
+                decoration-warning="state=='to_expire'"
+                decoration-success="state=='valid'"
+            >
+                <field name="name" />
+                <field name="establishment" />
+                <field name="expedition_point" />
+                <field name="document_type" />
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="invoice_number_from" />
+                <field name="invoice_number_to" />
+                <field name="next_number" />
+                <field name="remaining_numbers" />
+                <field
+                    name="state"
+                    widget="badge"
+                    decoration-danger="state=='expired'"
+                    decoration-warning="state=='to_expire'"
+                    decoration-success="state=='valid'"
+                />
+                <field name="active" widget="boolean_toggle" />
             </tree>
         </field>
     </record>
@@ -82,24 +103,68 @@
         <field name="model">account.authorization</field>
         <field name="arch" type="xml">
             <search string="Buscar Timbrados">
-                <field name="name" string="Timbrado"/>
-                <field name="establishment"/>
-                <field name="expedition_point"/>
-                <field name="document_type"/>
-                <filter string="Vigentes" name="valid" domain="[('state', '=', 'valid')]"/>
-                <filter string="Por Vencer" name="to_expire" domain="[('state', '=', 'to_expire')]"/>
-                <filter string="Vencidos" name="expired" domain="[('state', '=', 'expired')]"/>
-                <separator/>
-                <filter string="Activos" name="active" domain="[('active', '=', True)]"/>
-                <filter string="Inactivos" name="inactive" domain="[('active', '=', False)]"/>
-                <separator/>
-                <filter string="Facturas" name="invoice" domain="[('document_type', '=', 'invoice')]"/>
-                <filter string="Notas de Crédito" name="credit_note" domain="[('document_type', '=', 'credit_note')]"/>
-                <filter string="Notas de Débito" name="debit_note" domain="[('document_type', '=', 'debit_note')]"/>
+                <field name="name" string="Timbrado" />
+                <field name="establishment" />
+                <field name="expedition_point" />
+                <field name="document_type" />
+                <filter
+                    string="Vigentes"
+                    name="valid"
+                    domain="[('state', '=', 'valid')]"
+                />
+                <filter
+                    string="Por Vencer"
+                    name="to_expire"
+                    domain="[('state', '=', 'to_expire')]"
+                />
+                <filter
+                    string="Vencidos"
+                    name="expired"
+                    domain="[('state', '=', 'expired')]"
+                />
+                <separator />
+                <filter
+                    string="Activos"
+                    name="active"
+                    domain="[('active', '=', True)]"
+                />
+                <filter
+                    string="Inactivos"
+                    name="inactive"
+                    domain="[('active', '=', False)]"
+                />
+                <separator />
+                <filter
+                    string="Facturas"
+                    name="invoice"
+                    domain="[('document_type', '=', 'invoice')]"
+                />
+                <filter
+                    string="Notas de Crédito"
+                    name="credit_note"
+                    domain="[('document_type', '=', 'credit_note')]"
+                />
+                <filter
+                    string="Notas de Débito"
+                    name="debit_note"
+                    domain="[('document_type', '=', 'debit_note')]"
+                />
                 <group expand="0" string="Agrupar Por">
-                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="Tipo de Documento" name="group_type" context="{'group_by': 'document_type'}"/>
-                    <filter string="Establecimiento" name="group_establishment" context="{'group_by': 'establishment'}"/>
+                    <filter
+                        string="Estado"
+                        name="group_state"
+                        context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        string="Tipo de Documento"
+                        name="group_type"
+                        context="{'group_by': 'document_type'}"
+                    />
+                    <filter
+                        string="Establecimiento"
+                        name="group_establishment"
+                        context="{'group_by': 'establishment'}"
+                    />
                 </group>
             </search>
         </field>
@@ -110,7 +175,9 @@
         <field name="name">Timbrados</field>
         <field name="res_model">account.authorization</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_active': 1, 'search_default_valid': 1}</field>
+        <field
+            name="context"
+        >{'search_default_active': 1, 'search_default_valid': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Crear un nuevo timbrado
@@ -123,10 +190,12 @@
     </record>
 
     <!-- Menú para account.authorization -->
-    <menuitem id="menu_account_authorization"
-              name="Timbrados"
-              parent="account.menu_finance_configuration"
-              action="action_account_authorization"
-              sequence="50"/>
+    <menuitem
+        id="menu_account_authorization"
+        name="Timbrados"
+        parent="account.menu_finance_configuration"
+        action="action_account_authorization"
+        sequence="50"
+    />
 
 </odoo>

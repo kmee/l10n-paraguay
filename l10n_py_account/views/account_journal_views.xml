@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="view_account_journal_form_edi" model="ir.ui.view">
         <field name="name">account.journal.form.edi</field>
         <field name="model">account.journal</field>
-        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
             <xpath expr="//page[@name='other']" position="after">
                 <page string="Configuración EDI Paraguay" name="l10n_py_edi_config">
                     <group>
                         <group string="Identificación">
-                            <field name="l10n_py_establishment"/>
-                            <field name="l10n_py_point"/>
+                            <field name="l10n_py_establishment" />
+                            <field name="l10n_py_point" />
                         </group>
                         <group string="Timbrado">
-                            <field name="l10n_py_timbrado"/>
-                            <field name="l10n_py_timbrado_validity"/>
+                            <field name="l10n_py_timbrado" />
+                            <field name="l10n_py_timbrado_validity" />
                         </group>
                     </group>
                 </page>

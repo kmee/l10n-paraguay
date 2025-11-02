@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
         <!-- FactPy Setup Wizard Form -->
@@ -13,16 +13,21 @@
                             <p>Configure las credenciales para conectar con FactPy</p>
                         </div>
                         <group>
-                            <field name="name"/>
-                            <field name="environment"/>
+                            <field name="name" />
+                            <field name="environment" />
                         </group>
                         <group>
-                            <field name="api_key" password="True"/>
-                            <field name="api_secret" password="True"/>
+                            <field name="api_key" password="True" />
+                            <field name="api_secret" password="True" />
                         </group>
                         <footer>
-                            <button name="action_create_connector" type="object" string="Crear Conector" class="btn-primary"/>
-                            <button special="cancel" string="Cancelar"/>
+                            <button
+                                name="action_create_connector"
+                                type="object"
+                                string="Crear Conector"
+                                class="btn-primary"
+                            />
+                            <button special="cancel" string="Cancelar" />
                         </footer>
                     </sheet>
                 </form>

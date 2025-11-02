@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <record id="view_facturasend_connector_tree" model="ir.ui.view">
         <field name="name">l10n_py.edi.connector.facturasend.tree</field>
         <field name="model">l10n_py.edi.connector.facturasend</field>
         <field name="arch" type="xml">
             <tree string="Conectores FacturaSend">
-                <field name="name"/>
-                <field name="company_id"/>
-                <field name="environment"/>
-                <field name="active"/>
+                <field name="name" />
+                <field name="company_id" />
+                <field name="environment" />
+                <field name="active" />
             </tree>
         </field>
     </record>
@@ -20,23 +20,29 @@
             <form string="Conector FacturaSend">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="test_connection" string="Probar Conexión" type="object" class="oe_stat_button" icon="fa-plug"/>
+                        <button
+                            name="test_connection"
+                            string="Probar Conexión"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-plug"
+                        />
                     </div>
                     <group>
                         <group>
-                            <field name="name"/>
-                            <field name="company_id"/>
-                            <field name="active"/>
+                            <field name="name" />
+                            <field name="company_id" />
+                            <field name="active" />
                         </group>
                         <group>
-                            <field name="environment"/>
-                            <field name="base_url" readonly="1"/>
-                            <field name="timeout"/>
+                            <field name="environment" />
+                            <field name="base_url" readonly="1" />
+                            <field name="timeout" />
                         </group>
                     </group>
                     <group string="Credenciales">
-                        <field name="api_key" password="True"/>
-                        <field name="tenant_id"/>
+                        <field name="api_key" password="True" />
+                        <field name="tenant_id" />
                     </group>
                 </sheet>
             </form>

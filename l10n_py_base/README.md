@@ -5,23 +5,30 @@ Módulo base de localización para Paraguay compatible con Odoo 17.0.
 ## Características
 
 ### 🏛️ Estructura Administrativa
+
 - **Departamentos**: 17 departamentos usando `res.country.state` del core
 - **Distritos**: Nivel intermedio específico de Paraguay (modelo personalizado)
 - **Ciudades**: Usando `res.city` del core con extensiones
 
 ### 📝 Datos Fiscales
+
 - **RUC**: Registro Único del Contribuyente con cálculo automático de dígito verificador
 - **Tipos de Contribuyente**: Contribuyente / No Contribuyente
 - **Tipos de Documento**: Cédula paraguaya, Pasaporte, Cédula extranjera, etc.
 
 ### 📍 Códigos SET
-Todos los niveles administrativos incluyen códigos oficiales de la Subsecretaría de Estado de Tributación (SET):
+
+Todos los niveles administrativos incluyen códigos oficiales de la Subsecretaría de
+Estado de Tributación (SET):
+
 - Código de Departamento (1-17)
 - Código de Distrito (XXYY)
 - Código de Ciudad (XXYYZZ)
 
 ### 🔗 Integración con Core
+
 Usa modelos estándar de Odoo mediante `base_address_extended`:
+
 - `res.country.state` para departamentos
 - `res.city` para ciudades
 - Jerarquía automática y validaciones
@@ -107,6 +114,7 @@ res.country (Paraguay - PY)
 ### Campos en res.partner
 
 **Identificación Fiscal:**
+
 - `l10n_py_taxpayer_type`: Tipo de contribuyente (1=Contribuyente, 2=No Contribuyente)
 - `l10n_py_ruc`: RUC sin dígito verificador (8 dígitos)
 - `l10n_py_dv`: Dígito verificador (calculado)
@@ -115,17 +123,20 @@ res.country (Paraguay - PY)
 - `l10n_py_document_number`: Número de documento
 
 **Ubicación (editables):**
+
 - `state_id`: Departamento (Many2one a res.country.state)
 - `l10n_py_district_id`: Distrito (Many2one a l10n_py.district)
 - `city_id`: Ciudad (Many2one a res.city)
 - `street_number`: Número de casa
 
 **Códigos SET (calculados automáticamente):**
+
 - `l10n_py_department_code`: Código del departamento (related)
 - `l10n_py_district_code`: Código del distrito (related)
 - `l10n_py_city_code`: Código de la ciudad (related)
 
 **Información Adicional:**
+
 - `l10n_py_trade_name`: Nombre comercial o fantasía
 - `l10n_py_economic_activity`: Código de actividad económica
 - `l10n_py_is_diplomatic`: Indicador de status diplomático
@@ -133,39 +144,42 @@ res.country (Paraguay - PY)
 
 ## Departamentos de Paraguay
 
-| Código | Nombre              | Code   |
-|--------|---------------------|--------|
-| 1      | Concepción          | PY-1   |
-| 2      | San Pedro           | PY-2   |
-| 3      | Cordillera          | PY-3   |
-| 4      | Guairá              | PY-4   |
-| 5      | Caaguazú            | PY-5   |
-| 6      | Caazapá             | PY-6   |
-| 7      | Itapúa              | PY-7   |
-| 8      | Misiones            | PY-8   |
-| 9      | Paraguarí           | PY-9   |
-| 10     | Alto Paraná         | PY-10  |
-| 11     | Central             | PY-11  |
-| 12     | Ñeembucú            | PY-12  |
-| 13     | Amambay             | PY-13  |
-| 14     | Canindeyú           | PY-14  |
-| 15     | Presidente Hayes    | PY-15  |
-| 16     | Boquerón            | PY-16  |
-| 17     | Alto Paraguay       | PY-17  |
-| -      | Asunción (Capital)  | PY-ASU |
+| Código | Nombre             | Code   |
+| ------ | ------------------ | ------ |
+| 1      | Concepción         | PY-1   |
+| 2      | San Pedro          | PY-2   |
+| 3      | Cordillera         | PY-3   |
+| 4      | Guairá             | PY-4   |
+| 5      | Caaguazú           | PY-5   |
+| 6      | Caazapá            | PY-6   |
+| 7      | Itapúa             | PY-7   |
+| 8      | Misiones           | PY-8   |
+| 9      | Paraguarí          | PY-9   |
+| 10     | Alto Paraná        | PY-10  |
+| 11     | Central            | PY-11  |
+| 12     | Ñeembucú           | PY-12  |
+| 13     | Amambay            | PY-13  |
+| 14     | Canindeyú          | PY-14  |
+| 15     | Presidente Hayes   | PY-15  |
+| 16     | Boquerón           | PY-16  |
+| 17     | Alto Paraguay      | PY-17  |
+| -      | Asunción (Capital) | PY-ASU |
 
 ## Validaciones
 
 ### Validación de RUC
+
 - Formato numérico de 6-8 dígitos
 - Cálculo de dígito verificador usando módulo 11
 - Obligatorio para contribuyentes
 
 ### Validación de Documentos
+
 - Cédula paraguaya: solo números
 - Validación según tipo de documento
 
 ### Validación de Ubicación
+
 - Jerarquía departamento → distrito → ciudad validada automáticamente
 - Departamento obligatorio para clientes paraguayos en facturación electrónica
 
@@ -205,16 +219,22 @@ ruc_number = RUCValidator.get_ruc_number(ruc_string)
 ## Comportamiento Automático (onchange)
 
 ### Selección de Ciudad
+
 Al seleccionar una ciudad, el distrito y departamento se llenan automáticamente.
 
 ### Selección de Distrito
+
 Al seleccionar un distrito, el departamento se actualiza automáticamente.
 
 ### Cambio de Departamento
-Al cambiar el departamento, el distrito y ciudad se limpian si no pertenecen al nuevo departamento.
+
+Al cambiar el departamento, el distrito y ciudad se limpian si no pertenecen al nuevo
+departamento.
 
 ### Ingreso de RUC
+
 Al ingresar un RUC:
+
 - Se normaliza el formato
 - Se calcula el dígito verificador
 - Se marca automáticamente como contribuyente
@@ -222,12 +242,14 @@ Al ingresar un RUC:
 ## Integración con EDI
 
 Este módulo es la base para los módulos de facturación electrónica:
+
 - `l10n_py_account`: Extensiones contables
 - `l10n_py_edi_base`: Base de facturación electrónica
 - `l10n_py_edi_factpy`: Integración con FactPy
 - `l10n_py_edi_facturasend`: Integración con FacturaSend
 
 Los códigos SET están disponibles para integración EDI:
+
 ```python
 customer_data = {
     'departamento': partner.l10n_py_department_code,
@@ -246,7 +268,7 @@ Crear archivo XML en `data/`:
 <record id="district_nuevo" model="l10n_py.district">
     <field name="code">1106</field>
     <field name="name">Nuevo Distrito</field>
-    <field name="state_id" ref="state_py_central"/>
+    <field name="state_id" ref="state_py_central" />
 </record>
 ```
 
@@ -255,21 +277,23 @@ Crear archivo XML en `data/`:
 ```xml
 <record id="city_nueva" model="res.city">
     <field name="name">Nueva Ciudad</field>
-    <field name="state_id" ref="state_py_central"/>
-    <field name="country_id" ref="base.py"/>
+    <field name="state_id" ref="state_py_central" />
+    <field name="country_id" ref="base.py" />
     <field name="l10n_py_code">110601</field>
-    <field name="l10n_py_district_id" ref="district_nuevo"/>
+    <field name="l10n_py_district_id" ref="district_nuevo" />
 </record>
 ```
 
 ## Documentación
 
-- [MIGRACAO_BASE_ADDRESS_EXTENDED.md](MIGRACAO_BASE_ADDRESS_EXTENDED.md): Documentación técnica de la migración
+- [MIGRACAO_BASE_ADDRESS_EXTENDED.md](MIGRACAO_BASE_ADDRESS_EXTENDED.md): Documentación
+  técnica de la migración
 - [EXEMPLOS_USO.md](EXEMPLOS_USO.md): Ejemplos de uso prácticos
 
 ## Autor
 
 **KMEE**
+
 - Website: https://github.com/kmee
 
 ## Licencia
@@ -283,9 +307,9 @@ LGPL-3
 ## Changelog
 
 ### 17.0.1.0.0
+
 - Refactorización para usar `base_address_extended`
 - Migración de modelos personalizados a extensiones del core
 - Mejora de UX con widgets de selección
 - Validación automática de jerarquía administrativa
 - Documentación completa
-

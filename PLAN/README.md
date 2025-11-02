@@ -2,7 +2,10 @@
 
 ## 📋 Descripción
 
-Este proyecto implementa la integración de facturación electrónica del Paraguay (SIFEN - Sistema Integrado de Facturación Electrónica Nacional) con Odoo 17, permitiendo la emisión de documentos electrónicos conforme a las normativas de la SET (Subsecretaría de Estado de Tributación).
+Este proyecto implementa la integración de facturación electrónica del Paraguay (SIFEN -
+Sistema Integrado de Facturación Electrónica Nacional) con Odoo 17, permitiendo la
+emisión de documentos electrónicos conforme a las normativas de la SET (Subsecretaría de
+Estado de Tributación).
 
 ## 🏗️ Arquitectura
 
@@ -43,10 +46,12 @@ cp -r l10n_py_edi_* /path/to/odoo/addons/
 ```
 
 2. **Actualizar la lista de aplicaciones en Odoo:**
+
    - Ir a Aplicaciones → Actualizar Lista de Aplicaciones
    - Activar modo desarrollador si es necesario
 
 3. **Instalar el módulo base:**
+
    - Buscar "Paraguay - Electronic Invoicing Base"
    - Instalar
 
@@ -73,8 +78,9 @@ Contabilidad → Configuración → Diarios
 ```
 
 Para cada punto de venta:
+
 - **Establecimiento**: 001
-- **Punto de Expedición**: 001  
+- **Punto de Expedición**: 001
 - **Timbrado**: Número de timbrado vigente
 - **Fecha Vencimiento Timbrado**: Fecha límite
 
@@ -101,12 +107,14 @@ Ajustes → Técnico → Parámetros del Sistema
 ### 4. Configuración de Productos
 
 Para cada producto:
+
 - **Código NCM**: Nomenclatura común del Mercosur (8 dígitos)
 - **Unidad de Medida**: Según tabla SET
 
 ### 5. Configuración de Clientes
 
 Datos obligatorios:
+
 - **RUC** (para contribuyentes)
 - **Tipo de Documento** y **Número** (para no contribuyentes)
 - **Dirección completa**
@@ -174,19 +182,23 @@ Configuración → Técnico → Automatización → Acciones Planificadas
 ## 🔍 Troubleshooting
 
 ### Error: "RUC inválido"
+
 - Verificar formato: XXXXXXXX-X
 - Verificar dígito verificador
 - El RUC debe estar activo en SET
 
 ### Error: "Timbrado vencido"
+
 - Actualizar timbrado en configuración del diario
 - Solicitar nuevo timbrado a SET
 
 ### Error: "NCM no especificado"
+
 - Completar código NCM en todos los productos
 - Usar tabla oficial de NCM del Mercosur
 
 ### Error de conexión
+
 - Verificar credenciales API
 - Verificar conectividad de red
 - Revisar logs en: `Facturación → EDI → Logs`
@@ -203,6 +215,7 @@ Configuración → Técnico → Automatización → Acciones Planificadas
 ### Estructura de Datos
 
 Ver `paraguay_edi_integration_plan.md` para:
+
 - Mapeo completo de campos
 - Flujos de procesamiento
 - Especificaciones técnicas
@@ -210,6 +223,7 @@ Ver `paraguay_edi_integration_plan.md` para:
 ## 🤝 Soporte
 
 Para soporte técnico:
+
 1. Revisar documentación incluida
 2. Consultar logs del sistema
 3. Contactar al proveedor EDI
@@ -222,6 +236,7 @@ Este proyecto está bajo licencia LGPL-3.
 ## 🔄 Actualizaciones
 
 ### Versión 1.0.0 (Actual)
+
 - ✅ Soporte para Factura Electrónica
 - ✅ Soporte para Nota de Crédito
 - ✅ Soporte para Nota de Débito
@@ -229,6 +244,7 @@ Este proyecto está bajo licencia LGPL-3.
 - ✅ Generación de QR y KUDE
 
 ### Próximas Versiones
+
 - [ ] Nota de Remisión Electrónica
 - [ ] Autofactura Electrónica
 - [ ] Consulta de RUC en línea
@@ -249,4 +265,5 @@ Este proyecto está bajo licencia LGPL-3.
 
 ---
 
-**Nota:** Este es un proyecto en desarrollo. Asegúrese de cumplir con todas las normativas fiscales vigentes en Paraguay antes de usar en producción.
+**Nota:** Este es un proyecto en desarrollo. Asegúrese de cumplir con todas las
+normativas fiscales vigentes en Paraguay antes de usar en producción.

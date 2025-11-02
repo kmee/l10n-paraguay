@@ -37,10 +37,11 @@ odoo-addons/
 ### 2.1 Modelos de Dados
 
 #### account.move (Extensão)
+
 ```python
 class AccountMove(models.Model):
     _inherit = 'account.move'
-    
+
     # Campos EDI Paraguai
     l10n_py_edi_document_type = fields.Selection([
         ('1', 'Factura Electrónica'),
@@ -49,12 +50,12 @@ class AccountMove(models.Model):
         ('6', 'Nota de Débito Electrónica'),
         ('7', 'Nota de Remisión Electrónica'),
     ])
-    
+
     l10n_py_emission_type = fields.Selection([
         ('1', 'Normal'),
         ('2', 'Contingencia')
     ], default='1')
-    
+
     l10n_py_transaction_type = fields.Selection([
         ('1', 'Venta de mercadería'),
         ('2', 'Prestación de servicios'),
@@ -70,7 +71,7 @@ class AccountMove(models.Model):
         ('12', 'Venta de crédito fiscal'),
         ('13', 'Compra de crédito fiscal')
     ])
-    
+
     l10n_py_cdc = fields.Char('CDC', readonly=True)
     l10n_py_qr_code = fields.Binary('QR Code')
     l10n_py_edi_xml = fields.Binary('XML Firmado')
@@ -83,16 +84,17 @@ class AccountMove(models.Model):
         ('rejected', 'Rechazado'),
         ('cancelled', 'Cancelado')
     ])
-    
+
     l10n_py_security_code = fields.Char('Código de Seguridad', size=9)
     l10n_py_batch_id = fields.Char('ID de Lote')
 ```
 
 #### res.partner (Extensión)
+
 ```python
 class ResPartner(models.Model):
     _inherit = 'res.partner'
-    
+
     l10n_py_ruc = fields.Char('RUC', help='Registro Único del Contribuyente')
     l10n_py_dv = fields.Char('DV', size=1, compute='_compute_dv')
     l10n_py_taxpayer_type = fields.Selection([
@@ -107,7 +109,7 @@ class ResPartner(models.Model):
         ('5', 'Innominado'),
         ('9', 'Otro')
     ])
-    
+
     # Campos de ubicación específicos
     l10n_py_department_code = fields.Integer('Código Departamento')
     l10n_py_district_code = fields.Integer('Código Distrito')
@@ -119,7 +121,7 @@ class ResPartner(models.Model):
 ```python
 class EDIDocumentBuilder:
     """Clase para construir el JSON del documento electrónico"""
-    
+
     def build_invoice_data(self, invoice):
         return {
             "tipoDocumento": invoice.l10n_py_edi_document_type,
@@ -135,7 +137,7 @@ class EDIDocumentBuilder:
             "totales": self._calculate_totals(invoice),
             # ... más campos según requerimientos
         }
-    
+
     def _build_customer_data(self, partner):
         """Construir datos del cliente"""
         return {
@@ -164,22 +166,22 @@ class EDIDocumentBuilder:
 class EDIConnectorBase(models.AbstractModel):
     _name = 'l10n_py.edi.connector.base'
     _description = 'Base EDI Connector for Paraguay'
-    
+
     @abstractmethod
     def send_document(self, invoice_data):
         """Enviar documento al proveedor EDI"""
         pass
-    
+
     @abstractmethod
     def check_status(self, batch_id):
         """Verificar estado del documento"""
         pass
-    
+
     @abstractmethod
     def cancel_document(self, cdc):
         """Cancelar documento electrónico"""
         pass
-    
+
     @abstractmethod
     def get_pdf(self, cdc):
         """Obtener KUDE (representación impresa)"""
@@ -192,26 +194,26 @@ class EDIConnectorBase(models.AbstractModel):
 class FactPyConnector(models.Model):
     _name = 'l10n_py.edi.connector.factpy'
     _inherit = 'l10n_py.edi.connector.base'
-    
+
     api_key = fields.Char('API Key', required=True)
     api_secret = fields.Char('API Secret', required=True)
     environment = fields.Selection([
         ('test', 'Pruebas'),
         ('prod', 'Producción')
     ])
-    
+
     def send_document(self, invoice_data):
         headers = {
             'Authorization': f'Bearer {self._get_token()}',
             'Content-Type': 'application/json'
         }
-        
+
         response = requests.post(
             f'{self._get_base_url()}/api/v1/invoices',
             json=invoice_data,
             headers=headers
         )
-        
+
         return response.json()
 ```
 
@@ -221,24 +223,24 @@ class FactPyConnector(models.Model):
 class FacturaSendConnector(models.Model):
     _name = 'l10n_py.edi.connector.facturasend'
     _inherit = 'l10n_py.edi.connector.base'
-    
+
     api_key = fields.Char('API Key', required=True)
     tenant_id = fields.Char('Tenant ID', required=True)
-    
+
     def send_document(self, invoice_data):
         headers = {
             'Authorization': f'Bearer {self.api_key}'
         }
-        
+
         # Adaptar formato según FacturaSend
         adapted_data = self._adapt_to_facturasend_format(invoice_data)
-        
+
         response = requests.post(
             f'https://api.facturasend.com.py/{self.tenant_id}/lote/create',
             json=[adapted_data],
             headers=headers
         )
-        
+
         return response.json()
 ```
 
@@ -267,34 +269,34 @@ graph TD
 
 ```python
 class InvoiceEDIValidator:
-    
+
     def validate_invoice(self, invoice):
         errors = []
-        
+
         # Validar RUC
         if not self._validate_ruc(invoice.partner_id.l10n_py_ruc):
             errors.append('RUC inválido')
-        
+
         # Validar datos obligatorios
         if not invoice.partner_id.street:
             errors.append('Dirección del cliente requerida')
-        
+
         # Validar NCM en productos
         for line in invoice.invoice_line_ids:
             if not line.product_id.l10n_py_ncm:
                 errors.append(f'NCM faltante en {line.product_id.name}')
-        
+
         # Validar timbrado
         if not invoice.journal_id.l10n_py_timbrado:
             errors.append('Timbrado no configurado')
-        
+
         return errors
-    
+
     def _validate_ruc(self, ruc):
         """Validar RUC con dígito verificador"""
         if not ruc:
             return False
-        
+
         # Algoritmo de validación del DV
         # ...
         return True
@@ -303,35 +305,41 @@ class InvoiceEDIValidator:
 ## 5. Cronograma de Implementación
 
 ### Fase 1: Configuración Base (2 semanas)
+
 - [ ] Crear estructura de módulos
 - [ ] Implementar modelos base
 - [ ] Cargar datos maestros (departamentos, ciudades)
 - [ ] Configurar vistas y formularios
 
 ### Fase 2: Generador de Datos (2 semanas)
+
 - [ ] Implementar builder de JSON
 - [ ] Crear validadores
 - [ ] Implementar cálculo de impuestos (IVA 5%, 10%, exento)
 - [ ] Generar código de seguridad aleatorio
 
 ### Fase 3: Conectores API (3 semanas)
+
 - [ ] Implementar conector FactPy
 - [ ] Implementar conector FacturaSend
 - [ ] Crear sistema de logs
 - [ ] Implementar manejo de errores
 
 ### Fase 4: Procesamiento de Respuestas (2 semanas)
+
 - [ ] Procesar CDC
 - [ ] Generar y almacenar QR
 - [ ] Guardar XML firmado
 - [ ] Implementar consulta de estado
 
 ### Fase 5: KUDE y Reportes (1 semana)
+
 - [ ] Diseñar template KUDE
 - [ ] Implementar generación PDF
 - [ ] Crear reportes de control
 
 ### Fase 6: Testing y Homologación (2 semanas)
+
 - [ ] Pruebas unitarias
 - [ ] Pruebas de integración
 - [ ] Homologación con SET
@@ -340,6 +348,7 @@ class InvoiceEDIValidator:
 ## 6. Configuración de Ambiente
 
 ### 6.1 Requirements Python
+
 ```txt
 requests>=2.28.0
 qrcode>=7.3.1
@@ -349,16 +358,17 @@ zeep>=4.2.1  # Para SOAP si necesario
 ```
 
 ### 6.2 Configuración Odoo
+
 ```python
 # res_config_settings.py
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
-    
+
     l10n_py_edi_provider = fields.Selection([
         ('factpy', 'FactPy'),
         ('facturasend', 'FacturaSend')
     ], config_parameter='l10n_py.edi_provider')
-    
+
     l10n_py_edi_environment = fields.Selection([
         ('test', 'Pruebas'),
         ('prod', 'Producción')
@@ -386,7 +396,7 @@ ERROR_CODES = {
 
 ```python
 class EDIRetryMixin:
-    
+
     @retry(max_attempts=3, delay=60)
     def send_with_retry(self, invoice):
         try:
@@ -400,7 +410,7 @@ class EDIRetryMixin:
 ```python
 class EDILog(models.Model):
     _name = 'l10n_py.edi.log'
-    
+
     invoice_id = fields.Many2one('account.move')
     action = fields.Selection([
         ('send', 'Envío'),
@@ -425,13 +435,14 @@ class EDILog(models.Model):
 ## 10. Testing
 
 ### 10.1 Tests Unitarios
+
 ```python
 class TestEDIBuilder(TestCase):
-    
+
     def test_ruc_validation(self):
         self.assertTrue(validate_ruc('80009401-6'))
         self.assertFalse(validate_ruc('80009401-7'))
-    
+
     def test_invoice_json_generation(self):
         invoice = self.create_test_invoice()
         json_data = EDIBuilder().build(invoice)
@@ -439,6 +450,7 @@ class TestEDIBuilder(TestCase):
 ```
 
 ### 10.2 Tests de Integración
+
 - Envío en ambiente de pruebas
 - Validación de respuestas
 - Generación de KUDE

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 {
-    'name': 'Paraguay - FacturaSend EDI Connector',
-    'version': '17.0.1.0.0',
-    'category': 'Accounting/Localizations/EDI',
-    'summary': 'FacturaSend connector for Electronic Invoicing in Paraguay',
-    'description': """
+    "name": "Paraguay - FacturaSend EDI Connector",
+    "version": "17.0.1.0.0",
+    "category": "Accounting/Localizations/EDI",
+    "summary": "FacturaSend connector for Electronic Invoicing in Paraguay",
+    "description": """
 FacturaSend EDI Connector for Paraguay
 ======================================
 
@@ -30,24 +29,21 @@ Configuration:
 2. Set l10n_py.edi_provider = 'facturasend'
 3. Configure connector in Facturación Electrónica > Connectors
     """,
-    'author': 'KMEE',
-    'website': 'https://github.com/kmee',
-    'license': 'LGPL-3',
-    'depends': [
-        'l10n_py_edi_base',
+    "author": "KMEE",
+    "website": "https://github.com/OCA/l10n-paraguay",
+    "license": "LGPL-3",
+    "depends": [
+        "l10n_py_edi_base",
     ],
-    'data': [
+    "data": [
         # Security
-        'security/ir.model.access.csv',
-        
+        "security/ir.model.access.csv",
         # Views
-        'views/facturasend_connector_views.xml',
-        
+        "views/facturasend_connector_views.xml",
         # Wizard
-        'wizard/facturasend_connector_wizard_views.xml',
+        "wizard/facturasend_connector_wizard_views.xml",
     ],
-    'installable': True,
-    'application': False,
-    'auto_install': False,
+    "installable": True,
+    "application": False,
+    "auto_install": False,
 }
-

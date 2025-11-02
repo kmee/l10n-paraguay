@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # l10n_py_edi_base/services/cdc_generator.py
 
 """
@@ -6,10 +5,9 @@ Gerador de Código de Control (CDC) para documentos eletrônicos paraguaios
 Implementação conforme Manual Técnico SIFEN v150
 """
 
-import random
-import hashlib
-from datetime import datetime
 import logging
+import random
+from datetime import datetime
 
 _logger = logging.getLogger(__name__)
 
@@ -17,7 +15,7 @@ _logger = logging.getLogger(__name__)
 class CDCGenerator:
     """
     Gerador de Código de Control (CDC) para documentos eletrônicos
-    
+
     Formato CDC (43 dígitos):
     - RUC do emissor (8 dígitos)
     - Tipo de documento (2 dígitos)
@@ -33,8 +31,15 @@ class CDCGenerator:
     MULTIPLIERS = [2, 3, 4, 5, 6, 7, 8, 9] * 6  # Repetir até 42 posições
 
     @classmethod
-    def generate(cls, company_ruc, doc_type, establishment,
-                 expedition_point, sequence, emission_date=None):
+    def generate(
+        cls,
+        company_ruc,
+        doc_type,
+        establishment,
+        expedition_point,
+        sequence,
+        emission_date=None,
+    ):
         """
         Gerar CDC conforme especificação SIFEN v150
 
@@ -54,14 +59,17 @@ class CDCGenerator:
 
         # Validar parâmetros
         cls._validate_parameters(
-            company_ruc, doc_type, establishment,
-            expedition_point, sequence
+            company_ruc, doc_type, establishment, expedition_point, sequence
         )
 
         # Construir CDC base (42 dígitos)
         cdc_base = cls._build_cdc_base(
-            company_ruc, doc_type, establishment,
-            expedition_point, sequence, emission_date
+            company_ruc,
+            doc_type,
+            establishment,
+            expedition_point,
+            sequence,
+            emission_date,
         )
 
         # Calcular dígito verificador
@@ -78,11 +86,12 @@ class CDCGenerator:
         return cdc_complete
 
     @classmethod
-    def _validate_parameters(cls, company_ruc, doc_type, establishment,
-                            expedition_point, sequence):
+    def _validate_parameters(
+        cls, company_ruc, doc_type, establishment, expedition_point, sequence
+    ):
         """Validar parâmetros de entrada"""
         # Validar RUC
-        ruc_clean = ''.join(filter(str.isdigit, str(company_ruc)))
+        ruc_clean = "".join(filter(str.isdigit, str(company_ruc)))
         if len(ruc_clean) < 6 or len(ruc_clean) > 8:
             raise ValueError(f"RUC inválido: {company_ruc}")
 
@@ -105,8 +114,15 @@ class CDCGenerator:
             raise ValueError(f"Sequência inválida: {sequence}")
 
     @classmethod
-    def _build_cdc_base(cls, company_ruc, doc_type, establishment,
-                        expedition_point, sequence, emission_date):
+    def _build_cdc_base(
+        cls,
+        company_ruc,
+        doc_type,
+        establishment,
+        expedition_point,
+        sequence,
+        emission_date,
+    ):
         """
         Construir base do CDC (42 dígitos)
 
@@ -120,7 +136,7 @@ class CDCGenerator:
         - Data/hora: 11 dígitos (YYMMDDHHmm + random)
         """
         # RUC da empresa (8 dígitos - extrair apenas números)
-        ruc_clean = ''.join(filter(str.isdigit, str(company_ruc)))
+        ruc_clean = "".join(filter(str.isdigit, str(company_ruc)))
         cdc = ruc_clean[:8].zfill(8)
 
         # Tipo de documento (2 dígitos)
@@ -227,7 +243,10 @@ class CDCGenerator:
             return False, f"Erro ao calcular DV: {str(e)}"
 
         if calculated_digit != check_digit:
-            return False, f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}"
+            return (
+                False,
+                f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}",
+            )
 
         return True, ""
 
@@ -246,18 +265,18 @@ class CDCGenerator:
             raise ValueError(f"CDC deve ter 43 dígitos, recebido: {len(cdc)}")
 
         return {
-            'ruc': cdc[0:8],
-            'doc_type': cdc[8:10],
-            'establishment': cdc[10:13],
-            'expedition_point': cdc[13:16],
-            'sequence': cdc[16:23],
-            'security_code': cdc[23:31],
-            'datetime_code': cdc[31:42],
-            'check_digit': cdc[42],
+            "ruc": cdc[0:8],
+            "doc_type": cdc[8:10],
+            "establishment": cdc[10:13],
+            "expedition_point": cdc[13:16],
+            "sequence": cdc[16:23],
+            "security_code": cdc[23:31],
+            "datetime_code": cdc[31:42],
+            "check_digit": cdc[42],
         }
 
     @classmethod
-    def format_cdc(cls, cdc, separator='-'):
+    def format_cdc(cls, cdc, separator="-"):
         """
         Formatar CDC para exibição legível
 
@@ -273,12 +292,13 @@ class CDCGenerator:
 
         components = cls.parse_cdc(cdc)
 
-        return (f"{components['ruc']}{separator}"
-                f"{components['doc_type']}{separator}"
-                f"{components['establishment']}{separator}"
-                f"{components['expedition_point']}{separator}"
-                f"{components['sequence']}{separator}"
-                f"{components['security_code']}{separator}"
-                f"{components['datetime_code']}{separator}"
-                f"{components['check_digit']}")
-
+        return (
+            f"{components['ruc']}{separator}"
+            f"{components['doc_type']}{separator}"
+            f"{components['establishment']}{separator}"
+            f"{components['expedition_point']}{separator}"
+            f"{components['sequence']}{separator}"
+            f"{components['security_code']}{separator}"
+            f"{components['datetime_code']}{separator}"
+            f"{components['check_digit']}"
+        )

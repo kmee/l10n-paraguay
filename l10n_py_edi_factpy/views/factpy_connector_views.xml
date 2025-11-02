@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
     <data>
         <!-- FactPy Connector Tree View -->
@@ -7,10 +7,10 @@
             <field name="model">l10n_py.edi.connector.factpy</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="name"/>
-                    <field name="company_id"/>
-                    <field name="environment"/>
-                    <field name="active"/>
+                    <field name="name" />
+                    <field name="company_id" />
+                    <field name="environment" />
+                    <field name="active" />
                 </tree>
             </field>
         </record>
@@ -22,24 +22,29 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button name="test_connection" type="object" string="Probar Conexión" class="btn-primary"/>
+                        <button
+                            name="test_connection"
+                            type="object"
+                            string="Probar Conexión"
+                            class="btn-primary"
+                        />
                     </header>
                     <sheet>
                         <div class="oe_title">
-                            <label for="name" class="oe_edit_only"/>
-                            <h1><field name="name"/></h1>
+                            <label for="name" class="oe_edit_only" />
+                            <h1><field name="name" /></h1>
                         </div>
                         <group>
                             <group>
-                                <field name="company_id"/>
-                                <field name="environment"/>
-                                <field name="active"/>
-                                <field name="timeout"/>
+                                <field name="company_id" />
+                                <field name="environment" />
+                                <field name="active" />
+                                <field name="timeout" />
                             </group>
                             <group>
-                                <field name="api_key" password="True"/>
-                                <field name="api_secret" password="True"/>
-                                <field name="base_url" readonly="1"/>
+                                <field name="api_key" password="True" />
+                                <field name="api_secret" password="True" />
+                                <field name="base_url" readonly="1" />
                             </group>
                         </group>
                     </sheet>
@@ -53,14 +58,18 @@
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">l10n_py.edi.connector.factpy</field>
             <field name="view_mode">tree,form</field>
-            <field name="help">Configure FactPy EDI connectors for electronic invoicing</field>
+            <field
+                name="help"
+            >Configure FactPy EDI connectors for electronic invoicing</field>
         </record>
 
         <!-- FactPy Connector Menu -->
-        <menuitem id="menu_factpy_connector"
-                  name="FactPy Connectors"
-                  parent="l10n_py_edi_base.menu_edi_connectors"
-                  action="action_factpy_connector"
-                  sequence="20"/>
+        <menuitem
+            id="menu_factpy_connector"
+            name="FactPy Connectors"
+            parent="l10n_py_edi_base.menu_edi_connectors"
+            action="action_factpy_connector"
+            sequence="20"
+        />
     </data>
 </odoo>

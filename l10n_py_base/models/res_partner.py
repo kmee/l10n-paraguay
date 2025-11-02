@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # l10n_py_base/models/res_partner.py
 
-from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
-import re
 import logging
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 from ..validators.ruc_validator import RUCValidator
 
@@ -12,117 +11,118 @@ _logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
-    _inherit = 'res.partner'
+    _inherit = "res.partner"
 
     # ============== CAMPOS RUC ==============
 
     l10n_py_ruc = fields.Char(
-        string='RUC',
+        string="RUC",
         size=8,
-        help='Registro Único del Contribuyente sin dígito verificador'
+        help="Registro Único del Contribuyente sin dígito verificador",
     )
 
     l10n_py_dv = fields.Char(
-        string='DV',
+        string="DV",
         size=1,
-        compute='_compute_dv',
+        compute="_compute_dv",
         store=True,
-        help='Dígito Verificador del RUC'
+        help="Dígito Verificador del RUC",
     )
 
     l10n_py_ruc_full = fields.Char(
-        string='RUC Completo',
-        compute='_compute_ruc_full',
+        string="RUC Completo",
+        compute="_compute_ruc_full",
         store=True,
-        help='RUC con dígito verificador'
+        help="RUC con dígito verificador",
     )
 
     # ============== CAMPOS DE IDENTIFICACIÓN ==============
 
-    l10n_py_taxpayer_type = fields.Selection([
-        ('1', 'Contribuyente'),
-        ('2', 'No Contribuyente')
-    ], string='Tipo de Contribuyente', default='2')
+    l10n_py_taxpayer_type = fields.Selection(
+        [("1", "Contribuyente"), ("2", "No Contribuyente")],
+        string="Tipo de Contribuyente",
+        default="2",
+    )
 
-    l10n_py_document_type = fields.Selection([
-        ('1', 'Cédula paraguaya'),
-        ('2', 'Pasaporte'),
-        ('3', 'Cédula extranjera'),
-        ('4', 'Carnet de residencia'),
-        ('5', 'Innominado'),
-        ('9', 'Otro')
-    ], string='Tipo de Documento')
+    l10n_py_document_type = fields.Selection(
+        [
+            ("1", "Cédula paraguaya"),
+            ("2", "Pasaporte"),
+            ("3", "Cédula extranjera"),
+            ("4", "Carnet de residencia"),
+            ("5", "Innominado"),
+            ("9", "Otro"),
+        ],
+        string="Tipo de Documento",
+    )
 
     l10n_py_document_number = fields.Char(
-        string='Número de Documento',
-        help='Número de documento de identidad sin puntos ni guiones'
+        string="Número de Documento",
+        help="Número de documento de identidad sin puntos ni guiones",
     )
 
     # ============== CAMPOS DE UBICACIÓN ==============
 
     l10n_py_district_id = fields.Many2one(
-        'l10n_py.district',
-        string='Distrito',
+        "l10n_py.district",
+        string="Distrito",
         domain="[('state_id', '=', state_id)]",
-        help='Distrito de Paraguay (nivel intermedio entre departamento y ciudad)'
+        help="Distrito de Paraguay (nivel intermedio entre departamento y ciudad)",
     )
 
     # Campos computados de solo lectura para códigos SET
     l10n_py_department_code = fields.Integer(
-        string='Código Departamento SET',
-        related='state_id.l10n_py_code',
+        string="Código Departamento SET",
+        related="state_id.l10n_py_code",
         store=True,
         readonly=True,
-        help='Código del departamento según SET'
+        help="Código del departamento según SET",
     )
 
     l10n_py_district_code = fields.Integer(
-        string='Código Distrito SET',
-        related='l10n_py_district_id.code',
+        string="Código Distrito SET",
+        related="l10n_py_district_id.code",
         store=True,
         readonly=True,
-        help='Código del distrito según SET'
+        help="Código del distrito según SET",
     )
 
     l10n_py_city_code = fields.Integer(
-        string='Código Ciudad SET',
-        related='city_id.l10n_py_code',
+        string="Código Ciudad SET",
+        related="city_id.l10n_py_code",
         store=True,
         readonly=True,
-        help='Código de la ciudad según SET'
+        help="Código de la ciudad según SET",
     )
 
     # ============== CAMPOS ADICIONALES ==============
 
     l10n_py_trade_name = fields.Char(
-        string='Nombre Fantasía',
-        help='Nombre comercial o de fantasía'
+        string="Nombre Fantasía", help="Nombre comercial o de fantasía"
     )
 
     l10n_py_economic_activity = fields.Char(
-        string='Actividad Económica',
-        help='Código de actividad económica principal'
+        string="Actividad Económica", help="Código de actividad económica principal"
     )
 
     street_number = fields.Char(
-        string='Número de Casa',
-        help='Número de casa o edificio'
+        string="Número de Casa", help="Número de casa o edificio"
     )
 
     l10n_py_is_diplomatic = fields.Boolean(
-        string='Es Diplomático',
-        help='Marcar si el cliente tiene status diplomático'
+        string="Es Diplomático", help="Marcar si el cliente tiene status diplomático"
     )
 
-    l10n_py_dncp = fields.Selection([
-        ('0', 'Normal'),
-        ('1', 'Estado')
-    ], string='DNCP', default='0',
-       help='Dirección Nacional de Contrataciones Públicas')
+    l10n_py_dncp = fields.Selection(
+        [("0", "Normal"), ("1", "Estado")],
+        string="DNCP",
+        default="0",
+        help="Dirección Nacional de Contrataciones Públicas",
+    )
 
     # ============== COMPUTE METHODS ==============
 
-    @api.depends('l10n_py_ruc')
+    @api.depends("l10n_py_ruc")
     def _compute_dv(self):
         """Calcular dígito verificador del RUC usando RUCValidator"""
         for partner in self:
@@ -131,7 +131,7 @@ class ResPartner(models.Model):
             else:
                 partner.l10n_py_dv = False
 
-    @api.depends('l10n_py_ruc', 'l10n_py_dv')
+    @api.depends("l10n_py_ruc", "l10n_py_dv")
     def _compute_ruc_full(self):
         """Calcular RUC completo con DV"""
         for partner in self:
@@ -140,25 +140,32 @@ class ResPartner(models.Model):
             else:
                 partner.l10n_py_ruc_full = False
 
-    @api.onchange('state_id')
+    @api.onchange("state_id")
     def _onchange_state_id(self):
         """Limpiar distrito y ciudad cuando cambia el departamento"""
-        if self.state_id and self.l10n_py_district_id and self.l10n_py_district_id.state_id != self.state_id:
+        if (
+            self.state_id
+            and self.l10n_py_district_id
+            and self.l10n_py_district_id.state_id != self.state_id
+        ):
             self.l10n_py_district_id = False
         if self.state_id and self.city_id and self.city_id.state_id != self.state_id:
             self.city_id = False
 
-    @api.onchange('l10n_py_district_id')
+    @api.onchange("l10n_py_district_id")
     def _onchange_district_id(self):
         """Filtrar ciudades por distrito"""
         if self.l10n_py_district_id:
-            if self.city_id and self.city_id.l10n_py_district_id != self.l10n_py_district_id:
+            if (
+                self.city_id
+                and self.city_id.l10n_py_district_id != self.l10n_py_district_id
+            ):
                 self.city_id = False
             # Actualizar state_id si no está definido
             if not self.state_id and self.l10n_py_district_id.state_id:
                 self.state_id = self.l10n_py_district_id.state_id
 
-    @api.onchange('city_id')
+    @api.onchange("city_id")
     def _onchange_city_id(self):
         """Actualizar distrito y departamento desde ciudad"""
         if self.city_id:
@@ -179,7 +186,7 @@ class ResPartner(models.Model):
             return False
 
         # Asegurar que el RUC tenga el formato correcto
-        ruc = ruc.replace('-', '').strip()
+        ruc = ruc.replace("-", "").strip()
 
         if len(ruc) < 6:
             return False
@@ -212,7 +219,7 @@ class ResPartner(models.Model):
             return True
 
         # Eliminar guiones y espacios
-        ruc_clean = ruc.replace('-', '').replace(' ', '')
+        ruc_clean = ruc.replace("-", "").replace(" ", "")
 
         # Debe ser numérico y tener entre 6 y 8 dígitos
         if not ruc_clean.isdigit():
@@ -225,7 +232,7 @@ class ResPartner(models.Model):
 
     # ============== CONSTRAINT METHODS ==============
 
-    @api.constrains('l10n_py_ruc')
+    @api.constrains("l10n_py_ruc")
     def _check_ruc_format(self):
         """Validar formato del RUC usando RUCValidator"""
         for partner in self:
@@ -233,33 +240,36 @@ class ResPartner(models.Model):
                 is_valid, error_msg = RUCValidator.validate(partner.l10n_py_ruc)
                 if not is_valid:
                     raise ValidationError(
-                        _('RUC inválido para %s: %s') % (partner.name or 'Partner', error_msg)
+                        _("RUC inválido para %s: %s")
+                        % (partner.name or "Partner", error_msg)
                     )
 
-    @api.constrains('l10n_py_document_type', 'l10n_py_document_number')
+    @api.constrains("l10n_py_document_type", "l10n_py_document_number")
     def _check_document_number(self):
         """Validar número de documento según tipo"""
         for partner in self:
-            if partner.l10n_py_document_type == '1' and partner.l10n_py_document_number:
+            if partner.l10n_py_document_type == "1" and partner.l10n_py_document_number:
                 # Cédula paraguaya - validar formato
-                cedula = partner.l10n_py_document_number.replace('.', '').replace(',', '')
+                cedula = partner.l10n_py_document_number.replace(".", "").replace(
+                    ",", ""
+                )
                 if not cedula.isdigit():
                     raise ValidationError(
-                        _('La cédula paraguaya debe contener solo números')
+                        _("La cédula paraguaya debe contener solo números")
                     )
 
-    @api.constrains('l10n_py_taxpayer_type', 'l10n_py_ruc')
+    @api.constrains("l10n_py_taxpayer_type", "l10n_py_ruc")
     def _check_taxpayer_requirements(self):
         """Validar requisitos según tipo de contribuyente"""
         for partner in self:
-            if partner.l10n_py_taxpayer_type == '1' and not partner.l10n_py_ruc:
+            if partner.l10n_py_taxpayer_type == "1" and not partner.l10n_py_ruc:
                 raise ValidationError(
-                    _('Los contribuyentes deben tener RUC obligatoriamente')
+                    _("Los contribuyentes deben tener RUC obligatoriamente")
                 )
 
     # ============== ONCHANGE METHODS ==============
 
-    @api.onchange('l10n_py_ruc')
+    @api.onchange("l10n_py_ruc")
     def _onchange_ruc(self):
         """Validar y formatear RUC al cambiar"""
         if self.l10n_py_ruc:
@@ -270,32 +280,32 @@ class ResPartner(models.Model):
             # Si es RUC válido, marcar como contribuyente
             is_valid, _ = RUCValidator.validate(self.l10n_py_ruc)
             if is_valid:
-                self.l10n_py_taxpayer_type = '1'
+                self.l10n_py_taxpayer_type = "1"
 
-    @api.onchange('country_id')
+    @api.onchange("country_id")
     def _onchange_country_id(self):
         """Ajustar campos según país"""
-        if self.country_id and self.country_id.code != 'PY':
+        if self.country_id and self.country_id.code != "PY":
             # Cliente extranjero
-            self.l10n_py_document_type = '2'  # Pasaporte por defecto
-            self.l10n_py_taxpayer_type = '2'  # No contribuyente
+            self.l10n_py_document_type = "2"  # Pasaporte por defecto
+            self.l10n_py_taxpayer_type = "2"  # No contribuyente
         else:
             # Cliente paraguayo
             if self.is_company:
                 self.l10n_py_document_type = False
-                self.l10n_py_taxpayer_type = '1'  # Contribuyente
+                self.l10n_py_taxpayer_type = "1"  # Contribuyente
             else:
-                self.l10n_py_document_type = '1'  # Cédula paraguaya
+                self.l10n_py_document_type = "1"  # Cédula paraguaya
 
-    @api.onchange('is_company')
+    @api.onchange("is_company")
     def _onchange_is_company_py(self):
         """Ajustar tipo de contribuyente según tipo de persona"""
         if self.is_company:
-            self.l10n_py_taxpayer_type = '1'  # Las empresas son contribuyentes
+            self.l10n_py_taxpayer_type = "1"  # Las empresas son contribuyentes
         else:
             # Personas físicas pueden ser o no contribuyentes
             if not self.l10n_py_taxpayer_type:
-                self.l10n_py_taxpayer_type = '2'
+                self.l10n_py_taxpayer_type = "2"
 
     # ============== PUBLIC METHODS ==============
 
@@ -306,41 +316,46 @@ class ResPartner(models.Model):
         errors = []
 
         # Validar RUC si es contribuyente
-        if self.l10n_py_taxpayer_type == '1':
+        if self.l10n_py_taxpayer_type == "1":
             if not self.l10n_py_ruc:
-                errors.append(_('RUC es obligatorio para contribuyentes'))
+                errors.append(_("RUC es obligatorio para contribuyentes"))
             else:
                 # Validar RUC completo usando RUCValidator
                 is_valid, error_msg = RUCValidator.validate(self.l10n_py_ruc)
                 if not is_valid:
-                    errors.append(_('RUC inválido: %s') % error_msg)
+                    errors.append(_("RUC inválido: %s") % error_msg)
                 else:
                     # Validar DV
                     calculated_dv = RUCValidator.get_check_digit(self.l10n_py_ruc)
                     if calculated_dv != self.l10n_py_dv:
                         errors.append(
-                            _('El dígito verificador del RUC es incorrecto. '
-                              'Debería ser: %s') % calculated_dv
+                            _(
+                                "El dígito verificador del RUC es incorrecto. "
+                                "Debería ser: %s"
+                            )
+                            % calculated_dv
                         )
 
         # Validar documento
         if not self.l10n_py_document_type and not self.is_company:
-            errors.append(_('Tipo de documento es obligatorio para personas físicas'))
+            errors.append(_("Tipo de documento es obligatorio para personas físicas"))
 
         if self.l10n_py_document_type and not self.l10n_py_document_number:
-            errors.append(_('Número de documento es obligatorio'))
+            errors.append(_("Número de documento es obligatorio"))
 
         # Validar dirección para facturación electrónica
         if not self.street:
-            errors.append(_('La dirección es obligatoria para facturación electrónica'))
+            errors.append(_("La dirección es obligatoria para facturación electrónica"))
 
         # Validar ubicación
-        if self.country_id and self.country_id.code == 'PY':
+        if self.country_id and self.country_id.code == "PY":
             if not self.state_id:
-                errors.append(_('El departamento es obligatorio para clientes paraguayos'))
+                errors.append(
+                    _("El departamento es obligatorio para clientes paraguayos")
+                )
 
         if errors:
-            raise ValidationError('\n'.join(errors))
+            raise ValidationError("\n".join(errors))
 
         return True
 
@@ -352,22 +367,24 @@ class ResPartner(models.Model):
         """
         # Validar formato
         if not self._validate_ruc_format(ruc):
-            raise ValidationError(_('Formato de RUC inválido'))
+            raise ValidationError(_("Formato de RUC inválido"))
 
         # Calcular DV
-        ruc_clean = ruc.replace('-', '').strip()
+        ruc_clean = ruc.replace("-", "").strip()
         dv = self._calculate_dv(ruc_clean)
 
         # TODO: Consultar datos del RUC en servicio externo
         # Por ahora, crear con datos mínimos
 
-        partner = self.create({
-            'name': f'Cliente RUC {ruc_clean}-{dv}',
-            'l10n_py_ruc': ruc_clean,
-            'l10n_py_taxpayer_type': '1',
-            'is_company': True,
-            'country_id': self.env.ref('base.py').id,
-        })
+        partner = self.create(
+            {
+                "name": f"Cliente RUC {ruc_clean}-{dv}",
+                "l10n_py_ruc": ruc_clean,
+                "l10n_py_taxpayer_type": "1",
+                "is_company": True,
+                "country_id": self.env.ref("base.py").id,
+            }
+        )
 
         return partner
 
@@ -379,7 +396,7 @@ class ResPartner(models.Model):
         self.ensure_one()
 
         if not self.l10n_py_ruc:
-            raise ValidationError(_('No hay RUC para validar'))
+            raise ValidationError(_("No hay RUC para validar"))
 
         # TODO: Implementar consulta a SET
 
@@ -387,12 +404,12 @@ class ResPartner(models.Model):
         self.validate_fiscal_data()
 
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': _('Validación Exitosa'),
-                'message': _('Los datos fiscales son válidos'),
-                'type': 'success',
-                'sticky': False,
-            }
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Validación Exitosa"),
+                "message": _("Los datos fiscales son válidos"),
+                "type": "success",
+                "sticky": False,
+            },
         }

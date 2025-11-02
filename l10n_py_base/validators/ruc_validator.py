@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # l10n_py_base/validators/ruc_validator.py
 
 """
@@ -6,8 +5,8 @@ Validador robusto para RUC paraguaio
 Implementa validação completa conforme especificações da SET
 """
 
-import re
 import logging
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -33,15 +32,15 @@ class RUCValidator:
             return False, "RUC é obrigatório"
 
         # Limpar caracteres especiais
-        clean_ruc = re.sub(r'[^\d-]', '', ruc)
+        clean_ruc = re.sub(r"[^\d-]", "", ruc)
 
         # Verificar formato básico (aceita com ou sem hífen)
-        if not re.match(r'^\d{6,8}(-\d)?$', clean_ruc):
+        if not re.match(r"^\d{6,8}(-\d)?$", clean_ruc):
             return False, "Formato inválido. Use: XXXXXXX-D ou XXXXXXX"
 
         # Separar RUC e dígito verificador se houver hífen
-        if '-' in clean_ruc:
-            ruc_number, check_digit = clean_ruc.split('-')
+        if "-" in clean_ruc:
+            ruc_number, check_digit = clean_ruc.split("-")
         else:
             # Se não houver hífen, assume que o último dígito é o DV
             if len(clean_ruc) >= 7:
@@ -61,7 +60,10 @@ class RUCValidator:
         # Se um DV foi fornecido, validá-lo
         if check_digit is not None:
             if str(calculated_digit) != check_digit:
-                return False, f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}"
+                return (
+                    False,
+                    f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}",
+                )
 
         return True, ""
 
@@ -106,7 +108,7 @@ class RUCValidator:
             str: RUC formatado (XXXXXXX-D)
         """
         # Limpar formato
-        clean_ruc = re.sub(r'[^\d]', '', ruc)
+        clean_ruc = re.sub(r"[^\d]", "", ruc)
 
         if len(clean_ruc) < 6:
             return ruc  # Retorna original se muito curto
@@ -151,7 +153,7 @@ class RUCValidator:
         Returns:
             str: Número do RUC sem DV
         """
-        clean_ruc = re.sub(r'[^\d]', '', ruc)
+        clean_ruc = re.sub(r"[^\d]", "", ruc)
 
         if not clean_ruc:
             return ""
@@ -199,7 +201,7 @@ class RUCValidator:
         if not ruc:
             return False
 
-        clean_ruc = re.sub(r'[^\d]', '', ruc)
+        clean_ruc = re.sub(r"[^\d]", "", ruc)
 
         # Deve ter entre 6 e 9 dígitos (6-8 para RUC + 1 para DV)
         if len(clean_ruc) < 6 or len(clean_ruc) > 9:
@@ -228,4 +230,3 @@ class RUCValidator:
             return ruc  # Retorna original se inválido
 
         return cls.format_ruc(ruc, include_dv=True)
-

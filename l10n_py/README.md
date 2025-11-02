@@ -2,13 +2,15 @@
 
 ## Descripción
 
-Módulo de localización contable para Paraguay (`l10n_py`) que implementa los requisitos fiscales y contables específicos del país.
+Módulo de localización contable para Paraguay (`l10n_py`) que implementa los requisitos
+fiscales y contables específicos del país.
 
 ## Características
 
 ### Gestión de Timbrados
 
-- **Modelo de Autorización (Timbrado)**: Gestión completa de timbrados otorgados por la SET (Subsecretaría de Estado de Tributación)
+- **Modelo de Autorización (Timbrado)**: Gestión completa de timbrados otorgados por la
+  SET (Subsecretaría de Estado de Tributación)
 - Control de fechas de vigencia
 - Rango de numeración autorizada
 - Establecimiento y punto de expedición
@@ -18,6 +20,7 @@ Módulo de localización contable para Paraguay (`l10n_py`) que implementa los r
 ### Facturación
 
 - **Campos específicos paraguayos en facturas**:
+
   - Número completo de factura (formato: 001-001-0000001)
   - Discriminación automática de IVA por alícuota (5%, 10%, Exento)
   - Total en letras (guaraníes)
@@ -57,6 +60,7 @@ Configurados tanto para ventas como para compras.
 Ir a: **Contabilidad > Configuración > Timbrados**
 
 Crear un nuevo timbrado con:
+
 - Número de timbrado (8 dígitos)
 - Fechas de inicio y vencimiento
 - Rango de numeración autorizada
@@ -67,6 +71,7 @@ Crear un nuevo timbrado con:
 ### 2. Configurar Clientes y Proveedores
 
 Agregar el RUC en los contactos:
+
 - Ir a **Contactos**
 - Editar o crear un contacto
 - Ingresar el RUC en el campo correspondiente
@@ -90,6 +95,7 @@ Agregar el RUC en los contactos:
 5. Confirmar la factura
 
 Al confirmar, el sistema:
+
 - Valida que el timbrado sea vigente
 - Asigna automáticamente el próximo número disponible
 - Calcula la discriminación de IVA
@@ -98,6 +104,7 @@ Al confirmar, el sistema:
 ### Ver Información Fiscal
 
 En la factura confirmada, ir a la pestaña **"Información Fiscal Paraguay"** para ver:
+
 - Discriminación de IVA (5%, 10%, exento)
 - Subtotales por alícuota
 - Total de IVA
@@ -136,18 +143,21 @@ l10n_py/
 ## Validaciones Implementadas
 
 ### Timbrados
+
 - Número de timbrado: 8 dígitos numéricos
 - Establecimiento y punto de expedición: 3 dígitos numéricos
 - Rango de numeración válido
 - Fechas coherentes (inicio < vencimiento)
 
 ### Facturas
+
 - Timbrado obligatorio para facturas de venta
 - Timbrado debe estar vigente
 - Número de factura dentro del rango autorizado
 - Número de factura único por timbrado
 
 ### RUC
+
 - Entre 7 y 9 dígitos (incluyendo dígito verificador)
 - Solo caracteres numéricos
 - RUC único por contacto
@@ -161,11 +171,13 @@ l10n_py/
 ## Roadmap
 
 ### Versión 1.1 (Planeada)
+
 - Mejora en conversión de números a letras
 - Reportes fiscales adicionales
 - Datos demo
 
 ### Versión 2.0 (Futuro)
+
 - Integración con SIFEN
 - Facturación electrónica
 - Libros fiscales electrónicos
@@ -173,6 +185,7 @@ l10n_py/
 ## Soporte
 
 Para reportar issues o solicitar características:
+
 - GitHub: https://github.com/kmee
 
 ## Licencia

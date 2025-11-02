@@ -1,88 +1,80 @@
-# -*- coding: utf-8 -*-
 # l10n_py_edi_factpy/models/factpy_connector.py
 
-import requests
 import json
 import logging
 from datetime import datetime
-from odoo import models, fields, api, _
+
+import requests
+
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
 
 class FactPyConnector(models.Model):
-    _name = 'l10n_py.edi.connector.factpy'
-    _description = 'FactPy EDI Connector for Paraguay'
-    _rec_name = 'name'
+    _name = "l10n_py.edi.connector.factpy"
+    _description = "FactPy EDI Connector for Paraguay"
+    _rec_name = "name"
 
     # ============== CONFIGURATION FIELDS ==============
 
-    name = fields.Char(
-        string='Nombre',
-        required=True,
-        default='FactPy Connector'
-    )
+    name = fields.Char(string="Nombre", required=True, default="FactPy Connector")
 
     company_id = fields.Many2one(
-        'res.company',
-        string='Compañía',
+        "res.company",
+        string="Compañía",
         required=True,
-        default=lambda self: self.env.company
+        default=lambda self: self.env.company,
     )
 
     api_key = fields.Char(
-        string='API Key',
+        string="API Key",
         required=True,
-        help='Token de autenticación proporcionado por FactPy'
+        help="Token de autenticación proporcionado por FactPy",
     )
 
     api_secret = fields.Char(
-        string='API Secret',
+        string="API Secret",
         required=True,
-        help='Secret de autenticación proporcionado por FactPy'
+        help="Secret de autenticación proporcionado por FactPy",
     )
 
-    environment = fields.Selection([
-        ('test', 'Pruebas'),
-        ('prod', 'Producción')
-    ], string='Ambiente', default='test', required=True)
-
-    base_url = fields.Char(
-        string='URL Base',
-        compute='_compute_base_url',
-        store=True
+    environment = fields.Selection(
+        [("test", "Pruebas"), ("prod", "Producción")],
+        string="Ambiente",
+        default="test",
+        required=True,
     )
+
+    base_url = fields.Char(string="URL Base", compute="_compute_base_url", store=True)
 
     timeout = fields.Integer(
-        string='Timeout (segundos)',
+        string="Timeout (segundos)",
         default=30,
-        help='Tiempo máximo de espera para respuesta'
+        help="Tiempo máximo de espera para respuesta",
     )
 
-    active = fields.Boolean(
-        string='Activo',
-        default=True
-    )
+    active = fields.Boolean(string="Activo", default=True)
 
     # ============== COMPUTE METHODS ==============
 
-    @api.depends('environment')
+    @api.depends("environment")
     def _compute_base_url(self):
         for record in self:
-            if record.environment == 'test':
-                record.base_url = 'https://api-test.factpy.com'
+            if record.environment == "test":
+                record.base_url = "https://api-test.factpy.com"
             else:
-                record.base_url = 'https://api.factpy.com'
+                record.base_url = "https://api.factpy.com"
 
     # ============== PRIVATE METHODS ==============
 
     def _get_headers(self):
         """Obtener headers para las peticiones"""
         return {
-            'Authorization': f'Bearer {self._get_token()}',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Authorization": f"Bearer {self._get_token()}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         }
 
     def _get_token(self):
@@ -91,22 +83,19 @@ class FactPyConnector(models.Model):
             url = f"{self.base_url}/auth/token"
             response = requests.post(
                 url,
-                json={
-                    'api_key': self.api_key,
-                    'api_secret': self.api_secret
-                },
-                timeout=self.timeout
+                json={"api_key": self.api_key, "api_secret": self.api_secret},
+                timeout=self.timeout,
             )
 
             if response.status_code == 200:
                 data = response.json()
-                return data.get('access_token')
+                return data.get("access_token")
             else:
-                raise UserError(_('Error obteniendo token: %s') % response.text)
+                raise UserError(_("Error obteniendo token: %s") % response.text)
 
         except Exception as e:
-            _logger.error(f'Error getting FactPy token: {str(e)}')
-            raise UserError(_('Error de autenticación con FactPy'))
+            _logger.error(f"Error getting FactPy token: {str(e)}")
+            raise UserError(_("Error de autenticación con FactPy"))
 
     def _adapt_to_factpy_format(self, invoice_data):
         """
@@ -114,22 +103,26 @@ class FactPyConnector(models.Model):
         """
         # Adaptar estructura básica (similar a FacturaSend pero con campos específicos de FactPy)
         adapted_data = {
-            'fechaEmision': datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
-            'establecimiento': invoice_data.get('establecimiento', '001'),
-            'puntoExpedicion': invoice_data.get('punto', '001'),
-            'numeroFactura': invoice_data.get('numero', '0000001'),
-            'tipoDocumento': invoice_data.get('tipoDocumento'),
-            'tipoEmision': invoice_data.get('tipoEmision'),
-            'tipoTransaccion': invoice_data.get('tipoTransaccion'),
-            'cliente': invoice_data.get('cliente', {}),
-            'detalles': invoice_data.get('items', []),
-            'condicionPago': invoice_data.get('condicion', {}).get('tipo', 1),
-            'moneda': invoice_data.get('moneda', 'PYG'),
+            "fechaEmision": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "establecimiento": invoice_data.get("establecimiento", "001"),
+            "puntoExpedicion": invoice_data.get("punto", "001"),
+            "numeroFactura": invoice_data.get("numero", "0000001"),
+            "tipoDocumento": invoice_data.get("tipoDocumento"),
+            "tipoEmision": invoice_data.get("tipoEmision"),
+            "tipoTransaccion": invoice_data.get("tipoTransaccion"),
+            "cliente": invoice_data.get("cliente", {}),
+            "detalles": invoice_data.get("items", []),
+            "condicionPago": invoice_data.get("condicion", {}).get("tipo", 1),
+            "moneda": invoice_data.get("moneda", "PYG"),
         }
 
         # Adaptar condición de pago
-        if adapted_data['condicionPago'] == 2:  # Crédito
-            adapted_data['cuotas'] = invoice_data.get('condicion', {}).get('credito', {}).get('infoCuotas', [])
+        if adapted_data["condicionPago"] == 2:  # Crédito
+            adapted_data["cuotas"] = (
+                invoice_data.get("condicion", {})
+                .get("credito", {})
+                .get("infoCuotas", [])
+            )
 
         return adapted_data
 
@@ -139,22 +132,19 @@ class FactPyConnector(models.Model):
             data = response.json()
         except json.JSONDecodeError:
             _logger.error(f"Error decodificando JSON: {response.text}")
-            raise UserError(_('Error en la respuesta del servidor'))
+            raise UserError(_("Error en la respuesta del servidor"))
 
         if response.status_code == 200:
-            if data.get('success'):
-                return {
-                    'success': True,
-                    'result': data.get('data', {})
-                }
+            if data.get("success"):
+                return {"success": True, "result": data.get("data", {})}
             else:
                 return {
-                    'success': False,
-                    'error': data.get('message', 'Error desconocido')
+                    "success": False,
+                    "error": data.get("message", "Error desconocido"),
                 }
         elif response.status_code == 400:
             # Error de validación
-            errors = data.get('errors', {})
+            errors = data.get("errors", {})
             error_messages = []
             for field, messages in errors.items():
                 if isinstance(messages, list):
@@ -164,52 +154,52 @@ class FactPyConnector(models.Model):
                     error_messages.append(f"{field}: {messages}")
 
             return {
-                'success': False,
-                'error': '\n'.join(error_messages) or data.get('message', 'Error de validación')
+                "success": False,
+                "error": "\n".join(error_messages)
+                or data.get("message", "Error de validación"),
             }
         elif response.status_code == 401:
             return {
-                'success': False,
-                'error': 'Autenticación fallida. Verifique sus credenciales'
+                "success": False,
+                "error": "Autenticación fallida. Verifique sus credenciales",
             }
         elif response.status_code == 404:
             return {
-                'success': False,
-                'error': 'Endpoint no encontrado. Verifique la configuración'
+                "success": False,
+                "error": "Endpoint no encontrado. Verifique la configuración",
             }
         elif response.status_code == 429:
             return {
-                'success': False,
-                'error': 'Límite de rate excedido. Intente más tarde'
+                "success": False,
+                "error": "Límite de rate excedido. Intente más tarde",
             }
         elif response.status_code == 500:
-            return {
-                'success': False,
-                'error': 'Error interno del servidor FactPy'
-            }
+            return {"success": False, "error": "Error interno del servidor FactPy"}
         else:
             return {
-                'success': False,
-                'error': f'Error HTTP {response.status_code}: {response.text[:200]}'
+                "success": False,
+                "error": f"Error HTTP {response.status_code}: {response.text[:200]}",
             }
 
     def _log_request(self, method, endpoint, data=None, response=None):
         """Registrar petición y respuesta"""
         log_vals = {
-            'connector_id': self.id,
-            'method': method,
-            'endpoint': endpoint,
-            'request_data': json.dumps(data, indent=2) if data else '',
-            'timestamp': fields.Datetime.now()
+            "connector_id": self.id,
+            "method": method,
+            "endpoint": endpoint,
+            "request_data": json.dumps(data, indent=2) if data else "",
+            "timestamp": fields.Datetime.now(),
         }
 
         if response:
-            log_vals.update({
-                'status_code': response.status_code,
-                'response_data': response.text[:5000]  # Limitar tamaño
-            })
+            log_vals.update(
+                {
+                    "status_code": response.status_code,
+                    "response_data": response.text[:5000],  # Limitar tamaño
+                }
+            )
 
-        self.env['l10n_py.edi.log'].create(log_vals)
+        self.env["l10n_py.edi.log"].create(log_vals)
 
     # ============== PUBLIC METHODS ==============
 
@@ -222,34 +212,32 @@ class FactPyConnector(models.Model):
             url = f"{self.base_url}/user/info"
 
             response = requests.get(
-                url,
-                headers=self._get_headers(),
-                timeout=self.timeout
+                url, headers=self._get_headers(), timeout=self.timeout
             )
 
             if response.status_code == 200:
                 return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': _('Conexión Exitosa'),
-                        'message': _('La conexión con FactPy fue exitosa'),
-                        'type': 'success',
-                        'sticky': False,
-                    }
+                    "type": "ir.actions.client",
+                    "tag": "display_notification",
+                    "params": {
+                        "title": _("Conexión Exitosa"),
+                        "message": _("La conexión con FactPy fue exitosa"),
+                        "type": "success",
+                        "sticky": False,
+                    },
                 }
             else:
                 raise UserError(
-                    _('Error de conexión: HTTP %s\n%s') %
-                    (response.status_code, response.text[:200])
+                    _("Error de conexión: HTTP %s\n%s")
+                    % (response.status_code, response.text[:200])
                 )
 
         except requests.exceptions.Timeout:
-            raise UserError(_('Timeout: El servidor no respondió a tiempo'))
+            raise UserError(_("Timeout: El servidor no respondió a tiempo"))
         except requests.exceptions.ConnectionError:
-            raise UserError(_('Error de conexión: No se pudo conectar con FactPy'))
+            raise UserError(_("Error de conexión: No se pudo conectar con FactPy"))
         except Exception as e:
-            raise UserError(_('Error inesperado: %s') % str(e))
+            raise UserError(_("Error inesperado: %s") % str(e))
 
     def send_document(self, invoice_data):
         """
@@ -272,31 +260,25 @@ class FactPyConnector(models.Model):
                 url,
                 json=adapted_data,
                 headers=self._get_headers(),
-                timeout=self.timeout
+                timeout=self.timeout,
             )
 
             # Registrar petición
-            self._log_request('POST', '/documents/send', adapted_data, response)
+            self._log_request("POST", "/documents/send", adapted_data, response)
 
             # Procesar respuesta
             return self._process_response(response)
 
         except requests.exceptions.Timeout:
             return {
-                'success': False,
-                'error': 'Timeout: El servidor no respondió a tiempo'
+                "success": False,
+                "error": "Timeout: El servidor no respondió a tiempo",
             }
         except requests.exceptions.ConnectionError:
-            return {
-                'success': False,
-                'error': 'Error de conexión con FactPy'
-            }
+            return {"success": False, "error": "Error de conexión con FactPy"}
         except Exception as e:
-            _logger.exception('Error enviando documento a FactPy')
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            _logger.exception("Error enviando documento a FactPy")
+            return {"success": False, "error": str(e)}
 
     def check_status(self, document_id):
         """
@@ -311,23 +293,20 @@ class FactPyConnector(models.Model):
 
         try:
             response = requests.get(
-                url,
-                headers=self._get_headers(),
-                timeout=self.timeout
+                url, headers=self._get_headers(), timeout=self.timeout
             )
 
-            self._log_request('GET', f'/documents/{document_id}/status', None, response)
+            self._log_request("GET", f"/documents/{document_id}/status", None, response)
 
             return self._process_response(response)
 
         except Exception as e:
-            _logger.exception('Error consultando estado del documento')
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            _logger.exception("Error consultando estado del documento")
+            return {"success": False, "error": str(e)}
 
-    def cancel_document(self, document_id, reason='Cancelación solicitada por el usuario'):
+    def cancel_document(
+        self, document_id, reason="Cancelación solicitada por el usuario"
+    ):
         """
         Cancelar documento electrónico
 
@@ -339,28 +318,22 @@ class FactPyConnector(models.Model):
 
         url = f"{self.base_url}/documents/{document_id}/cancel"
 
-        cancel_data = {
-            'reason': reason
-        }
+        cancel_data = {"reason": reason}
 
         try:
             response = requests.post(
-                url,
-                json=cancel_data,
-                headers=self._get_headers(),
-                timeout=self.timeout
+                url, json=cancel_data, headers=self._get_headers(), timeout=self.timeout
             )
 
-            self._log_request('POST', f'/documents/{document_id}/cancel', cancel_data, response)
+            self._log_request(
+                "POST", f"/documents/{document_id}/cancel", cancel_data, response
+            )
 
             return self._process_response(response)
 
         except Exception as e:
-            _logger.exception('Error cancelando documento')
-            return {
-                'success': False,
-                'error': str(e)
-            }
+            _logger.exception("Error cancelando documento")
+            return {"success": False, "error": str(e)}
 
     def get_pdf(self, document_id):
         """
@@ -375,21 +348,20 @@ class FactPyConnector(models.Model):
 
         try:
             response = requests.get(
-                url,
-                headers=self._get_headers(),
-                timeout=self.timeout
+                url, headers=self._get_headers(), timeout=self.timeout
             )
 
             if response.status_code == 200:
                 # Retornar el PDF en base64
                 import base64
-                return base64.b64encode(response.content).decode('utf-8')
+
+                return base64.b64encode(response.content).decode("utf-8")
             else:
                 _logger.error(f"Error obteniendo PDF: {response.status_code}")
                 return False
 
-        except Exception as e:
-            _logger.exception('Error obteniendo PDF')
+        except Exception:
+            _logger.exception("Error obteniendo PDF")
             return False
 
     def get_xml(self, document_id):
@@ -405,9 +377,7 @@ class FactPyConnector(models.Model):
 
         try:
             response = requests.get(
-                url,
-                headers=self._get_headers(),
-                timeout=self.timeout
+                url, headers=self._get_headers(), timeout=self.timeout
             )
 
             if response.status_code == 200:
@@ -416,6 +386,6 @@ class FactPyConnector(models.Model):
                 _logger.error(f"Error obteniendo XML: {response.status_code}")
                 return False
 
-        except Exception as e:
-            _logger.exception('Error obteniendo XML')
+        except Exception:
+            _logger.exception("Error obteniendo XML")
             return False

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # l10n_py_edi_base/models/edi_logging_mixin.py
 
 """
@@ -6,18 +5,20 @@ Mixin para Logging Automático de Operações EDI
 Facilita o logging consistente em todos os conectores
 """
 
-from odoo import models, api
-import time
 import logging
+import time
 from contextlib import contextmanager
+
+from odoo import models
 
 _logger = logging.getLogger(__name__)
 
 
 class EDILoggingMixin(models.AbstractModel):
     """Mixin para logging automático de operações EDI"""
-    _name = 'l10n_py.edi.logging.mixin'
-    _description = 'Mixin para Logging Automático EDI'
+
+    _name = "l10n_py.edi.logging.mixin"
+    _description = "Mixin para Logging Automático EDI"
 
     @contextmanager
     def log_edi_operation(self, operation_type, provider, document=None, **kwargs):
@@ -40,10 +41,10 @@ class EDILoggingMixin(models.AbstractModel):
         """
         start_time = time.time()
         log_data = {
-            'operation_type': operation_type,
-            'provider': provider,
-            'document': document,
-            **kwargs
+            "operation_type": operation_type,
+            "provider": provider,
+            "document": document,
+            **kwargs,
         }
 
         try:
@@ -52,16 +53,14 @@ class EDILoggingMixin(models.AbstractModel):
 
             # Operação bem-sucedida
             execution_time = (time.time() - start_time) * 1000
-            self.env['l10n_py.edi.log'].log_operation(
-                execution_time=execution_time,
-                success=True,
-                **log_data
+            self.env["l10n_py.edi.log"].log_operation(
+                execution_time=execution_time, success=True, **log_data
             )
 
         except Exception as e:
             # Operação com erro
             execution_time = (time.time() - start_time) * 1000
-            self.env['l10n_py.edi.log'].log_operation(
+            self.env["l10n_py.edi.log"].log_operation(
                 execution_time=execution_time,
                 success=False,
                 error_message=str(e),
@@ -70,8 +69,9 @@ class EDILoggingMixin(models.AbstractModel):
             # Re-raise a exceção
             raise
 
-    def _log_success(self, operation_type, provider, document=None,
-                    execution_time=0, **kwargs):
+    def _log_success(
+        self, operation_type, provider, document=None, execution_time=0, **kwargs
+    ):
         """
         Log de operação bem-sucedida
 
@@ -82,7 +82,7 @@ class EDILoggingMixin(models.AbstractModel):
             execution_time (float): Tempo de execução em ms
             **kwargs: Dados adicionais
         """
-        return self.env['l10n_py.edi.log'].log_operation(
+        return self.env["l10n_py.edi.log"].log_operation(
             operation_type=operation_type,
             provider=provider,
             document=document,
@@ -91,8 +91,15 @@ class EDILoggingMixin(models.AbstractModel):
             **kwargs
         )
 
-    def _log_error(self, operation_type, provider, error_message,
-                  document=None, execution_time=0, **kwargs):
+    def _log_error(
+        self,
+        operation_type,
+        provider,
+        error_message,
+        document=None,
+        execution_time=0,
+        **kwargs
+    ):
         """
         Log de operação com erro
 
@@ -104,7 +111,7 @@ class EDILoggingMixin(models.AbstractModel):
             execution_time (float): Tempo de execução em ms
             **kwargs: Dados adicionais
         """
-        return self.env['l10n_py.edi.log'].log_operation(
+        return self.env["l10n_py.edi.log"].log_operation(
             operation_type=operation_type,
             provider=provider,
             document=document,
@@ -113,4 +120,3 @@ class EDILoggingMixin(models.AbstractModel):
             error_message=error_message,
             **kwargs
         )
-

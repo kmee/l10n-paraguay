@@ -4,11 +4,7 @@
         <field name="name">l10n_py.edi.log.tree</field>
         <field name="model">l10n_py.edi.log</field>
         <field name="arch" type="xml">
-            <tree
-                string="Logs EDI"
-                decoration-danger="error==True"
-                decoration-info="error==False"
-            >
+            <tree decoration-danger="error==True" decoration-info="error==False">
                 <field name="timestamp" />
                 <field name="invoice_id" />
                 <field name="method" />

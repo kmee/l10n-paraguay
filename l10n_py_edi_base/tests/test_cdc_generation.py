@@ -65,7 +65,7 @@ class TestCDCGeneration(common.TransactionCase):
         )
         self.assertEqual(
             components["doc_type"],
-            f"{self.doc_type:02d}",
+            f"{self.doc_type: 02d}",
             "Tipo documento incorreto no CDC",
         )
         self.assertEqual(
@@ -79,7 +79,9 @@ class TestCDCGeneration(common.TransactionCase):
             "Ponto expedição incorreto no CDC",
         )
         self.assertEqual(
-            components["sequence"], f"{self.sequence:07d}", "Sequência incorreta no CDC"
+            components["sequence"],
+            f"{self.sequence: 07d}",
+            "Sequência incorreta no CDC",
         )
 
     def test_cdc_uniqueness(self):
@@ -226,7 +228,7 @@ class TestCDCGeneration(common.TransactionCase):
             components = CDCGenerator.parse_cdc(cdc)
             self.assertEqual(
                 components["doc_type"],
-                f"{doc_type:02d}",
+                f"{doc_type: 02d}",
                 f"Tipo de documento incorreto para {doc_type}",
             )
 

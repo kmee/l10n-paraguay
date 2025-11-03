@@ -34,12 +34,6 @@
         # Menus
         "views/l10n_py_edi_menu.xml",
     ],
-    "demo": [
-        "demo/product_demo.xml",
-    ],
-    "test": [
-        "tests/test_edi_validation.py",
-    ],
     "external_dependencies": {
         "python": [
             "qrcode",

@@ -324,12 +324,12 @@ class AccountMove(models.Model):
                     iva_type = 3  # Exenta
                     iva_rate = 0
 
-            # Calcular base gravable e IVA
-            if iva_type == 1:  # Gravado
-                base_grav = line.price_subtotal / (1 + iva_rate / 100)
-                line.price_subtotal - base_grav
-            else:
-                base_grav = 0
+            # # Calcular base gravable e IVA
+            # if iva_type == 1:  # Gravado
+            #     base_grav = line.price_subtotal / (1 + iva_rate / 100)
+            #     # La resta 'line.price_subtotal - base_grav' no tenía efecto; eliminada.
+            # else:
+            #     base_grav = 0
 
             item = {
                 "codigo": line.product_id.default_code or f"PROD-{line.product_id.id}",
@@ -449,7 +449,7 @@ class AccountMove(models.Model):
             _logger.error(f"Error enviando EDI: {str(e)}")
             self.l10n_py_edi_status = "error"
             self.l10n_py_edi_message = str(e)
-            raise UserError(_("Error enviando documento: %s") % str(e))
+            raise UserError(_("Error enviando documento: %s") % str(e)) from e
 
     def _process_edi_response(self, response):
         """Procesar respuesta exitosa del EDI"""

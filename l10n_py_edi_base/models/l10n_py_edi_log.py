@@ -66,7 +66,7 @@ class EDILog(models.Model):
 
     # ============== DADOS DA REQUISIÇÃO ==============
 
-    endpoint = fields.Char(string="Endpoint", help="URL ou endpoint da API")
+    endpoint = fields.Char(help="URL ou endpoint da API")
 
     method = fields.Selection(
         [

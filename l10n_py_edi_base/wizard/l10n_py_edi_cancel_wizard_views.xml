@@ -4,7 +4,7 @@
         <field name="name">l10n_py.edi.cancel.wizard.form</field>
         <field name="model">l10n_py.edi.cancel.wizard</field>
         <field name="arch" type="xml">
-            <form string="Cancelar Documento EDI">
+            <form>
                 <sheet>
                     <group>
                         <field name="invoice_id" readonly="1" />

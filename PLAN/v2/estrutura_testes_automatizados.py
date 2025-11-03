@@ -700,8 +700,8 @@ class TestPerformance(TestL10nPyBase):
         for i in range(100):
             partners_data.append(
                 {
-                    "name": f"Partner {i:03d}",
-                    "l10n_py_ruc": f"{1000000 + i:07d}-{(i % 10)}",
+                    "name": f"Partner {i: 03d}",
+                    "l10n_py_ruc": f"{1000000 + i: 07d}-{(i % 10)}",
                     "l10n_py_taxpayer_type": "2",
                 }
             )
@@ -714,7 +714,7 @@ class TestPerformance(TestL10nPyBase):
         self.assertLess(
             execution_time,
             5.0,
-            f"Validação de 100 RUCs deve ser rápida (atual: {execution_time:.2f}s)",
+            f"Validação de 100 RUCs deve ser rápida (atual: {execution_time: .2f}s)",
         )
 
     def test_bulk_cdc_generation(self):
@@ -744,7 +744,7 @@ class TestPerformance(TestL10nPyBase):
         self.assertLess(
             execution_time,
             2.0,
-            f"Geração de 50 CDCs deve ser rápida (atual: {execution_time:.2f}s)",
+            f"Geração de 50 CDCs deve ser rápida (atual: {execution_time: .2f}s)",
         )
 
 
@@ -789,26 +789,24 @@ if __name__ == "__main__":
 # COMANDOS PARA EXECUTAR TESTES
 # =============================================================================
 
-"""
 # Executar todos os testes da localização paraguaia
-python -m odoo.tests.loader -i l10n_py_core,l10n_py_accounting,l10n_py_edi_core --test-tags=l10n_py
+# python -m odoo.tests.loader -i l10n_py_core,l10n_py_accounting,l10n_py_edi_core --test-tags=l10n_py
 
 # Executar apenas testes de RUC
-python -m odoo.tests.loader -i l10n_py_core --test-tags=ruc
+# python -m odoo.tests.loader -i l10n_py_core --test-tags=ruc
 
 # Executar apenas testes de CDC
-python -m odoo.tests.loader -i l10n_py_edi_core --test-tags=cdc
+# python -m odoo.tests.loader -i l10n_py_edi_core --test-tags=cdc
 
 # Executar testes de performance
-python -m odoo.tests.loader -i l10n_py_core,l10n_py_edi_core --test-tags=performance
+# python -m odoo.tests.loader -i l10n_py_core,l10n_py_edi_core --test-tags=performance
 
 # Executar testes de EDI (sem integração real)
-python -m odoo.tests.loader -i l10n_py_edi_core --test-tags=edi,-integration
+# python -m odoo.tests.loader -i l10n_py_edi_core --test-tags=edi,-integration
 
 # Coverage report (com coverage.py instalado)
-coverage run --source=addons/l10n_py_core,addons/l10n_py_edi_core -m odoo.tests.loader -i l10n_py_core,l10n_py_edi_core --test-tags=l10n_py
-coverage html
-"""
+# coverage run --source=addons/l10n_py_core,addons/l10n_py_edi_core -m odoo.tests.loader -i l10n_py_core,l10n_py_edi_core --test-tags=l10n_py
+# coverage html
 
 # =============================================================================
 # CONFIGURAÇÃO DE CI/CD

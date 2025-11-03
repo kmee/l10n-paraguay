@@ -75,6 +75,8 @@ class AccountJournal(models.Model):
                 ):
                     raise ValidationError(
                         _(
-                            "El timbrado seleccionado no corresponde al establecimiento y punto de expedición configurados en el diario."
+                            "El timbrado seleccionado no corresponde al "
+                            "establecimiento y punto de expedición "
+                            "configurados en el diario."
                         )
                     )

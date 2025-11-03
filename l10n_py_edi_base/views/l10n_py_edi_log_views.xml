@@ -23,7 +23,7 @@
         <field name="name">l10n_py.edi.log.form</field>
         <field name="model">l10n_py.edi.log</field>
         <field name="arch" type="xml">
-            <form string="Log EDI">
+            <form>
                 <sheet>
                     <group>
                         <group>

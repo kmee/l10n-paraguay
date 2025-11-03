@@ -283,7 +283,7 @@ class AccountMove(models.Model):
             # Preparar información de cuotas
             cuotas = []
             if self.invoice_date and self.invoice_payment_term_id.line_ids:
-                for i, line in enumerate(self.invoice_payment_term_id.line_ids):
+                for _i, line in enumerate(self.invoice_payment_term_id.line_ids):
                     due_date = self.invoice_date + relativedelta(days=line.days)
                     cuotas.append(
                         {
@@ -534,7 +534,10 @@ class AccountMove(models.Model):
 
         return {
             "type": "ir.actions.act_url",
-            "url": f"/web/content/{self._name}/{self.id}/l10n_py_edi_xml/{self.l10n_py_edi_xml_filename}?download=true",
+            "url": (
+                f"/web/content/{self._name}/{self.id}/l10n_py_edi_xml/"
+                f"{self.l10n_py_edi_xml_filename}?download=true"
+            ),
             "target": "self",
         }
 
@@ -551,7 +554,10 @@ class AccountMove(models.Model):
 
         return {
             "type": "ir.actions.act_url",
-            "url": f"/web/content/{self._name}/{self.id}/l10n_py_kude_pdf/{self.l10n_py_kude_filename}?download=true",
+            "url": (
+                f"/web/content/{self._name}/{self.id}/l10n_py_kude_pdf/"
+                f"{self.l10n_py_kude_filename}?download=true"
+            ),
             "target": "self",
         }
 

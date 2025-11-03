@@ -95,13 +95,14 @@ class FactPyConnector(models.Model):
 
         except Exception as e:
             _logger.error(f"Error getting FactPy token: {str(e)}")
-            raise UserError(_("Error de autenticación con FactPy"))
+            raise UserError(_("Error de autenticación con FactPy: %s") % str(e)) from e
 
     def _adapt_to_factpy_format(self, invoice_data):
         """
         Adaptar formato de datos del módulo base al formato FactPy
         """
-        # Adaptar estructura básica (similar a FacturaSend pero con campos específicos de FactPy)
+        # Adaptar estructura básica (similar a FacturaSend
+        # pero con campos específicos de FactPy)
         adapted_data = {
             "fechaEmision": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
             "establecimiento": invoice_data.get("establecimiento", "001"),
@@ -130,9 +131,11 @@ class FactPyConnector(models.Model):
         """Procesar respuesta de FactPy"""
         try:
             data = response.json()
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as err:
             _logger.error(f"Error decodificando JSON: {response.text}")
-            raise UserError(_("Error en la respuesta del servidor"))
+            raise UserError(
+                _("Error en la respuesta del servidor: %s") % response.text
+            ) from err
 
         if response.status_code == 200:
             if data.get("success"):
@@ -140,7 +143,7 @@ class FactPyConnector(models.Model):
             else:
                 return {
                     "success": False,
-                    "error": data.get("message", "Error desconocido"),
+                    "error": data.get("message", _("Error desconocido")),
                 }
         elif response.status_code == 400:
             # Error de validación
@@ -156,25 +159,25 @@ class FactPyConnector(models.Model):
             return {
                 "success": False,
                 "error": "\n".join(error_messages)
-                or data.get("message", "Error de validación"),
+                or data.get("message", _("Error de validación")),
             }
         elif response.status_code == 401:
             return {
                 "success": False,
-                "error": "Autenticación fallida. Verifique sus credenciales",
+                "error": _("Autenticación fallida. Verifique sus credenciales"),
             }
         elif response.status_code == 404:
             return {
                 "success": False,
-                "error": "Endpoint no encontrado. Verifique la configuración",
+                "error": _("Endpoint no encontrado. Verifique la configuración"),
             }
         elif response.status_code == 429:
             return {
                 "success": False,
-                "error": "Límite de rate excedido. Intente más tarde",
+                "error": _("Límite de rate excedido. Intente más tarde"),
             }
         elif response.status_code == 500:
-            return {"success": False, "error": "Error interno del servidor FactPy"}
+            return {"success": False, "error": _("Error interno del servidor FactPy")}
         else:
             return {
                 "success": False,
@@ -228,16 +231,23 @@ class FactPyConnector(models.Model):
                 }
             else:
                 raise UserError(
-                    _("Error de conexión: HTTP %s\n%s")
-                    % (response.status_code, response.text[:200])
+                    _("Error de conexión: HTTP %(status_code)s\n%(response_text)s")
+                    % {
+                        "status_code": response.status_code,
+                        "response_text": response.text[:200],
+                    }
                 )
 
-        except requests.exceptions.Timeout:
-            raise UserError(_("Timeout: El servidor no respondió a tiempo"))
-        except requests.exceptions.ConnectionError:
-            raise UserError(_("Error de conexión: No se pudo conectar con FactPy"))
+        except requests.exceptions.Timeout as e:
+            raise UserError(
+                _("Timeout: El servidor no respondió a tiempo: %s") % str(e)
+            ) from e
+        except requests.exceptions.ConnectionError as e:
+            raise UserError(
+                _("Error de conexión: No se pudo conectar con FactPy: %s") % str(e)
+            ) from e
         except Exception as e:
-            raise UserError(_("Error inesperado: %s") % str(e))
+            raise UserError(_("Error inesperado: %s") % str(e)) from e
 
     def send_document(self, invoice_data):
         """
@@ -269,13 +279,12 @@ class FactPyConnector(models.Model):
             # Procesar respuesta
             return self._process_response(response)
 
-        except requests.exceptions.Timeout:
-            return {
-                "success": False,
-                "error": "Timeout: El servidor no respondió a tiempo",
-            }
-        except requests.exceptions.ConnectionError:
-            return {"success": False, "error": "Error de conexión con FactPy"}
+        except requests.exceptions.Timeout as e:
+            raise UserError(
+                _("Timeout: El servidor no respondió a tiempo: %s") % str(e)
+            ) from e
+        except requests.exceptions.ConnectionError as e:
+            raise UserError(_("Error de conexión con FactPy: %s") % str(e)) from e
         except Exception as e:
             _logger.exception("Error enviando documento a FactPy")
             return {"success": False, "error": str(e)}

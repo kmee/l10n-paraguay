@@ -91,7 +91,7 @@ class TestRUCValidation(common.TransactionCase):
             ("  1234567  ", "1234567-"),  # Com espaços
         ]
 
-        for input_ruc, expected_prefix in test_cases:
+        for input_ruc, _expected_prefix in test_cases:
             with self.subTest(ruc=input_ruc):
                 formatted = RUCValidator.format_ruc(input_ruc)
                 self.assertIn("-", formatted, f"RUC deve incluir hífen: {formatted}")

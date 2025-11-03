@@ -20,9 +20,6 @@
         # Views
         "views/res_partner_views.xml",
     ],
-    "demo": [
-        "demo/res_partner_demo.xml",
-    ],
     "installable": True,
     "application": False,
     "auto_install": False,

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <!-- FactPy Connector Tree View -->
         <record id="view_factpy_connector_tree" model="ir.ui.view">
             <field name="name">l10n_py.edi.connector.factpy.tree</field>
@@ -23,11 +22,11 @@
                 <form>
                     <header>
                         <button
-                            name="test_connection"
-                            type="object"
-                            string="Probar Conexión"
-                            class="btn-primary"
-                        />
+                        name="test_connection"
+                        type="object"
+                        string="Probar Conexión"
+                        class="btn-primary"
+                    />
                     </header>
                     <sheet>
                         <div class="oe_title">
@@ -59,17 +58,16 @@
             <field name="res_model">l10n_py.edi.connector.factpy</field>
             <field name="view_mode">tree,form</field>
             <field
-                name="help"
-            >Configure FactPy EDI connectors for electronic invoicing</field>
+            name="help"
+        >Configure FactPy EDI connectors for electronic invoicing</field>
         </record>
 
         <!-- FactPy Connector Menu -->
         <menuitem
-            id="menu_factpy_connector"
-            name="FactPy Connectors"
-            parent="l10n_py_edi_base.menu_edi_connectors"
-            action="action_factpy_connector"
-            sequence="20"
-        />
-    </data>
+        id="menu_factpy_connector"
+        name="FactPy Connectors"
+        parent="l10n_py_edi_base.menu_edi_connectors"
+        action="action_factpy_connector"
+        sequence="20"
+    />
 </odoo>

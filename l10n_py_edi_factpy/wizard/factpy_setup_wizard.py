@@ -24,7 +24,6 @@ class FactPySetupWizard(models.TransientModel):
 
     environment = fields.Selection(
         [("test", "Pruebas"), ("prod", "Producción")],
-        string="Environment",
         default="test",
         required=True,
     )
@@ -78,7 +77,10 @@ class FactPySetupWizard(models.TransientModel):
                     "view_mode": "form",
                     "target": "new",
                     "context": {
-                        "default_error_message": "No se pudo conectar con FactPy. Verifique sus credenciales."
+                        "default_error_message": (
+                            "No se pudo conectar con FactPy. "
+                            "Verifique sus credenciales."
+                        )
                     },
                 }
         except Exception as e:

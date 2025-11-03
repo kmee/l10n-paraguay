@@ -10,7 +10,10 @@ class CountryState(models.Model):
 
     l10n_py_code = fields.Integer(
         string="Código SET",
-        help="Código del departamento según SET (Subsecretaría de Estado de Tributación)",
+        help=(
+            "Código del departamento según SET "
+            "(Subsecretaría de Estado de Tributación)"
+        ),
     )
 
     _sql_constraints = [

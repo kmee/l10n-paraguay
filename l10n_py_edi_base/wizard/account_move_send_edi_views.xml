@@ -4,7 +4,7 @@
         <field name="name">account.move.send.edi.wizard.form</field>
         <field name="model">account.move.send.edi.wizard</field>
         <field name="arch" type="xml">
-            <form string="Enviar a EDI">
+            <form>
                 <sheet>
                     <group>
                         <field name="invoice_id" readonly="1" />

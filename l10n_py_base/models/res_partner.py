@@ -240,8 +240,8 @@ class ResPartner(models.Model):
                 is_valid, error_msg = RUCValidator.validate(partner.l10n_py_ruc)
                 if not is_valid:
                     raise ValidationError(
-                        _("RUC inválido para %s: %s")
-                        % (partner.name or "Partner", error_msg)
+                        _("RUC inválido para %(partner)s: %(error)s")
+                        % {"partner": partner.name or "Partner", "error": error_msg}
                     )
 
     @api.constrains("l10n_py_document_type", "l10n_py_document_number")

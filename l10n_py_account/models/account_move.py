@@ -11,7 +11,11 @@ class AccountMove(models.Model):
     authorization_id = fields.Many2one(
         "account.authorization",
         string="Timbrado",
-        domain="[('company_id', '=', company_id), ('active', '=', True), ('state', '!=', 'expired')]",
+        domain=(
+            "[('company_id', '=', company_id), "
+            "('active', '=', True), "
+            "('state', '!=', 'expired')]"
+        ),
         help="Timbrado utilizado para esta factura",
     )
 

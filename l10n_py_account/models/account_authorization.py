@@ -167,7 +167,8 @@ class AccountAuthorization(models.Model):
             if not record.name.isdigit() or len(record.name) != 8:
                 raise ValidationError(
                     _(
-                        "El número de timbrado debe contener exactamente 8 dígitos numéricos."
+                        "El número de timbrado debe contener exactamente "
+                        "8 dígitos numéricos."
                     )
                 )
 
@@ -178,7 +179,8 @@ class AccountAuthorization(models.Model):
             if not record.establishment.isdigit() or len(record.establishment) != 3:
                 raise ValidationError(
                     _(
-                        "El código de establecimiento debe contener exactamente 3 dígitos."
+                        "El código de establecimiento debe contener "
+                        "exactamente 3 dígitos."
                     )
                 )
             if (
@@ -187,7 +189,8 @@ class AccountAuthorization(models.Model):
             ):
                 raise ValidationError(
                     _(
-                        "El código de punto de expedición debe contener exactamente 3 dígitos."
+                        "El código de punto de expedición debe contener "
+                        "exactamente 3 dígitos."
                     )
                 )
 
@@ -209,7 +212,8 @@ class AccountAuthorization(models.Model):
             if record.date_to < record.date_from:
                 raise ValidationError(
                     _(
-                        "La fecha de vencimiento debe ser posterior a la fecha de inicio."
+                        "La fecha de vencimiento debe ser posterior "
+                        "a la fecha de inicio."
                     )
                 )
 
@@ -217,7 +221,10 @@ class AccountAuthorization(models.Model):
         """Formato de visualización del timbrado"""
         result = []
         for record in self:
-            name = f"Timbrado {record.name} ({record.establishment}-{record.expedition_point})"
+            name = (
+                f"Timbrado {record.name} "
+                f"({record.establishment}-{record.expedition_point})"
+            )
             result.append((record.id, name))
         return result
 
@@ -243,8 +250,14 @@ class AccountAuthorization(models.Model):
 
         if number < self.invoice_number_from or number > self.invoice_number_to:
             raise ValidationError(
-                _("El número %s está fuera del rango autorizado (%s - %s).")
-                % (number, self.invoice_number_from, self.invoice_number_to)
+                _(
+                    "El número %(number)s está fuera del rango autorizado (%(from)s - %(to)s)."
+                )
+                % {
+                    "number": number,
+                    "from": self.invoice_number_from,
+                    "to": self.invoice_number_to,
+                }
             )
 
         # Verificar si el número ya fue utilizado
@@ -257,8 +270,13 @@ class AccountAuthorization(models.Model):
 
         if existing:
             raise ValidationError(
-                _("El número %s ya ha sido utilizado en la factura %s.")
-                % (number, existing[0].name)
+                _(
+                    "El número %(number)s ya ha sido utilizado en la factura %(invoice_name)s."
+                )
+                % {
+                    "number": number,
+                    "invoice_name": existing[0].name,
+                }
             )
 
         return True

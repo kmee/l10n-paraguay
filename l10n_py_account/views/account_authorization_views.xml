@@ -6,7 +6,7 @@
         <field name="name">account.authorization.form</field>
         <field name="model">account.authorization</field>
         <field name="arch" type="xml">
-            <form string="Timbrado">
+            <form>
                 <header>
                     <field
                         name="state"
@@ -70,7 +70,6 @@
         <field name="model">account.authorization</field>
         <field name="arch" type="xml">
             <tree
-                string="Timbrados"
                 decoration-danger="state=='expired'"
                 decoration-warning="state=='to_expire'"
                 decoration-success="state=='valid'"

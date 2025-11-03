@@ -140,20 +140,20 @@ class CDCGenerator:
         cdc = ruc_clean[:8].zfill(8)
 
         # Tipo de documento (2 dígitos)
-        cdc += f"{doc_type:02d}"
+        cdc += f"{doc_type: 02d}"
 
         # Establecimiento (3 dígitos)
-        cdc += f"{int(establishment):03d}"
+        cdc += f"{int(establishment): 03d}"
 
         # Punto de expedición (3 dígitos)
-        cdc += f"{int(expedition_point):03d}"
+        cdc += f"{int(expedition_point): 03d}"
 
         # Número do documento (7 dígitos)
-        cdc += f"{sequence:07d}"
+        cdc += f"{sequence: 07d}"
 
         # Código de segurança (8 dígitos) - gerado aleatoriamente
         security_code = cls._generate_security_code()
-        cdc += f"{security_code:08d}"
+        cdc += f"{security_code: 08d}"
 
         # Data e hora (11 dígitos)
         datetime_code = cls._generate_datetime_code(emission_date)
@@ -245,7 +245,9 @@ class CDCGenerator:
         if calculated_digit != check_digit:
             return (
                 False,
-                f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}",
+                f"Dígito verificador inválido. "
+                f"Esperado: {calculated_digit}, "
+                f"Recebido: {check_digit}",
             )
 
         return True, ""

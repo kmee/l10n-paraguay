@@ -62,7 +62,9 @@ class RUCValidator:
             if str(calculated_digit) != check_digit:
                 return (
                     False,
-                    f"Dígito verificador inválido. Esperado: {calculated_digit}, Recebido: {check_digit}",
+                    f"Dígito verificador inválido. "
+                    f"Esperado: {calculated_digit}, "
+                    f"Recebido: {check_digit}",
                 )
 
         return True, ""

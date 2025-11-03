@@ -183,9 +183,9 @@ class FacturaSendConnector(models.Model):
         """Procesar respuesta de FacturaSend"""
         try:
             data = response.json()
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as err:
             _logger.error(f"Error decodificando JSON: {response.text}")
-            raise UserError(_("Error en la respuesta del servidor"))
+            raise UserError(_("Error en la respuesta del servidor")) from err
 
         if response.status_code == 200:
             if data.get("success"):
@@ -278,16 +278,18 @@ class FacturaSendConnector(models.Model):
                 }
             else:
                 raise UserError(
-                    _("Error de conexión: HTTP %s\n%s")
-                    % (response.status_code, response.text[:200])
+                    _("Error de conexión: HTTP %(code)s\n%(msg)s")
+                    % {"code": response.status_code, "msg": response.text[:200]}
                 )
 
-        except requests.exceptions.Timeout:
-            raise UserError(_("Timeout: El servidor no respondió a tiempo"))
-        except requests.exceptions.ConnectionError:
-            raise UserError(_("Error de conexión: No se pudo conectar con FacturaSend"))
+        except requests.exceptions.Timeout as err:
+            raise UserError(_("Timeout: El servidor no respondió a tiempo")) from err
+        except requests.exceptions.ConnectionError as err:
+            raise UserError(
+                _("Error de conexión: No se pudo conectar con FacturaSend")
+            ) from err
         except Exception as e:
-            raise UserError(_("Error inesperado: %s") % str(e))
+            raise UserError(_("Error inesperado: %s") % str(e)) from e
 
     def send_document(self, invoice_data):
         """
@@ -319,16 +321,17 @@ class FacturaSendConnector(models.Model):
             # Procesar respuesta
             return self._process_response(response)
 
-        except requests.exceptions.Timeout:
-            return {
-                "success": False,
-                "error": "Timeout: El servidor no respondió a tiempo",
-            }
-        except requests.exceptions.ConnectionError:
-            return {"success": False, "error": "Error de conexión con FacturaSend"}
+        except requests.exceptions.Timeout as err:
+            raise UserError(
+                _("Timeout: El servidor no respondió a tiempo: %s") % str(err)
+            ) from err
+        except requests.exceptions.ConnectionError as err:
+            raise UserError(
+                _("Error de conexión con FacturaSend: %s") % str(err)
+            ) from err
         except Exception as e:
             _logger.exception("Error enviando documento a FacturaSend")
-            return {"success": False, "error": str(e)}
+            raise UserError(_("Error inesperado: %s") % str(e)) from e
 
     def check_status(self, batch_id):
         """

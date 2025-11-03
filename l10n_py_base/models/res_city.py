@@ -16,7 +16,10 @@ class City(models.Model):
     l10n_py_district_id = fields.Many2one(
         "l10n_py.district",
         string="Distrito",
-        help="Distrito al que pertenece la ciudad (nivel intermedio entre departamento y ciudad)",
+        help=(
+            "Distrito al que pertenece la ciudad "
+            "(nivel intermedio entre departamento y ciudad)"
+        ),
     )
 
     _sql_constraints = [

@@ -1,7 +1,8 @@
 # GUIA TÉCNICO DE IMPLEMENTAÇÃO
 ## Melhorias para Módulos de Localização Paraguaia
 
-Este documento contém exemplos práticos de código para implementar as melhorias propostas nos módulos de localização paraguaia.
+# Este documento contém exemplos práticos de código para
+# implementar as melhorias propostas nos módulos de localização paraguaia.
 
 ## 1. VALIDAÇÃO ROBUSTA DE RUC
 

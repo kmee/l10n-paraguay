@@ -1,79 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo noupdate="1">
+<odoo>
+    <data>
+        <!-- Plantilla de Plan de Cuentas para Paraguay -->
+        <record id="py_chart_template" model="account.chart.template">
+            <field
+                name="name"
+            >Plan de Cuentas - Paraguay (Resolución General N° 49/14)</field>
+            <field name="currency_id" ref="base.PYG" />
+            <field name="bank_account_code_prefix">1.01.01.04</field>
+            <field name="cash_account_code_prefix">1.01.01.02</field>
+            <field name="transfer_account_code_prefix">1.01.01.03</field>
+            <field name="country_id" ref="base.py" />
+        </record>
 
-    <!-- Plantilla de Plan de Cuentas para Paraguay -->
 
-    <record id="py_chart_template" model="account.chart.template">
-        <field name="name">Plan de Cuentas - Paraguay</field>
-        <field name="code_digits">6</field>
-        <field name="currency_id" ref="base.PYG" />
-        <field name="bank_account_code_prefix">1.1.01</field>
-        <field name="cash_account_code_prefix">1.1.02</field>
-        <field name="transfer_account_code_prefix">1.1.03</field>
-    </record>
-
-    <!-- Impuestos de Venta -->
-
-    <record id="tax_sale_10" model="account.tax.template">
-        <field name="name">IVA Venta 10%</field>
-        <field name="description">IVA 10%</field>
-        <field name="amount">10.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_iva_10" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
-    <record id="tax_sale_5" model="account.tax.template">
-        <field name="name">IVA Venta 5%</field>
-        <field name="description">IVA 5%</field>
-        <field name="amount">5.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_iva_5" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
-    <record id="tax_sale_exempt" model="account.tax.template">
-        <field name="name">Exento</field>
-        <field name="description">Exento</field>
-        <field name="amount">0.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">sale</field>
-        <field name="tax_group_id" ref="tax_group_exempt" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
-    <!-- Impuestos de Compra -->
-
-    <record id="tax_purchase_10" model="account.tax.template">
-        <field name="name">IVA Compra 10%</field>
-        <field name="description">IVA 10%</field>
-        <field name="amount">10.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_iva_10" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
-    <record id="tax_purchase_5" model="account.tax.template">
-        <field name="name">IVA Compra 5%</field>
-        <field name="description">IVA 5%</field>
-        <field name="amount">5.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_iva_5" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
-    <record id="tax_purchase_exempt" model="account.tax.template">
-        <field name="name">Exento Compra</field>
-        <field name="description">Exento</field>
-        <field name="amount">0.0</field>
-        <field name="amount_type">percent</field>
-        <field name="type_tax_use">purchase</field>
-        <field name="tax_group_id" ref="tax_group_exempt" />
-        <field name="chart_template_id" ref="py_chart_template" />
-    </record>
-
+    </data>
 </odoo>

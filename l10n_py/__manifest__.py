@@ -19,6 +19,7 @@
         "data/account_chart_template_account_account_link.xml",
         "data/account_chart_template_configure_data.xml",
         "data/account_tax_template_data.xml",
+        "data/fiscal_position_template_data.xml",
         # Views
     ],
     "demo": [],

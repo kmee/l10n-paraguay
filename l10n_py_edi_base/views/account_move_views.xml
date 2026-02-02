@@ -29,36 +29,38 @@
                 </group>
             </xpath>
             <xpath expr="//header" position="inside">
+                <field name="l10n_py_edi_xml" invisible="1" />
+                <field name="l10n_py_kude_pdf" invisible="1" />
                 <button
                     name="action_send_edi"
                     string="Enviar a EDI"
                     type="object"
                     class="oe_highlight"
-                    attrs="{'invisible': [('l10n_py_edi_status', 'in', ['sent', 'accepted', 'processing'])]}"
+                    invisible="l10n_py_edi_status in ['sent', 'accepted', 'processing']"
                 />
                 <button
                     name="action_retry_edi"
                     string="Reintentar"
                     type="object"
-                    attrs="{'invisible': [('l10n_py_edi_status', 'not in', ['error', 'rejected'])]}"
+                    invisible="l10n_py_edi_status not in ['error', 'rejected']"
                 />
                 <button
                     name="action_cancel_edi"
                     string="Cancelar EDI"
                     type="object"
-                    attrs="{'invisible': [('l10n_py_cdc', '=', False)]}"
+                    invisible="not l10n_py_cdc"
                 />
                 <button
                     name="action_download_xml"
                     string="Descargar XML"
                     type="object"
-                    attrs="{'invisible': [('l10n_py_edi_xml', '=', False)]}"
+                    invisible="not l10n_py_edi_xml"
                 />
                 <button
                     name="action_download_kude"
                     string="Descargar KUDE"
                     type="object"
-                    attrs="{'invisible': [('l10n_py_kude_pdf', '=', False)]}"
+                    invisible="not l10n_py_kude_pdf"
                 />
             </xpath>
         </field>

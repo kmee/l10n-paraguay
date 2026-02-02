@@ -5,7 +5,7 @@
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form" />
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='accounting']" position="after">
+            <xpath expr="//sheet/notebook" position="inside">
                 <page string="Datos Fiscales Paraguay" name="l10n_py_fiscal">
                     <group>
                         <group string="Identificación Fiscal">
@@ -16,10 +16,9 @@
                             <field name="l10n_py_economic_activity" />
                         </group>
                         <group string="Ubicación">
-                            <field name="l10n_py_department_code" />
-                            <field name="l10n_py_department_name" readonly="1" />
-                            <field name="l10n_py_district_code" />
-                            <field name="l10n_py_city_code" />
+                            <field name="l10n_py_department_code" readonly="1" />
+                            <field name="l10n_py_district_code" readonly="1" />
+                            <field name="l10n_py_city_code" readonly="1" />
                         </group>
                     </group>
                 </page>

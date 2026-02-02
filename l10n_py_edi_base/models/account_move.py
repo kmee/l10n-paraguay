@@ -113,7 +113,7 @@ class AccountMove(models.Model):
 
     # ============== COMPUTE METHODS ==============
 
-    @api.depends("move_type", "debit_origin_id")
+    @api.depends("move_type")
     def _compute_edi_document_type(self):
         for move in self:
             if move.move_type == "out_invoice":
@@ -125,8 +125,6 @@ class AccountMove(models.Model):
                 and move.partner_id.id == move.company_id.partner_id.id
             ):
                 move.l10n_py_edi_document_type = "4"  # Autofactura
-            elif move.debit_origin_id:
-                move.l10n_py_edi_document_type = "6"  # Nota de Débito
             else:
                 move.l10n_py_edi_document_type = False
 

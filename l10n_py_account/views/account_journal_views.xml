@@ -5,7 +5,7 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='other']" position="after">
+            <xpath expr="//sheet/notebook" position="inside">
                 <page string="Configuración EDI Paraguay" name="l10n_py_edi_config">
                     <group>
                         <group string="Identificación">

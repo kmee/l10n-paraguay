@@ -108,6 +108,6 @@
         <field name="name">Asunción</field>
         <field name="code">PY-ASU</field>
         <field name="country_id" ref="base.py" />
-        <field name="l10n_py_code">11</field> <!-- Mismo código que Central -->
+        <field name="l10n_py_code">18</field> <!-- Código único para Asunción -->
     </record>
 </odoo>

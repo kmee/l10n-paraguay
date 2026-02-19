@@ -162,10 +162,10 @@ class EDILog(models.Model):
         for record in self:
             if record.execution_time:
                 if record.execution_time < 1000:
-                    record.duration_human = f"{record.execution_time: .0f} ms"
+                    record.duration_human = f"{int(record.execution_time)} ms"
                 else:
                     seconds = record.execution_time / 1000
-                    record.duration_human = f"{seconds: 2f} s"
+                    record.duration_human = f"{round(seconds, 2)} s"
             else:
                 record.duration_human = "N/A"
 
@@ -252,7 +252,7 @@ class EDILog(models.Model):
             else:
                 _logger.info(
                     f"EDI Success [{provider}] {operation_type} "
-                    f"({execution_time: .0f}ms)"
+                    f"({int(execution_time)}ms)"
                 )
 
             return log_record

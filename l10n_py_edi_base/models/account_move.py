@@ -1,7 +1,7 @@
 # l10n_py_edi_base/models/account_move.py
 
 import logging
-import random
+import secrets
 import string
 
 from dateutil.relativedelta import relativedelta
@@ -16,19 +16,6 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     # ============== CAMPOS EDI PARAGUAY ==============
-
-    l10n_py_edi_document_type = fields.Selection(
-        [
-            ("1", "Factura Electrónica"),
-            ("4", "Autofactura Electrónica"),
-            ("5", "Nota de Crédito Electrónica"),
-            ("6", "Nota de Débito Electrónica"),
-            ("7", "Nota de Remisión Electrónica"),
-        ],
-        string="Tipo Documento Electrónico",
-        compute="_compute_edi_document_type",
-        store=True,
-    )
 
     l10n_py_emission_type = fields.Selection(
         [("1", "Normal"), ("2", "Contingencia")],
@@ -111,25 +98,6 @@ class AccountMove(models.Model):
     # Campos para contingencia
     l10n_py_contingency_motive = fields.Char("Motivo de Contingencia")
 
-    # ============== COMPUTE METHODS ==============
-
-    @api.depends("move_type", "debit_origin_id")
-    def _compute_edi_document_type(self):
-        for move in self:
-            if move.move_type == "out_invoice":
-                move.l10n_py_edi_document_type = "1"  # Factura
-            elif move.move_type == "out_refund":
-                move.l10n_py_edi_document_type = "5"  # Nota de Crédito
-            elif (
-                move.move_type == "in_invoice"
-                and move.partner_id.id == move.company_id.partner_id.id
-            ):
-                move.l10n_py_edi_document_type = "4"  # Autofactura
-            elif move.debit_origin_id:
-                move.l10n_py_edi_document_type = "6"  # Nota de Débito
-            else:
-                move.l10n_py_edi_document_type = False
-
     # ============== ONCHANGE METHODS ==============
 
     @api.onchange("invoice_line_ids")
@@ -160,14 +128,14 @@ class AccountMove(models.Model):
         for record in self:
             if record.l10n_py_security_code and len(record.l10n_py_security_code) != 9:
                 raise ValidationError(
-                    _("El código de seguridad debe tener exactamente 9 caracteres")
+                    _("El código de seguridad debe tener " "exactamente 9 caracteres")
                 )
 
     # ============== PRIVATE METHODS ==============
 
     def _generate_security_code(self):
         """Generar código de seguridad aleatorio de 9 dígitos"""
-        return "".join(random.choices(string.digits, k=9))
+        return "".join(secrets.choice(string.digits) for _ in range(9))
 
     def _prepare_edi_document_data(self):
         """Preparar datos del documento electrónico en formato JSON"""
@@ -176,22 +144,29 @@ class AccountMove(models.Model):
         if not self.l10n_py_security_code:
             self.l10n_py_security_code = self._generate_security_code()
 
+        # Obtener código de tipo de documento desde l10n_latam
+        doc_type_code = "1"
+        if self.l10n_latam_document_type_id:
+            doc_type_code = self.l10n_latam_document_type_id.code or "1"
+
         # Construir estructura de datos según formato requerido
         document_data = {
-            "tipoDocumento": int(self.l10n_py_edi_document_type),
-            "establecimiento": self.journal_id.l10n_py_establishment or "001",
+            "tipoDocumento": int(doc_type_code),
+            "establecimiento": (self.journal_id.l10n_py_establishment or "001"),
             "punto": self.journal_id.l10n_py_point or "001",
             "numero": self._get_edi_sequence_number(),
             "descripcion": self.name or "",
             "observacion": self.narration or "",
-            "fecha": self.invoice_date.strftime("%Y-%m-%dT%H:%M:%S")
-            if self.invoice_date
-            else fields.Datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "fecha": (
+                self.invoice_date.strftime("%Y-%m-%dT%H:%M:%S")
+                if self.invoice_date
+                else fields.Datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            ),
             "tipoEmision": int(self.l10n_py_emission_type),
             "tipoTransaccion": int(self.l10n_py_transaction_type),
             "tipoImpuesto": 1,  # IVA
             "moneda": self.currency_id.name,
-            "receiptId": self.l10n_py_receipt_id or f"{self.company_id.id}-{self.id}",
+            "receiptId": (self.l10n_py_receipt_id or f"{self.company_id.id}-{self.id}"),
             "codigoSeguridadAleatorio": self.l10n_py_security_code,
             "cliente": self._prepare_customer_data(),
             "factura": {"presencia": int(self.l10n_py_presence_type)},
@@ -218,30 +193,26 @@ class AccountMove(models.Model):
             "contribuyente": partner.l10n_py_taxpayer_type == "1",
             "ruc": partner.l10n_py_ruc or "",
             "razonSocial": partner.name,
-            "nombreFantasia": getattr(partner, "l10n_py_trade_name", False)
-            or partner.name,
+            "nombreFantasia": partner.l10n_py_fantasy_name or partner.name,
             "tipoOperacion": 1,  # B2B
             "direccion": partner.street or "N/A",
-            "numeroCasa": getattr(partner, "street_number", False) or "0",
+            "numeroCasa": (
+                partner.street_number if hasattr(partner, "street_number") else "0"
+            )
+            or "0",
             "pais": partner.country_id.code or "PRY",
             "paisDescripcion": partner.country_id.name or "Paraguay",
         }
 
         # Agregar datos de ubicación si están disponibles
-        if getattr(partner, "l10n_py_department_code", False):
+        if partner.l10n_py_department_code:
             customer_data.update(
                 {
                     "departamento": partner.l10n_py_department_code,
-                    "departamentoDescripcion": getattr(
-                        partner, "l10n_py_department_name", False
-                    )
-                    or "",
-                    "distrito": getattr(partner, "l10n_py_district_code", False) or 0,
-                    "distritoDescripcion": getattr(
-                        partner, "l10n_py_district_name", False
-                    )
-                    or "",
-                    "ciudad": getattr(partner, "l10n_py_city_code", False) or 0,
+                    "departamentoDescripcion": (
+                        partner.state_id.name if partner.state_id else ""
+                    ),
+                    "ciudad": partner.l10n_py_city_code or "",
                     "ciudadDescripcion": partner.city or "",
                 }
             )
@@ -254,42 +225,44 @@ class AccountMove(models.Model):
         if partner.email:
             customer_data["email"] = partner.email
 
-        # Agregar tipo y número de documento
-        if getattr(partner, "l10n_py_document_type", False):
+        # Tipo y número de documento
+        if partner.l10n_py_taxpayer_type:
             customer_data["tipoContribuyente"] = 1 if partner.is_company else 2
-            customer_data["documentoTipo"] = int(partner.l10n_py_document_type)
-            customer_data["documentoNumero"] = (
-                partner.vat or getattr(partner, "l10n_py_document_number", False) or ""
-            )
 
         return customer_data
 
     def _prepare_payment_condition(self):
         """Preparar condición de pago"""
         payment_condition = {
-            "tipo": 2 if self.invoice_payment_term_id else 1,  # 1: Contado, 2: Crédito
+            "tipo": (
+                2 if self.invoice_payment_term_id else 1
+            ),  # 1: Contado, 2: Crédito
         }
 
         if self.invoice_payment_term_id:
             # Es crédito
             payment_condition["credito"] = {
                 "tipo": 1,  # 1: Plazo, 2: Cuotas
-                "plazo": f"{self.invoice_payment_term_id.line_ids[0].days} días"
-                if self.invoice_payment_term_id.line_ids
-                else "0 días",
+                "plazo": (
+                    f"{self.invoice_payment_term_id.line_ids[0].days} días"
+                    if self.invoice_payment_term_id.line_ids
+                    else "0 días"
+                ),
                 "cuotas": len(self.invoice_payment_term_id.line_ids),
             }
 
             # Preparar información de cuotas
             cuotas = []
             if self.invoice_date and self.invoice_payment_term_id.line_ids:
-                for _i, line in enumerate(self.invoice_payment_term_id.line_ids):
+                for line in self.invoice_payment_term_id.line_ids:
                     due_date = self.invoice_date + relativedelta(days=line.days)
                     cuotas.append(
                         {
                             "moneda": self.currency_id.name,
-                            "monto": self.amount_total
-                            / len(self.invoice_payment_term_id.line_ids),
+                            "monto": (
+                                self.amount_total
+                                / len(self.invoice_payment_term_id.line_ids)
+                            ),
                             "vencimiento": due_date.strftime("%Y-%m-%d"),
                         }
                     )
@@ -324,18 +297,18 @@ class AccountMove(models.Model):
                     iva_type = 3  # Exenta
                     iva_rate = 0
 
-            # # Calcular base gravable e IVA
-            # if iva_type == 1:  # Gravado
-            #     base_grav = line.price_subtotal / (1 + iva_rate / 100)
-            #     # La resta 'line.price_subtotal - base_grav' no tenía efecto; eliminada.
-            # else:
-            #     base_grav = 0
-
             item = {
-                "codigo": line.product_id.default_code or f"PROD-{line.product_id.id}",
+                "codigo": (
+                    line.product_id.default_code or f"PROD-{line.product_id.id}"
+                ),
                 "descripcion": line.name or line.product_id.name,
                 "observacion": "",
-                "ncm": getattr(line.product_id, "l10n_py_ncm_code", False) or "",
+                "ncm": (
+                    line.product_id.l10n_py_ncm_code
+                    if hasattr(line.product_id, "l10n_py_ncm_code")
+                    else ""
+                )
+                or "",
                 "unidadMedida": 77,  # UNI - Unidad
                 "cantidad": line.quantity,
                 "precioUnitario": line.price_unit,
@@ -343,7 +316,7 @@ class AccountMove(models.Model):
                 "ivaTipo": iva_type,
                 "ivaBase": 100,
                 "iva": iva_rate,
-                "lote": getattr(line, "lot_name", False) or "",
+                "lote": "",
                 "vencimiento": "",
             }
 
@@ -353,7 +326,8 @@ class AccountMove(models.Model):
 
     def _get_edi_sequence_number(self):
         """Obtener número de secuencia para EDI"""
-        # Tomar los últimos 7 dígitos del número de factura
+        if self.l10n_py_invoice_number:
+            return str(self.l10n_py_invoice_number).zfill(7)
         if self.name:
             number = "".join(filter(str.isdigit, self.name.split("/")[-1]))
             return number.zfill(7)[-7:]
@@ -365,14 +339,12 @@ class AccountMove(models.Model):
 
         # Validar datos de la empresa
         company = self.company_id
-        if not getattr(company, "l10n_py_ruc", False):
+        if not company.l10n_py_ruc:
             errors.append(_("Configure el RUC de la empresa"))
 
         # Validar datos del cliente
         partner = self.partner_id
-        if getattr(partner, "l10n_py_taxpayer_type", False) == "1" and not getattr(
-            partner, "l10n_py_ruc", False
-        ):
+        if partner.l10n_py_taxpayer_type == "1" and not partner.l10n_py_ruc:
             errors.append(_("El cliente contribuyente debe tener RUC"))
 
         if not partner.street:
@@ -380,22 +352,22 @@ class AccountMove(models.Model):
 
         # Validar datos del diario
         journal = self.journal_id
-        if not getattr(journal, "l10n_py_timbrado", False):
+        if not journal.l10n_py_authorization_id:
             errors.append(_("Configure el timbrado en el diario"))
 
         if (
-            hasattr(journal, "l10n_py_timbrado_validity")
-            and journal.l10n_py_timbrado_validity
-            and journal.l10n_py_timbrado_validity < fields.Date.today()
+            journal.l10n_py_authorization_validity
+            and journal.l10n_py_authorization_validity < fields.Date.today()
         ):
             errors.append(_("El timbrado está vencido"))
 
         # Validar productos
         for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
-            if not getattr(line.product_id, "l10n_py_ncm_code", False):
-                errors.append(
-                    _("El producto %s no tiene código NCM") % line.product_id.name
-                )
+            if hasattr(line.product_id, "l10n_py_ncm_code"):
+                if not line.product_id.l10n_py_ncm_code:
+                    errors.append(
+                        _("El producto %s no tiene código NCM") % line.product_id.name
+                    )
 
         if errors:
             raise UserError("\n".join(errors))
@@ -446,7 +418,7 @@ class AccountMove(models.Model):
                 self.l10n_py_edi_message = response.get("error", "Error desconocido")
 
         except Exception as e:
-            _logger.error(f"Error enviando EDI: {str(e)}")
+            _logger.error("Error enviando EDI: %s", str(e))
             self.l10n_py_edi_status = "error"
             self.l10n_py_edi_message = str(e)
             raise UserError(_("Error enviando documento: %s") % str(e)) from e
@@ -466,7 +438,7 @@ class AccountMove(models.Model):
                     "l10n_py_qr_string": de_data.get("qr"),
                     "l10n_py_edi_status": "accepted",
                     "l10n_py_edi_batch_id": result.get("loteId"),
-                    "l10n_py_edi_message": "Documento aceptado exitosamente",
+                    "l10n_py_edi_message": ("Documento aceptado exitosamente"),
                 }
             )
 
@@ -474,9 +446,6 @@ class AccountMove(models.Model):
             if de_data.get("xml"):
                 self.l10n_py_edi_xml = de_data["xml"].encode("utf-8")
                 self.l10n_py_edi_xml_filename = f"{self.l10n_py_cdc}.xml"
-
-            # TODO: Generar QR code como imagen
-            # TODO: Solicitar/generar KUDE
 
     def action_cancel_edi(self):
         """Cancelar documento electrónico"""
@@ -520,7 +489,7 @@ class AccountMove(models.Model):
 
         if self.l10n_py_edi_status not in ["error", "rejected"]:
             raise UserError(
-                _("Solo se pueden reintentar documentos con error o rechazados")
+                _("Solo se pueden reintentar documentos " "con error o rechazados")
             )
 
         return self.action_send_edi()
@@ -581,6 +550,7 @@ class AccountMove(models.Model):
             self.env["ir.config_parameter"].sudo().get_param("l10n_py.edi_provider")
         )
 
+        connector = False
         if provider == "factpy":
             connector = (
                 self.env["l10n_py.edi.connector.factpy"].sudo().search([], limit=1)
@@ -600,4 +570,8 @@ class AccountMove(models.Model):
                     # Actualizar estado según respuesta
                     pass
             except Exception as e:
-                _logger.error(f"Error verificando estado EDI para {doc.name}: {str(e)}")
+                _logger.error(
+                    "Error verificando estado EDI para %s: %s",
+                    doc.name,
+                    str(e),
+                )

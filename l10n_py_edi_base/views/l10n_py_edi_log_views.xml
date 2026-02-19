@@ -5,11 +5,14 @@
         <field name="model">l10n_py.edi.log</field>
         <field name="arch" type="xml">
             <tree decoration-danger="error==True" decoration-info="error==False">
-                <field name="timestamp" />
-                <field name="invoice_id" />
+                <field name="create_date" />
+                <field name="operation_type" />
+                <field name="document_id" />
+                <field name="provider" />
                 <field name="method" />
                 <field name="endpoint" />
                 <field name="status_code" />
+                <field name="duration_human" />
                 <field name="error" />
             </tree>
         </field>
@@ -23,16 +26,22 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="timestamp" />
-                            <field name="invoice_id" />
-                            <field name="connector_id" />
+                            <field name="create_date" />
+                            <field name="operation_type" />
+                            <field name="document_id" />
+                            <field name="cdc" />
+                            <field name="provider" />
+                        </group>
+                        <group>
                             <field name="method" />
                             <field name="endpoint" />
                             <field name="status_code" />
+                            <field name="duration_human" />
+                            <field name="success" />
                             <field name="error" />
                         </group>
                     </group>
-                    <group string="Datos">
+                    <group string="Datos de Solicitud">
                         <field name="request_data" widget="text" />
                     </group>
                     <group string="Respuesta">

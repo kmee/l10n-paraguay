@@ -14,4 +14,11 @@
         action="action_l10n_py_edi_log"
         sequence="10"
     />
+
+    <menuitem
+        id="menu_edi_connectors"
+        name="Conectores"
+        parent="menu_l10n_py_edi_root"
+        sequence="20"
+    />
 </odoo>

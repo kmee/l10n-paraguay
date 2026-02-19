@@ -1,6 +1,6 @@
 {
     "name": "Paraguay - Electronic Invoicing Base",
-    "version": "16.0.1.0.0",
+    "version": "16.0.1.1.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "Base module for Electronic Invoicing in Paraguay",
     "author": "KMEE, Odoo Community Association (OCA)",
@@ -8,10 +8,9 @@
     "license": "LGPL-3",
     "depends": [
         "account",
-        "l10n_py_base",  # Base Paraguayan localization
-        "l10n_py_account",  # Accounting extensions
+        "l10n_py_base",
+        "l10n_py_account",
         "product",
-        "sale",
     ],
     "data": [
         # Security

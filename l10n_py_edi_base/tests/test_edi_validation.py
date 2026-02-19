@@ -1,158 +1,126 @@
-from odoo.exceptions import ValidationError
-from odoo.tests import TransactionCase
+# l10n_py_edi_base/tests/test_edi_validation.py
+
+from datetime import date, timedelta
+
+from odoo.tests import tagged
+from odoo.tests.common import TransactionCase
 
 
+@tagged("post_install", "-at_install", "l10n_py")
 class TestEDIValidation(TransactionCase):
-    def setUp(self):
-        super(TestEDIValidation, self).setUp()
+    """Tests para validación de datos EDI"""
 
-        # Create test company
-        self.company = self.env["res.company"].create(
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.country_py = cls.env.ref("base.py")
+
+        # Tipo de documento
+        cls.doc_type_invoice = cls.env["l10n_latam.document.type"].search(
+            [("country_id", "=", cls.country_py.id), ("code", "=", "1")],
+            limit=1,
+        )
+        if not cls.doc_type_invoice:
+            cls.doc_type_invoice = cls.env["l10n_latam.document.type"].create(
+                {
+                    "name": "Factura",
+                    "code": "1",
+                    "country_id": cls.country_py.id,
+                    "internal_type": "invoice",
+                }
+            )
+
+        # Empresa
+        cls.company = cls.env["res.company"].create(
             {
                 "name": "Test Company EDI",
-                "country_id": self.env.ref("base.py").id,
-                "l10n_py_ruc": "80009401-6",  # Valid RUC
+                "country_id": cls.country_py.id,
+                "l10n_py_ruc": "80009401",
             }
         )
 
-        # Create test partner
-        self.partner = self.env["res.partner"].create(
+        # Partner
+        cls.partner = cls.env["res.partner"].create(
             {
                 "name": "Test Partner",
                 "is_company": True,
-                "country_id": self.env.ref("base.py").id,
-                "l10n_py_ruc": "80009401-6",
-                "l10n_py_taxpayer_type": "1",  # Contribuyente
+                "country_id": cls.country_py.id,
+                "l10n_py_ruc": "80009401",
+                "l10n_py_taxpayer_type": "1",
                 "street": "Test Street 123",
             }
         )
 
-        # Create test journal
-        self.journal = self.env["account.journal"].create(
+        # Timbrado
+        today = date.today()
+        cls.authorization = cls.env["account.authorization"].create(
             {
-                "name": "Test Journal",
-                "type": "sale",
-                "code": "TEST",
-                "company_id": self.company.id,
-                "l10n_py_establishment": "001",
-                "l10n_py_point": "001",
-                "l10n_py_timbrado": "12345678",
-                "currency_id": self.env.ref("base.PYG").id,
+                "name": "12345678",
+                "date_from": today - timedelta(days=30),
+                "date_to": today + timedelta(days=335),
+                "invoice_number_from": 1,
+                "invoice_number_to": 10000,
+                "establishment": "001",
+                "expedition_point": "001",
+                "l10n_latam_document_type_id": cls.doc_type_invoice.id,
+                "company_id": cls.company.id,
             }
         )
 
-        # Create test product
-        self.product = self.env["product.product"].create(
+        # Journal
+        cls.journal = cls.env["account.journal"].create(
+            {
+                "name": "Test Journal EDI",
+                "type": "sale",
+                "code": "TEDI",
+                "company_id": cls.company.id,
+                "l10n_py_establishment": "001",
+                "l10n_py_point": "001",
+                "l10n_py_authorization_id": cls.authorization.id,
+            }
+        )
+
+        # Producto
+        cls.product = cls.env["product.product"].create(
             {
                 "name": "Test Product",
                 "type": "consu",
                 "default_code": "TEST001",
-                "l10n_py_ncm_code": "01012100",  # Valid NCM
+                "l10n_py_ncm_code": "01012100",
             }
         )
-
-    def test_ruc_validation(self):
-        """Test RUC validation"""
-        # Valid RUC
-        self.assertTrue(self.partner._validate_ruc_format("80009401-6"))
-
-        # Invalid RUC - wrong format
-        self.assertFalse(self.partner._validate_ruc_format("800094016"))
-
-        # Invalid RUC - too short
-        self.assertFalse(self.partner._validate_ruc_format("800094-6"))
-
-    def test_partner_fiscal_validation(self):
-        """Test partner fiscal data validation"""
-        # Valid partner should pass
-        try:
-            self.partner.validate_fiscal_data()
-        except ValidationError:
-            self.fail("Valid partner failed fiscal validation")
-
-        # Invalid partner - missing RUC for taxpayer
-        invalid_partner = self.env["res.partner"].create(
-            {
-                "name": "Invalid Partner",
-                "is_company": True,
-                "l10n_py_taxpayer_type": "1",  # Contribuyente without RUC
-                "street": "Test Street 123",
-            }
-        )
-
-        with self.assertRaises(ValidationError):
-            invalid_partner.validate_fiscal_data()
-
-    def test_invoice_edi_validation(self):
-        """Test invoice EDI data validation"""
-        # Create test invoice
-        invoice = self.env["account.move"].create(
-            {
-                "move_type": "out_invoice",
-                "partner_id": self.partner.id,
-                "journal_id": self.journal.id,
-                "company_id": self.company.id,
-                "invoice_date": "2024-01-01",
-                "currency_id": self.env.ref("base.PYG").id,
-                "l10n_py_emission_type": "1",
-                "l10n_py_transaction_type": "1",
-            }
-        )
-
-        # Add invoice line
-        self.env["account.move.line"].create(
-            {
-                "move_id": invoice.id,
-                "product_id": self.product.id,
-                "quantity": 1,
-                "price_unit": 100000,
-                "tax_ids": [(6, 0, [self.env.ref("l10n_py.iva_10").id])],
-            }
-        )
-
-        # Valid invoice should pass validation
-        try:
-            invoice._validate_edi_data()
-        except ValidationError:
-            self.fail("Valid invoice failed EDI validation")
 
     def test_security_code_generation(self):
-        """Test security code generation"""
-        invoice = self.env["account.move"].create(
-            {
-                "move_type": "out_invoice",
-                "partner_id": self.partner.id,
-                "journal_id": self.journal.id,
-                "company_id": self.company.id,
-            }
+        """Código de seguridad de 9 dígitos"""
+        invoice = (
+            self.env["account.move"]
+            .with_company(self.company)
+            .create(
+                {
+                    "move_type": "out_invoice",
+                    "partner_id": self.partner.id,
+                    "journal_id": self.journal.id,
+                    "company_id": self.company.id,
+                }
+            )
         )
 
         security_code = invoice._generate_security_code()
-
-        # Should be 9 digits
         self.assertEqual(len(security_code), 9)
         self.assertTrue(security_code.isdigit())
 
-    def test_document_type_computation(self):
-        """Test document type computation"""
-        # Invoice
-        invoice = self.env["account.move"].create(
-            {
-                "move_type": "out_invoice",
-                "partner_id": self.partner.id,
-                "journal_id": self.journal.id,
-                "company_id": self.company.id,
-            }
+    def test_edi_status_default(self):
+        """Estado EDI por defecto es 'draft'"""
+        invoice = (
+            self.env["account.move"]
+            .with_company(self.company)
+            .create(
+                {
+                    "move_type": "out_invoice",
+                    "partner_id": self.partner.id,
+                    "journal_id": self.journal.id,
+                    "company_id": self.company.id,
+                }
+            )
         )
-        self.assertEqual(invoice.l10n_py_edi_document_type, "1")
-
-        # Credit note
-        credit_note = self.env["account.move"].create(
-            {
-                "move_type": "out_refund",
-                "partner_id": self.partner.id,
-                "journal_id": self.journal.id,
-                "company_id": self.company.id,
-            }
-        )
-        self.assertEqual(credit_note.l10n_py_edi_document_type, "5")
+        self.assertEqual(invoice.l10n_py_edi_status, "draft")

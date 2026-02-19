@@ -6,9 +6,10 @@
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="l10n_py_edi_xml" invisible="1" />
+                <field name="l10n_py_kude_pdf" invisible="1" />
                 <group>
                     <group string="Facturación Electrónica">
-                        <field name="l10n_py_edi_document_type" readonly="1" />
                         <field name="l10n_py_emission_type" />
                         <field name="l10n_py_transaction_type" />
                         <field name="l10n_py_presence_type" />

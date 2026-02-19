@@ -1,12 +1,12 @@
 # l10n_py_edi_base/services/cdc_generator.py
 
 """
-Gerador de Código de Control (CDC) para documentos eletrônicos paraguaios
-Implementação conforme Manual Técnico SIFEN v150
+Generador de Código de Control (CDC) para documentos electrónicos paraguayos
+Implementación conforme Manual Técnico SIFEN v150
 """
 
 import logging
-import random
+import secrets
 from datetime import datetime
 
 _logger = logging.getLogger(__name__)
@@ -14,21 +14,21 @@ _logger = logging.getLogger(__name__)
 
 class CDCGenerator:
     """
-    Gerador de Código de Control (CDC) para documentos eletrônicos
+    Generador de Código de Control (CDC) para documentos electrónicos
 
     Formato CDC (43 dígitos):
-    - RUC do emissor (8 dígitos)
+    - RUC del emisor (8 dígitos)
     - Tipo de documento (2 dígitos)
-    - Estabelecimento (3 dígitos)
-    - Ponto de expedição (3 dígitos)
-    - Número do documento (7 dígitos)
-    - Código de segurança (8 dígitos)
-    - Data/hora de emissão (11 dígitos)
+    - Establecimiento (3 dígitos)
+    - Punto de expedición (3 dígitos)
+    - Número del documento (7 dígitos)
+    - Código de seguridad (8 dígitos)
+    - Fecha/hora de emisión (11 dígitos)
     - Dígito verificador (1 dígito)
     """
 
-    # Multiplicadores para dígito verificador (posições 1-42)
-    MULTIPLIERS = [2, 3, 4, 5, 6, 7, 8, 9] * 6  # Repetir até 42 posições
+    # Multiplicadores para dígito verificador (posiciones 1-42)
+    MULTIPLIERS = [2, 3, 4, 5, 6, 7, 8, 9] * 6  # Repetir hasta 42 posiciones
 
     @classmethod
     def generate(
@@ -41,23 +41,23 @@ class CDCGenerator:
         emission_date=None,
     ):
         """
-        Gerar CDC conforme especificação SIFEN v150
+        Generar CDC conforme especificación SIFEN v150
 
         Args:
-            company_ruc (str): RUC da empresa emissora (sem DV)
+            company_ruc (str): RUC de la empresa emisora (sin DV)
             doc_type (int): Tipo de documento (1=FE, 4=Autofactura, etc.)
             establishment (str): Establecimiento (3 dígitos)
             expedition_point (str): Punto de expedición (3 dígitos)
-            sequence (int): Número sequencial do documento
-            emission_date (datetime): Data de emissão (opcional)
+            sequence (int): Número secuencial del documento
+            emission_date (datetime): Fecha de emisión (opcional)
 
         Returns:
-            str: CDC completo com dígito verificador (43 dígitos)
+            str: CDC completo con dígito verificador (43 dígitos)
         """
         if emission_date is None:
             emission_date = datetime.now()
 
-        # Validar parâmetros
+        # Validar parámetros
         cls._validate_parameters(
             company_ruc, doc_type, establishment, expedition_point, sequence
         )
@@ -80,16 +80,18 @@ class CDCGenerator:
 
         # Validar formato final
         if len(cdc_complete) != 43:
-            raise ValueError(f"CDC deve ter 43 dígitos, gerado: {len(cdc_complete)}")
+            raise ValueError(
+                f"CDC debe tener 43 dígitos, generado: {len(cdc_complete)}"
+            )
 
-        _logger.info(f"CDC gerado: {cdc_complete}")
+        _logger.info("CDC generado: %s", cdc_complete)
         return cdc_complete
 
     @classmethod
     def _validate_parameters(
         cls, company_ruc, doc_type, establishment, expedition_point, sequence
     ):
-        """Validar parâmetros de entrada"""
+        """Validar parámetros de entrada"""
         # Validar RUC
         ruc_clean = "".join(filter(str.isdigit, str(company_ruc)))
         if len(ruc_clean) < 6 or len(ruc_clean) > 8:
@@ -111,7 +113,7 @@ class CDCGenerator:
 
         # Validar sequence
         if not isinstance(sequence, int) or sequence < 1 or sequence > 9999999:
-            raise ValueError(f"Sequência inválida: {sequence}")
+            raise ValueError(f"Secuencia inválida: {sequence}")
 
     @classmethod
     def _build_cdc_base(
@@ -124,7 +126,7 @@ class CDCGenerator:
         emission_date,
     ):
         """
-        Construir base do CDC (42 dígitos)
+        Construir base del CDC (42 dígitos)
 
         Formato conforme SIFEN:
         - RUC: 8 dígitos
@@ -132,52 +134,52 @@ class CDCGenerator:
         - Establecimiento: 3 dígitos
         - Punto expedición: 3 dígitos
         - Número documento: 7 dígitos
-        - Código segurança: 8 dígitos
-        - Data/hora: 11 dígitos (YYMMDDHHmm + random)
+        - Código seguridad: 8 dígitos
+        - Fecha/hora: 11 dígitos (YYMMDDHHmm + random)
         """
-        # RUC da empresa (8 dígitos - extrair apenas números)
+        # RUC de la empresa (8 dígitos - extraer solo números)
         ruc_clean = "".join(filter(str.isdigit, str(company_ruc)))
         cdc = ruc_clean[:8].zfill(8)
 
         # Tipo de documento (2 dígitos)
-        cdc += f"{doc_type: 02d}"
+        cdc += str(doc_type).zfill(2)
 
         # Establecimiento (3 dígitos)
-        cdc += f"{int(establishment): 03d}"
+        cdc += str(int(establishment)).zfill(3)
 
         # Punto de expedición (3 dígitos)
-        cdc += f"{int(expedition_point): 03d}"
+        cdc += str(int(expedition_point)).zfill(3)
 
-        # Número do documento (7 dígitos)
-        cdc += f"{sequence: 07d}"
+        # Número del documento (7 dígitos)
+        cdc += str(sequence).zfill(7)
 
-        # Código de segurança (8 dígitos) - gerado aleatoriamente
+        # Código de seguridad (8 dígitos) - generado aleatoriamente
         security_code = cls._generate_security_code()
-        cdc += f"{security_code: 08d}"
+        cdc += str(security_code).zfill(8)
 
-        # Data e hora (11 dígitos)
+        # Fecha y hora (11 dígitos)
         datetime_code = cls._generate_datetime_code(emission_date)
         cdc += datetime_code
 
         if len(cdc) != 42:
-            raise ValueError(f"CDC base deve ter 42 dígitos, gerado: {len(cdc)}")
+            raise ValueError(f"CDC base debe tener 42 dígitos, generado: {len(cdc)}")
 
         return cdc
 
     @classmethod
     def _generate_security_code(cls):
-        """Gerar código de segurança aleatório (8 dígitos)"""
-        return random.randint(10000000, 99999999)
+        """Generar código de seguridad aleatorio (8 dígitos)"""
+        return secrets.randbelow(90000000) + 10000000
 
     @classmethod
     def _generate_datetime_code(cls, emission_date):
         """
-        Gerar código de data/hora (11 dígitos)
+        Generar código de fecha/hora (11 dígitos)
 
-        Formato: YYMMDDHHmm + dígito aleatório
+        Formato: YYMMDDHHmm + dígito aleatorio
         """
         date_str = emission_date.strftime("%y%m%d%H%M")  # 10 dígitos
-        random_digit = random.randint(0, 9)  # 1 dígito
+        random_digit = secrets.randbelow(10)  # 1 dígito
 
         return date_str + str(random_digit)
 
@@ -193,15 +195,17 @@ class CDCGenerator:
             int: Dígito verificador (0-9)
         """
         if len(cdc_base) != 42:
-            raise ValueError(f"CDC base deve ter 42 dígitos, recebido: {len(cdc_base)}")
+            raise ValueError(
+                f"CDC base debe tener 42 dígitos, recibido: {len(cdc_base)}"
+            )
 
-        # Calcular soma ponderada
+        # Calcular suma ponderada
         total = 0
         for i, digit in enumerate(cdc_base):
             multiplier = cls.MULTIPLIERS[i % len(cls.MULTIPLIERS)]
             total += int(digit) * multiplier
 
-        # Calcular resto da divisão por 11
+        # Calcular resto de la división por 11
         remainder = total % 11
 
         # Determinar dígito verificador
@@ -213,7 +217,7 @@ class CDCGenerator:
     @classmethod
     def validate_cdc(cls, cdc):
         """
-        Validar formato e dígito verificador de um CDC
+        Validar formato y dígito verificador de un CDC
 
         Args:
             cdc (str): CDC a ser validado
@@ -222,17 +226,17 @@ class CDCGenerator:
             tuple: (is_valid, error_message)
         """
         if not cdc:
-            return False, "CDC é obrigatório"
+            return False, "CDC es obligatorio"
 
-        # Verificar comprimento
+        # Verificar longitud
         if len(cdc) != 43:
-            return False, f"CDC deve ter 43 dígitos, recebido: {len(cdc)}"
+            return False, f"CDC debe tener 43 dígitos, recibido: {len(cdc)}"
 
-        # Verificar se contém apenas dígitos
+        # Verificar si contiene solo dígitos
         if not cdc.isdigit():
-            return False, "CDC deve conter apenas números"
+            return False, "CDC debe contener solo números"
 
-        # Separar base e dígito verificador
+        # Separar base y dígito verificador
         cdc_base = cdc[:42]
         check_digit = int(cdc[42])
 
@@ -240,14 +244,14 @@ class CDCGenerator:
         try:
             calculated_digit = cls._calculate_check_digit(cdc_base)
         except Exception as e:
-            return False, f"Erro ao calcular DV: {str(e)}"
+            return False, f"Error al calcular DV: {str(e)}"
 
         if calculated_digit != check_digit:
             return (
                 False,
                 f"Dígito verificador inválido. "
                 f"Esperado: {calculated_digit}, "
-                f"Recebido: {check_digit}",
+                f"Recibido: {check_digit}",
             )
 
         return True, ""
@@ -255,16 +259,16 @@ class CDCGenerator:
     @classmethod
     def parse_cdc(cls, cdc):
         """
-        Extrair componentes do CDC
+        Extraer componentes del CDC
 
         Args:
             cdc (str): CDC completo (43 dígitos)
 
         Returns:
-            dict: Dicionário com componentes do CDC
+            dict: Diccionario con componentes del CDC
         """
         if len(cdc) != 43:
-            raise ValueError(f"CDC deve ter 43 dígitos, recebido: {len(cdc)}")
+            raise ValueError(f"CDC debe tener 43 dígitos, recibido: {len(cdc)}")
 
         return {
             "ruc": cdc[0:8],
@@ -280,14 +284,14 @@ class CDCGenerator:
     @classmethod
     def format_cdc(cls, cdc, separator="-"):
         """
-        Formatar CDC para exibição legível
+        Formatear CDC para visualización legible
 
         Args:
             cdc (str): CDC completo
             separator (str): Separador entre componentes
 
         Returns:
-            str: CDC formatado
+            str: CDC formateado
         """
         if len(cdc) != 43:
             return cdc

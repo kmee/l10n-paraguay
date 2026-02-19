@@ -4,7 +4,12 @@ from odoo import fields, models
 
 
 class CountryState(models.Model):
-    """Extensión de res.country.state para Paraguay (Departamentos)"""
+    """Extensión de res.country.state para Paraguay (Departamentos).
+
+    Este objeto extiende res.country.state para incluir el código SET
+    (Subsecretaría de Estado de Tributación) necesario para documentos
+    fiscales en Paraguay.
+    """
 
     _inherit = "res.country.state"
 

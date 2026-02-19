@@ -203,6 +203,10 @@ class RUCValidator:
         if not ruc:
             return False
 
+        # RUC deve conter apenas dígitos e opcionalmente um hífen
+        if not re.match(r"^[\d-]+$", ruc):
+            return False
+
         clean_ruc = re.sub(r"[^\d]", "", ruc)
 
         # Deve ter entre 6 e 9 dígitos (6-8 para RUC + 1 para DV)

@@ -4,21 +4,20 @@ from odoo import fields, models
 
 
 class City(models.Model):
-    """Extensión de res.city para Paraguay con distrito y código SET"""
+    """Extensión de res.city para Paraguay con código SET.
+
+    Este objeto extiende res.city para incluir el código SET
+    (Subsecretaría de Estado de Tributación) necesario para
+    documentos fiscales en Paraguay.
+    """
 
     _inherit = "res.city"
 
-    l10n_py_code = fields.Integer(
+    l10n_py_code = fields.Char(
         string="Código SET",
-        help="Código de la ciudad según SET (Subsecretaría de Estado de Tributación)",
-    )
-
-    l10n_py_district_id = fields.Many2one(
-        "l10n_py.district",
-        string="Distrito",
+        size=4,
         help=(
-            "Distrito al que pertenece la ciudad "
-            "(nivel intermedio entre departamento y ciudad)"
+            "Código de la ciudad según SET " "(Subsecretaría de Estado de Tributación)"
         ),
     )
 

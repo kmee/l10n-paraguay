@@ -1,6 +1,6 @@
 {
     "name": "Paraguay - Accounting",
-    "version": "16.0.1.0.0",
+    "version": "16.0.1.1.0",
     "category": "Accounting/Localizations/Account Charts",
     "summary": "Localización contable para Paraguay",
     "author": "KMEE, Odoo Community Association (OCA)",
@@ -8,7 +8,6 @@
     "license": "LGPL-3",
     "depends": [
         "account",
-        # "l10n_py_base",
     ],
     "data": [
         # Data - orden importante
@@ -20,6 +19,7 @@
         "data/account_chart_template_configure_data.xml",
         "data/account_tax_template_data.xml",
         "data/fiscal_position_template_data.xml",
+        "data/res_country_data.xml",
         # Views
     ],
     "demo": [],

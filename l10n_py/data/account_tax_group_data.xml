@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
-        <!-- Grupos de Impuestos para Paraguay -->
-        <record id="tax_group_iva_10" model="account.tax.group">
+    <!-- Grupos de Impuestos para Paraguay -->
+    <record id="tax_group_iva_10" model="account.tax.group">
             <field name="name">IVA 10%</field>
             <field name="sequence">1</field>
             <field name="country_id" ref="base.py" />
@@ -20,5 +19,4 @@
             <field name="country_id" ref="base.py" />
         </record>
 
-    </data>
 </odoo>

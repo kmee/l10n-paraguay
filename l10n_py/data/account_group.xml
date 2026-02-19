@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
     <!-- ACTIVO -->
     <record id="account_group_1" model="account.group.template">
         <field name="chart_template_id" ref="py_chart_template" />
@@ -373,16 +372,16 @@
         <field name="chart_template_id" ref="py_chart_template" />
         <field name="code_prefix_start">7.01</field>
         <field
-                name="name"
-            >INGRESOS POR PRODUCCIÓN Y/O TENENCIA DE ACTIVOS BIOLÓGICOS</field>
+            name="name"
+        >INGRESOS POR PRODUCCIÓN Y/O TENENCIA DE ACTIVOS BIOLÓGICOS</field>
     </record>
 
     <record id="account_group_702" model="account.group.template">
         <field name="chart_template_id" ref="py_chart_template" />
         <field name="code_prefix_start">7.02</field>
         <field
-                name="name"
-            >COSTO DE PRODUCCIÓN Y/O TENENCIA DE ACTIVOS BIOLÓGICOS</field>
+            name="name"
+        >COSTO DE PRODUCCIÓN Y/O TENENCIA DE ACTIVOS BIOLÓGICOS</field>
     </record>
 
     <!-- OTROS INGRESOS -->
@@ -465,5 +464,4 @@
         <field name="name">IMPUESTO A LA RENTA</field>
     </record>
 
-    </data>
 </odoo>

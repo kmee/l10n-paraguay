@@ -23,16 +23,16 @@ class AccountJournal(models.Model):
         help="Código de punto de expedición (3 dígitos)",
     )
 
-    l10n_py_timbrado = fields.Many2one(
+    l10n_py_authorization_id = fields.Many2one(
         "account.authorization",
         string="Timbrado",
         domain="[('company_id', '=', company_id), ('active', '=', True)]",
         help="Timbrado autorizado por SET para este diario",
     )
 
-    l10n_py_timbrado_validity = fields.Date(
+    l10n_py_authorization_validity = fields.Date(
         string="Vencimiento del Timbrado",
-        related="l10n_py_timbrado.date_to",
+        related="l10n_py_authorization_id.date_to",
         store=True,
         readonly=True,
         help="Fecha de vencimiento del timbrado",
@@ -62,15 +62,15 @@ class AccountJournal(models.Model):
                         _("El punto de expedición debe tener 3 dígitos")
                     )
 
-    @api.constrains("l10n_py_timbrado")
+    @api.constrains("l10n_py_authorization_id")
     def _check_timbrado_consistency(self):
         """Validar consistencia del timbrado con establecimiento y punto"""
         for journal in self:
-            if journal.l10n_py_timbrado:
+            if journal.l10n_py_authorization_id:
                 if (
-                    journal.l10n_py_timbrado.establishment
+                    journal.l10n_py_authorization_id.establishment
                     != journal.l10n_py_establishment
-                    or journal.l10n_py_timbrado.expedition_point
+                    or journal.l10n_py_authorization_id.expedition_point
                     != journal.l10n_py_point
                 ):
                     raise ValidationError(

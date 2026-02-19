@@ -17,7 +17,7 @@
         <field name="invoice_number_to">10000</field>
         <field name="establishment">001</field>
         <field name="expedition_point">001</field>
-        <field name="document_type">invoice</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_f" />
         <field name="active" eval="True" />
     </record>
 
@@ -36,7 +36,7 @@
         <field name="invoice_number_to">5000</field>
         <field name="establishment">001</field>
         <field name="expedition_point">002</field>
-        <field name="document_type">invoice</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_f" />
         <field name="active" eval="True" />
     </record>
 
@@ -55,7 +55,7 @@
         <field name="invoice_number_to">1000</field>
         <field name="establishment">001</field>
         <field name="expedition_point">001</field>
-        <field name="document_type">credit_note</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_nc" />
         <field name="active" eval="True" />
     </record>
 
@@ -74,7 +74,7 @@
         <field name="invoice_number_to">3000</field>
         <field name="establishment">002</field>
         <field name="expedition_point">001</field>
-        <field name="document_type">invoice</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_f" />
         <field name="active" eval="True" />
     </record>
 
@@ -93,7 +93,7 @@
         <field name="invoice_number_to">2000</field>
         <field name="establishment">001</field>
         <field name="expedition_point">003</field>
-        <field name="document_type">invoice</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_f" />
         <field name="active" eval="False" />
     </record>
 
@@ -112,7 +112,7 @@
         <field name="invoice_number_to">500</field>
         <field name="establishment">001</field>
         <field name="expedition_point">001</field>
-        <field name="document_type">debit_note</field>
+        <field name="l10n_latam_document_type_id" ref="dc_py_nd" />
         <field name="active" eval="True" />
     </record>
 </odoo>

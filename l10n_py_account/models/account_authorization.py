@@ -34,11 +34,15 @@ class AccountAuthorization(models.Model):
     )
 
     invoice_number_from = fields.Integer(
-        string="Número Desde", required=True, help="Primer número de factura autorizado"
+        string="Número Desde",
+        required=True,
+        help="Primer número de factura autorizado",
     )
 
     invoice_number_to = fields.Integer(
-        string="Número Hasta", required=True, help="Último número de factura autorizado"
+        string="Número Hasta",
+        required=True,
+        help="Último número de factura autorizado",
     )
 
     establishment = fields.Char(
@@ -57,15 +61,11 @@ class AccountAuthorization(models.Model):
         help="Código de punto de expedición (3 dígitos)",
     )
 
-    document_type = fields.Selection(
-        [
-            ("invoice", "Factura"),
-            ("credit_note", "Nota de Crédito"),
-            ("debit_note", "Nota de Débito"),
-        ],
+    l10n_latam_document_type_id = fields.Many2one(
+        comodel_name="l10n_latam.document.type",
         string="Tipo de Documento",
         required=True,
-        default="invoice",
+        help="Tipo de documento LATAM (Factura, NC, ND, etc.)",
     )
 
     company_id = fields.Many2one(
@@ -131,15 +131,15 @@ class AccountAuthorization(models.Model):
         for record in self:
             last_invoice = self.env["account.move"].search(
                 [
-                    ("authorization_id", "=", record.id),
+                    ("l10n_py_authorization_id", "=", record.id),
                     ("move_type", "in", ["out_invoice", "out_refund"]),
                 ],
-                order="invoice_number desc",
+                order="l10n_py_invoice_number desc",
                 limit=1,
             )
 
-            if last_invoice and last_invoice.invoice_number:
-                record.next_number = last_invoice.invoice_number + 1
+            if last_invoice and last_invoice.l10n_py_invoice_number:
+                record.next_number = last_invoice.l10n_py_invoice_number + 1
             else:
                 record.next_number = record.invoice_number_from
 
@@ -148,7 +148,7 @@ class AccountAuthorization(models.Model):
         for record in self:
             count = self.env["account.move"].search_count(
                 [
-                    ("authorization_id", "=", record.id),
+                    ("l10n_py_authorization_id", "=", record.id),
                     ("move_type", "in", ["out_invoice", "out_refund"]),
                 ]
             )
@@ -221,10 +221,17 @@ class AccountAuthorization(models.Model):
         """Formato de visualización del timbrado"""
         result = []
         for record in self:
+            doc_type_name = (
+                record.l10n_latam_document_type_id.name
+                if record.l10n_latam_document_type_id
+                else ""
+            )
             name = (
                 f"Timbrado {record.name} "
                 f"({record.establishment}-{record.expedition_point})"
             )
+            if doc_type_name:
+                name = f"{name} [{doc_type_name}]"
             result.append((record.id, name))
         return result
 
@@ -244,14 +251,15 @@ class AccountAuthorization(models.Model):
 
         return True
 
-    def check_number_available(self, number):
+    def check_number_available(self, number, exclude_move_id=False):
         """Verifica si un número está disponible en este timbrado"""
         self.ensure_one()
 
         if number < self.invoice_number_from or number > self.invoice_number_to:
             raise ValidationError(
                 _(
-                    "El número %(number)s está fuera del rango autorizado (%(from)s - %(to)s)."
+                    "El número %(number)s está fuera del rango autorizado "
+                    "(%(from)s - %(to)s)."
                 )
                 % {
                     "number": number,
@@ -261,17 +269,20 @@ class AccountAuthorization(models.Model):
             )
 
         # Verificar si el número ya fue utilizado
-        existing = self.env["account.move"].search(
-            [
-                ("authorization_id", "=", self.id),
-                ("invoice_number", "=", number),
-            ]
-        )
+        domain = [
+            ("l10n_py_authorization_id", "=", self.id),
+            ("l10n_py_invoice_number", "=", number),
+        ]
+        if exclude_move_id:
+            domain.append(("id", "!=", exclude_move_id))
+
+        existing = self.env["account.move"].search(domain)
 
         if existing:
             raise ValidationError(
                 _(
-                    "El número %(number)s ya ha sido utilizado en la factura %(invoice_name)s."
+                    "El número %(number)s ya ha sido utilizado en la factura "
+                    "%(invoice_name)s."
                 )
                 % {
                     "number": number,

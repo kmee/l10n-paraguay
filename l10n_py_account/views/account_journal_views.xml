@@ -5,7 +5,7 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form" />
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='other']" position="after">
+            <xpath expr="//page[@name='advanced_settings']" position="after">
                 <page string="Configuración EDI Paraguay" name="l10n_py_edi_config">
                     <group>
                         <group string="Identificación">
@@ -13,8 +13,8 @@
                             <field name="l10n_py_point" />
                         </group>
                         <group string="Timbrado">
-                            <field name="l10n_py_timbrado" />
-                            <field name="l10n_py_timbrado_validity" />
+                            <field name="l10n_py_authorization_id" />
+                            <field name="l10n_py_authorization_validity" />
                         </group>
                     </group>
                 </page>

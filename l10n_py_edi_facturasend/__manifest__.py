@@ -1,6 +1,6 @@
 {
     "name": "Paraguay - FacturaSend EDI Connector",
-    "version": "16.0.1.0.0",
+    "version": "16.0.1.1.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "FacturaSend connector for Electronic Invoicing in Paraguay",
     "author": "KMEE, Odoo Community Association (OCA)",

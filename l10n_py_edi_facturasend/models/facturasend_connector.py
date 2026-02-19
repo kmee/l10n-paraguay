@@ -231,21 +231,22 @@ class FacturaSendConnector(models.Model):
                 "error": f"Error HTTP {response.status_code}: {response.text[:200]}",
             }
 
-    def _log_request(self, method, endpoint, data=None, response=None):
+    def _log_request(self, operation_type, method, endpoint, data=None, response=None):
         """Registrar petición y respuesta"""
         log_vals = {
-            "connector_id": self.id,
+            "operation_type": operation_type,
+            "provider": "facturasend",
             "method": method,
             "endpoint": endpoint,
             "request_data": json.dumps(data, indent=2) if data else "",
-            "timestamp": fields.Datetime.now(),
         }
 
         if response:
             log_vals.update(
                 {
                     "status_code": response.status_code,
-                    "response_data": response.text[:5000],  # Limitar tamaño
+                    "response_data": response.text[:5000],
+                    "success": response.status_code < 400,
                 }
             )
 
@@ -316,7 +317,7 @@ class FacturaSendConnector(models.Model):
             )
 
             # Registrar petición
-            self._log_request("POST", "/lote/create", adapted_data, response)
+            self._log_request("send", "POST", "/lote/create", adapted_data, response)
 
             # Procesar respuesta
             return self._process_response(response)
@@ -349,7 +350,9 @@ class FacturaSendConnector(models.Model):
                 url, headers=self._get_headers(), timeout=self.timeout
             )
 
-            self._log_request("GET", f"/lote/{batch_id}/status", None, response)
+            self._log_request(
+                "status", "GET", f"/lote/{batch_id}/status", None, response
+            )
 
             return self._process_response(response)
 
@@ -375,7 +378,9 @@ class FacturaSendConnector(models.Model):
                 url, json=cancel_data, headers=self._get_headers(), timeout=self.timeout
             )
 
-            self._log_request("POST", f"/documento/{cdc}/cancel", cancel_data, response)
+            self._log_request(
+                "cancel", "POST", f"/documento/{cdc}/cancel", cancel_data, response
+            )
 
             return self._process_response(response)
 

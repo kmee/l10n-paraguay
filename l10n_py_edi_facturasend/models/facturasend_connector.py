@@ -177,6 +177,18 @@ class FacturaSendConnector(models.Model):
         adapted_data["totalPago"] = total
         adapted_data["totalRedondeo"] = 0
 
+        # Documentos asociados (Grupo H)
+        if invoice_data.get("documentosAsociados"):
+            adapted_data["documentosAsociados"] = invoice_data["documentosAsociados"]
+
+        # Campos NRE (tipo 7)
+        if invoice_data.get("remision"):
+            adapted_data["remision"] = invoice_data["remision"]
+
+        # Totales SIFEN
+        if invoice_data.get("totales"):
+            adapted_data["totales"] = invoice_data["totales"]
+
         return adapted_data
 
     def _process_response(self, response):

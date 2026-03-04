@@ -2,7 +2,8 @@
 
 from num2words import num2words
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -33,54 +34,163 @@ class AccountMove(models.Model):
         help="Número completo de factura (formato: 001-001-0000001)",
     )
 
-    # ============== CAMPOS IVA BREAKDOWN ==============
+    # ============== CAMPOS IVA BREAKDOWN (SIFEN) ==============
 
     l10n_py_amount_subtotal_10 = fields.Monetary(
-        string="Subtotal IVA 10%",
+        string="Total Gravado 10% (F005)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Subtotal gravado 10% — valor con impuesto incluido (SIFEN F005)",
     )
 
     l10n_py_amount_iva_10 = fields.Monetary(
-        string="IVA 10%",
+        string="Liquidación IVA 10% (F016)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Liquidación IVA 10% (SIFEN F016)",
     )
 
     l10n_py_amount_subtotal_5 = fields.Monetary(
-        string="Subtotal IVA 5%",
+        string="Total Gravado 5% (F004)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Subtotal gravado 5% — valor con impuesto incluido (SIFEN F004)",
     )
 
     l10n_py_amount_iva_5 = fields.Monetary(
-        string="IVA 5%",
+        string="Liquidación IVA 5% (F015)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Liquidación IVA 5% (SIFEN F015)",
     )
 
     l10n_py_amount_exempt = fields.Monetary(
-        string="Monto Exento",
+        string="Total Exento (F003)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Subtotal exento/no gravado (SIFEN F003)",
     )
 
     l10n_py_amount_iva_total = fields.Monetary(
-        string="Total IVA",
+        string="Total IVA (F014)",
         compute="_compute_l10n_py_iva",
         store=True,
         currency_field="currency_id",
+        help="Total liquidación IVA (SIFEN F014)",
+    )
+
+    l10n_py_base_10 = fields.Monetary(
+        string="Base Gravada 10% (F019)",
+        compute="_compute_l10n_py_iva",
+        store=True,
+        currency_field="currency_id",
+        help="Base gravada neta 10% sin IVA (SIFEN F019)",
+    )
+
+    l10n_py_base_5 = fields.Monetary(
+        string="Base Gravada 5% (F018)",
+        compute="_compute_l10n_py_iva",
+        store=True,
+        currency_field="currency_id",
+        help="Base gravada neta 5% sin IVA (SIFEN F018)",
+    )
+
+    l10n_py_base_total = fields.Monetary(
+        string="Total Base Gravada (F020)",
+        compute="_compute_l10n_py_iva",
+        store=True,
+        currency_field="currency_id",
+        help="Total base gravada (SIFEN F020 = F018 + F019)",
+    )
+
+    l10n_py_total_operation = fields.Monetary(
+        string="Total Operación (F008)",
+        compute="_compute_l10n_py_iva",
+        store=True,
+        currency_field="currency_id",
+        help="Total de la operación (SIFEN F008 = F003 + F004 + F005)",
+    )
+
+    # ============== CAMPOS TIPO DE CAMBIO PYG ==============
+
+    l10n_py_exchange_rate = fields.Float(
+        string="Tipo de Cambio",
+        digits=(16, 4),
+        help="Tipo de cambio a guaraníes (PYG) para facturación en moneda extranjera",
+    )
+
+    l10n_py_amount_total_pyg = fields.Monetary(
+        string="Total en Guaraníes (F023)",
+        compute="_compute_l10n_py_total_pyg",
+        store=True,
+        currency_field="currency_id",
+        help="Total de la operación en guaraníes (SIFEN F023)",
     )
 
     l10n_py_amount_total_words = fields.Char(
         string="Total en Letras",
         compute="_compute_l10n_py_amount_total_words",
     )
+
+    _sql_constraints = [
+        (
+            "l10n_py_invoice_unique",
+            "unique(l10n_py_authorization_id, l10n_py_invoice_number)",
+            "El número de factura debe ser único por timbrado.",
+        ),
+    ]
+
+    # ============== ACTION METHODS ==============
+
+    def action_post(self):
+        """Override para asignar numeración secuencial al confirmar"""
+        for move in self:
+            if (
+                move.move_type in ("out_invoice", "out_refund")
+                and move.company_id.country_id.code == "PY"
+                and move.journal_id.l10n_latam_use_documents
+            ):
+                if not move.l10n_py_authorization_id:
+                    raise UserError(
+                        _(
+                            "Debe seleccionar un timbrado para confirmar "
+                            "una factura de venta."
+                        )
+                    )
+                if not move.l10n_py_invoice_number:
+                    auth = move.l10n_py_authorization_id
+                    auth.check_validity()
+                    # Flush pending writes so the SQL query sees all data
+                    self.env["account.move"].flush_model(["l10n_py_invoice_number"])
+                    # Query next number directly to avoid ORM cache issues
+                    self.env.cr.execute(
+                        """
+                        SELECT COALESCE(MAX(l10n_py_invoice_number), 0)
+                        FROM account_move
+                        WHERE l10n_py_authorization_id = %s
+                          AND l10n_py_invoice_number > 0
+                          AND move_type IN ('out_invoice', 'out_refund')
+                        """,
+                        (auth.id,),
+                    )
+                    max_num = self.env.cr.fetchone()[0]
+                    next_num = max_num + 1 if max_num else auth.invoice_number_from
+                    if next_num > auth.invoice_number_to:
+                        raise UserError(
+                            _(
+                                "La faja de numeración está agotada "
+                                "para el timbrado %(timbrado)s.",
+                                timbrado=auth.name,
+                            )
+                        )
+                    auth.check_number_available(next_num, exclude_move_id=move.id)
+                    move.l10n_py_invoice_number = next_num
+        return super().action_post()
 
     # ============== COMPUTE METHODS ==============
 
@@ -100,14 +210,20 @@ class AccountMove(models.Model):
             else:
                 move.l10n_py_full_invoice_number = False
 
-    @api.depends("invoice_line_ids.price_subtotal", "invoice_line_ids.tax_ids")
+    @api.depends(
+        "invoice_line_ids.price_subtotal",
+        "invoice_line_ids.price_total",
+        "invoice_line_ids.tax_ids",
+    )
     def _compute_l10n_py_iva(self):
-        """Calcular desglose de IVA por tasa (10%, 5%, exento)"""
+        """Calcular desglose de IVA según fórmula SIFEN v150.
+
+        Fórmula SIFEN: base = price_total / (1 + tasa/100)
+                        iva  = price_total - base
+        """
         for move in self:
-            subtotal_10 = 0.0
-            iva_10 = 0.0
-            subtotal_5 = 0.0
-            iva_5 = 0.0
+            subtotal_10 = iva_10 = base_10 = 0.0
+            subtotal_5 = iva_5 = base_5 = 0.0
             exempt = 0.0
 
             for line in move.invoice_line_ids.filtered(
@@ -121,27 +237,58 @@ class AccountMove(models.Model):
                         tax_rate = 5
 
                 if tax_rate == 10:
-                    subtotal_10 += line.price_subtotal
-                    iva_10 += line.price_subtotal * 10 / 100
+                    base = line.price_total / 1.1
+                    subtotal_10 += line.price_total  # F005
+                    iva_10 += line.price_total - base  # F016
+                    base_10 += base  # F019
                 elif tax_rate == 5:
-                    subtotal_5 += line.price_subtotal
-                    iva_5 += line.price_subtotal * 5 / 100
+                    base = line.price_total / 1.05
+                    subtotal_5 += line.price_total  # F004
+                    iva_5 += line.price_total - base  # F015
+                    base_5 += base  # F018
                 else:
-                    exempt += line.price_subtotal
+                    exempt += line.price_subtotal  # F003
 
             move.l10n_py_amount_subtotal_10 = subtotal_10
             move.l10n_py_amount_iva_10 = iva_10
+            move.l10n_py_base_10 = base_10
             move.l10n_py_amount_subtotal_5 = subtotal_5
             move.l10n_py_amount_iva_5 = iva_5
+            move.l10n_py_base_5 = base_5
             move.l10n_py_amount_exempt = exempt
-            move.l10n_py_amount_iva_total = iva_10 + iva_5
+            move.l10n_py_amount_iva_total = iva_10 + iva_5  # F014
+            move.l10n_py_base_total = base_10 + base_5  # F020
+            move.l10n_py_total_operation = exempt + subtotal_5 + subtotal_10  # F008
+
+    @api.depends("amount_total", "l10n_py_exchange_rate")
+    def _compute_l10n_py_total_pyg(self):
+        """Calcular total en guaraníes (F023) para facturas en moneda extranjera"""
+        for move in self:
+            if move.l10n_py_exchange_rate and move.l10n_py_exchange_rate > 0:
+                move.l10n_py_amount_total_pyg = (
+                    move.amount_total * move.l10n_py_exchange_rate
+                )
+            else:
+                move.l10n_py_amount_total_pyg = 0.0
 
     @api.depends("amount_total", "currency_id")
     def _compute_l10n_py_amount_total_words(self):
         """Convertir total a letras en español"""
+        # Mapa de nombres en español para monedas comunes en Paraguay
+        _CURRENCY_NAMES_ES = {
+            "PYG": "guaraníes",
+            "USD": "dólares americanos",
+            "BRL": "reales",
+            "EUR": "euros",
+            "ARS": "pesos argentinos",
+        }
         for move in self:
             if move.amount_total:
-                currency_name = move.currency_id.currency_unit_label or "guaraníes"
+                currency_code = move.currency_id.name or ""
+                currency_name = _CURRENCY_NAMES_ES.get(
+                    currency_code,
+                    move.currency_id.currency_unit_label or "guaraníes",
+                )
                 amount_words = num2words(int(move.amount_total), lang="es")
                 move.l10n_py_amount_total_words = (
                     f"{amount_words} {currency_name}".capitalize()
@@ -172,6 +319,6 @@ class AccountMove(models.Model):
 
     @api.onchange("l10n_py_authorization_id")
     def _onchange_authorization_id(self):
-        """Actualizar número de factura cuando cambia el timbrado"""
-        if self.l10n_py_authorization_id and not self.l10n_py_invoice_number:
-            self.l10n_py_invoice_number = self.l10n_py_authorization_id.next_number
+        """Limpiar número al cambiar timbrado — se asigna en action_post"""
+        if self.l10n_py_authorization_id:
+            self.l10n_py_invoice_number = 0

@@ -1,8 +1,11 @@
 from datetime import date, timedelta
 
+from psycopg2 import IntegrityError
+
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
+from odoo.tools import mute_logger
 
 
 @tagged("post_install", "-at_install", "l10n_py")
@@ -37,7 +40,7 @@ class TestAccountAuthorization(TransactionCase):
 
     def _create_authorization(self, **kwargs):
         vals = {
-            "name": "12345678",
+            "name": "22334455",
             "date_from": self.date_from,
             "date_to": self.date_to,
             "invoice_number_from": 1,
@@ -50,19 +53,21 @@ class TestAccountAuthorization(TransactionCase):
         vals.update(kwargs)
         return self.Authorization.create(vals)
 
+    # ============== F01: Timbrado ==============
+
     def test_create_authorization(self):
-        """Crear timbrado válido"""
+        """F01: Crear timbrado válido"""
         auth = self._create_authorization()
         self.assertTrue(auth.id)
         self.assertEqual(auth.state, "valid")
 
     def test_authorization_state_valid(self):
-        """Estado 'valid' cuando vigente"""
+        """F01: Estado 'valid' cuando vigente"""
         auth = self._create_authorization()
         self.assertEqual(auth.state, "valid")
 
     def test_authorization_state_expired(self):
-        """Estado 'expired' cuando vencido"""
+        """F01: Estado 'expired' cuando vencido"""
         auth = self._create_authorization(
             date_from=self.today - timedelta(days=400),
             date_to=self.today - timedelta(days=35),
@@ -70,7 +75,7 @@ class TestAccountAuthorization(TransactionCase):
         self.assertEqual(auth.state, "expired")
 
     def test_authorization_state_to_expire(self):
-        """Estado 'to_expire' cuando < 30 días"""
+        """F01: Estado 'to_expire' cuando < 30 días"""
         auth = self._create_authorization(
             date_from=self.today - timedelta(days=300),
             date_to=self.today + timedelta(days=25),
@@ -78,7 +83,7 @@ class TestAccountAuthorization(TransactionCase):
         self.assertEqual(auth.state, "to_expire")
 
     def test_timbrado_format_validation(self):
-        """Rechaza timbrado con != 8 dígitos"""
+        """F01: Rechaza timbrado con != 8 dígitos"""
         with self.assertRaises(ValidationError):
             self._create_authorization(name="1234567")  # 7 dígitos
 
@@ -86,7 +91,7 @@ class TestAccountAuthorization(TransactionCase):
             self._create_authorization(name="1234567A")  # letras
 
     def test_establishment_format_validation(self):
-        """Rechaza establecimiento con != 3 dígitos"""
+        """F01: Rechaza establecimiento con != 3 dígitos"""
         with self.assertRaises(ValidationError):
             self._create_authorization(establishment="01")
 
@@ -94,12 +99,22 @@ class TestAccountAuthorization(TransactionCase):
             self._create_authorization(establishment="00A")
 
     def test_invoice_range_validation(self):
-        """Rechaza range inválido (from > to)"""
+        """F01: Rechaza range inválido (from > to)"""
         with self.assertRaises(ValidationError):
             self._create_authorization(invoice_number_from=1000, invoice_number_to=500)
 
+    def test_reject_range_exceeding_max(self):
+        """F01: Rechaza faja excediendo 9.999.999"""
+        with self.assertRaises(ValidationError):
+            self._create_authorization(invoice_number_to=10000000)
+
+    def test_range_at_max_boundary(self):
+        """F01: Aceita faja até exatamente 9.999.999"""
+        auth = self._create_authorization(invoice_number_to=9999999)
+        self.assertEqual(auth.invoice_number_to, 9999999)
+
     def test_date_validation(self):
-        """Rechaza date_to < date_from"""
+        """F01: Rechaza date_to < date_from"""
         with self.assertRaises(ValidationError):
             self._create_authorization(
                 date_from=self.today,
@@ -107,17 +122,17 @@ class TestAccountAuthorization(TransactionCase):
             )
 
     def test_document_type_latam_integration(self):
-        """l10n_latam_document_type_id funciona"""
+        """F01: l10n_latam_document_type_id funciona"""
         auth = self._create_authorization()
         self.assertEqual(auth.l10n_latam_document_type_id, self.doc_type_invoice)
 
     def test_check_validity(self):
-        """Verificación de vigencia"""
+        """F01: Verificación de vigencia"""
         auth = self._create_authorization()
         self.assertTrue(auth.check_validity())
 
     def test_check_validity_expired(self):
-        """Timbrado vencido lanza error"""
+        """F01: Timbrado vencido lanza error"""
         auth = self._create_authorization(
             date_from=self.today - timedelta(days=400),
             date_to=self.today - timedelta(days=35),
@@ -126,26 +141,91 @@ class TestAccountAuthorization(TransactionCase):
             auth.check_validity()
 
     def test_check_number_available(self):
-        """Número dentro del range y no usado"""
+        """F01: Número dentro del range y no usado"""
         auth = self._create_authorization()
         self.assertTrue(auth.check_number_available(500))
 
     def test_check_number_out_of_range(self):
-        """Número fuera del range"""
+        """F01: Número fuera del range"""
         auth = self._create_authorization()
         with self.assertRaises(ValidationError):
             auth.check_number_available(15000)
 
     def test_next_number_computation(self):
-        """Próximo número correcto"""
+        """F01: Próximo número correcto"""
         auth = self._create_authorization()
         self.assertEqual(auth.next_number, 1)
 
+    # ============== F01: Alertas de uso ==============
+
+    def test_usage_percentage(self):
+        """F01: Porcentaje de uso calculado correctamente"""
+        auth = self._create_authorization(
+            invoice_number_from=1,
+            invoice_number_to=100,
+        )
+        # Sin facturas, uso = 0%
+        self.assertEqual(auth.usage_percentage, 0.0)
+
+    # ============== F02: Serie AA-ZZ ==============
+
+    def test_series_default_aa(self):
+        """F02: Serie por defecto es AA"""
+        auth = self._create_authorization()
+        self.assertEqual(auth.series, "AA")
+
+    def test_series_validation_valid(self):
+        """F02: Serie válida de 2 letras mayúsculas"""
+        auth = self._create_authorization(series="AB")
+        self.assertEqual(auth.series, "AB")
+
+        auth2 = self._create_authorization(name="22334456", series="ZZ")
+        self.assertEqual(auth2.series, "ZZ")
+
+    def test_series_validation_invalid_mixed(self):
+        """F02: Serie con dígitos rechazada"""
+        with self.assertRaises(ValidationError):
+            self._create_authorization(series="A1")
+
+    def test_series_validation_invalid_lowercase(self):
+        """F02: Serie con minúsculas rechazada"""
+        with self.assertRaises(ValidationError):
+            self._create_authorization(series="ab")
+
+    def test_series_validation_invalid_single(self):
+        """F02: Serie de 1 carácter rechazada"""
+        with self.assertRaises(ValidationError):
+            self._create_authorization(series="A")
+
+    # ============== F01: name_get ==============
+
     def test_name_get(self):
-        """Formato de visualización"""
+        """F01: Formato de visualización"""
         auth = self._create_authorization(
             expedition_point="002",
         )
         name = auth.name_get()[0][1]
-        self.assertIn("12345678", name)
+        self.assertIn("22334455", name)
         self.assertIn("001-002", name)
+
+    def test_name_get_with_series(self):
+        """F02: name_get incluye serie cuando != AA"""
+        auth = self._create_authorization(series="BC")
+        name = auth.name_get()[0][1]
+        self.assertIn("Serie BC", name)
+
+    def test_name_get_default_series_hidden(self):
+        """F02: name_get no incluye serie AA (por defecto)"""
+        auth = self._create_authorization(series="AA")
+        name = auth.name_get()[0][1]
+        self.assertNotIn("Serie", name)
+
+    # ============== SQL Unique ==============
+
+    @mute_logger("odoo.sql_db")
+    def test_unique_constraint(self):
+        """F02: Timbrado duplicado lanza IntegrityError"""
+        self._create_authorization()
+        with self.assertRaises(IntegrityError):
+            self._create_authorization()
+            self.env.cr.flush()

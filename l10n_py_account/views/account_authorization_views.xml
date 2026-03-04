@@ -48,6 +48,7 @@
                         <group>
                             <field name="establishment" />
                             <field name="expedition_point" />
+                            <field name="series" />
                         </group>
                         <group>
                             <field name="invoice_number_from" />
@@ -58,6 +59,7 @@
                         <field name="next_number" />
                         <field name="used_numbers" />
                         <field name="remaining_numbers" />
+                        <field name="usage_percentage" widget="progressbar" />
                     </group>
                 </sheet>
             </form>
@@ -77,6 +79,7 @@
                 <field name="name" />
                 <field name="establishment" />
                 <field name="expedition_point" />
+                <field name="series" optional="hide" />
                 <field name="l10n_latam_document_type_id" />
                 <field name="date_from" />
                 <field name="date_to" />
@@ -84,6 +87,7 @@
                 <field name="invoice_number_to" />
                 <field name="next_number" />
                 <field name="remaining_numbers" />
+                <field name="usage_percentage" widget="progressbar" optional="show" />
                 <field
                     name="state"
                     widget="badge"
@@ -174,13 +178,20 @@
         </field>
     </record>
 
-    <!-- Menú para account.authorization -->
+    <!-- Menú Paraguay dentro de Configuración -->
+    <menuitem
+        id="menu_l10n_py_config"
+        name="Paraguay"
+        parent="account.menu_finance_configuration"
+        sequence="50"
+    />
+
     <menuitem
         id="menu_account_authorization"
         name="Timbrados"
-        parent="account.menu_finance_configuration"
+        parent="menu_l10n_py_config"
         action="action_account_authorization"
-        sequence="50"
+        sequence="10"
     />
 
 </odoo>

@@ -1,8 +1,11 @@
 # l10n_py_account/models/account_authorization.py
+import re
 from datetime import date
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+
+MAX_INVOICE_NUMBER = 9999999
 
 
 class AccountAuthorization(models.Model):
@@ -61,6 +64,14 @@ class AccountAuthorization(models.Model):
         help="Código de punto de expedición (3 dígitos)",
     )
 
+    series = fields.Char(
+        string="Serie",
+        size=2,
+        default="AA",
+        help="Serie del timbrado (2 letras mayúsculas, AA-ZZ). "
+        "Permite reiniciar numeración cuando se agota la faja.",
+    )
+
     l10n_latam_document_type_id = fields.Many2one(
         comodel_name="l10n_latam.document.type",
         string="Tipo de Documento",
@@ -109,6 +120,22 @@ class AccountAuthorization(models.Model):
         compute="_compute_remaining_numbers",
         help="Cantidad de números aún disponibles",
     )
+
+    usage_percentage = fields.Float(
+        string="Porcentaje de Uso",
+        compute="_compute_usage_percentage",
+        help="Porcentaje de números utilizados respecto al total autorizado",
+    )
+
+    _sql_constraints = [
+        (
+            "unique_timbrado",
+            "unique(name, establishment, expedition_point, series, "
+            "l10n_latam_document_type_id, company_id)",
+            "La combinación timbrado/establecimiento/punto de expedición/"
+            "serie/tipo de documento debe ser única.",
+        ),
+    ]
 
     @api.depends("date_from", "date_to")
     def _compute_state(self):
@@ -160,6 +187,15 @@ class AccountAuthorization(models.Model):
             total = record.invoice_number_to - record.invoice_number_from + 1
             record.remaining_numbers = total - record.used_numbers
 
+    def _compute_usage_percentage(self):
+        """Calcula el porcentaje de uso de la faja de numeración"""
+        for record in self:
+            total = record.invoice_number_to - record.invoice_number_from + 1
+            if total > 0:
+                record.usage_percentage = (record.used_numbers / total) * 100
+            else:
+                record.usage_percentage = 0.0
+
     @api.constrains("name")
     def _check_timbrado_format(self):
         """Valida el formato del número de timbrado"""
@@ -204,6 +240,25 @@ class AccountAuthorization(models.Model):
                 raise ValidationError(
                     _("El número final debe ser mayor al número inicial.")
                 )
+            if record.invoice_number_to > MAX_INVOICE_NUMBER:
+                raise ValidationError(
+                    _(
+                        "El número final no puede exceder %(max)s.",
+                        max=MAX_INVOICE_NUMBER,
+                    )
+                )
+
+    @api.constrains("series")
+    def _check_series_format(self):
+        """Valida que la serie sea exactamente 2 letras mayúsculas (AA-ZZ)"""
+        for record in self:
+            if record.series and not re.match(r"^[A-Z]{2}$", record.series):
+                raise ValidationError(
+                    _(
+                        "La serie debe ser exactamente 2 letras mayúsculas "
+                        "(ej: AA, AB, ZZ)."
+                    )
+                )
 
     @api.constrains("date_from", "date_to")
     def _check_dates(self):
@@ -230,6 +285,8 @@ class AccountAuthorization(models.Model):
                 f"Timbrado {record.name} "
                 f"({record.establishment}-{record.expedition_point})"
             )
+            if record.series and record.series != "AA":
+                name = f"{name} Serie {record.series}"
             if doc_type_name:
                 name = f"{name} [{doc_type_name}]"
             result.append((record.id, name))

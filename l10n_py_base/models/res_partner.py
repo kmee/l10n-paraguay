@@ -45,6 +45,23 @@ class ResPartner(models.Model):
         help="Descripción de la actividad económica principal",
     )
 
+    l10n_py_doc_type = fields.Selection(
+        [
+            ("1", "Cédula de Identidad"),
+            ("2", "Pasaporte"),
+            ("3", "Carnet de Residencia"),
+            ("4", "Innominado"),
+        ],
+        string="Tipo de Documento de Identidad",
+        help="Tipo de documento de identidad para no contribuyentes (SIFEN D024)",
+    )
+
+    l10n_py_doc_number = fields.Char(
+        string="Número de Documento",
+        size=20,
+        help="Número de documento de identidad para no contribuyentes (SIFEN D025)",
+    )
+
     # ============== CAMPOS DE UBICACIÓN (RELATED) ==============
 
     l10n_py_department_code = fields.Integer(

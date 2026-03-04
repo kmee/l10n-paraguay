@@ -104,3 +104,46 @@ class TestResPartner(TransactionCase):
                 state.l10n_py_code,
                 "Código departamento debe coincidir con el del estado",
             )
+
+    # ============== F15: Datos parceiro ==============
+
+    def test_non_taxpayer_with_ci(self):
+        """F15: No-contribuyente con cédula de identidad"""
+        partner = self.Partner.create(
+            {
+                "name": "Persona Natural PY",
+                "country_id": self.country_py.id,
+                "l10n_py_taxpayer_type": "2",
+                "l10n_py_doc_type": "1",
+                "l10n_py_doc_number": "4567890",
+            }
+        )
+        self.assertEqual(partner.l10n_py_doc_type, "1")
+        self.assertEqual(partner.l10n_py_doc_number, "4567890")
+
+    def test_taxpayer_with_ruc(self):
+        """F15: Contribuyente con RUC y DV"""
+        partner = self.Partner.create(
+            {
+                "name": "Empresa PY",
+                "country_id": self.country_py.id,
+                "l10n_py_taxpayer_type": "1",
+                "l10n_py_ruc": "80012345",
+            }
+        )
+        self.assertEqual(partner.l10n_py_taxpayer_type, "1")
+        self.assertTrue(partner.l10n_py_ruc_dv)
+
+    def test_non_taxpayer_doc_types(self):
+        """F15: Todos los tipos de documento de identidad son aceptados"""
+        for doc_type in ("1", "2", "3", "4"):
+            partner = self.Partner.create(
+                {
+                    "name": f"Partner doc_type {doc_type}",
+                    "country_id": self.country_py.id,
+                    "l10n_py_taxpayer_type": "2",
+                    "l10n_py_doc_type": doc_type,
+                    "l10n_py_doc_number": "12345",
+                }
+            )
+            self.assertEqual(partner.l10n_py_doc_type, doc_type)

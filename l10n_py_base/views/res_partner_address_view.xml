@@ -100,6 +100,14 @@
                     name="l10n_py_activity_description"
                     attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
                 />
+                <field
+                    name="l10n_py_doc_type"
+                    attrs="{'invisible': ['|', ('country_id', '!=', %(base.py)d), ('l10n_py_taxpayer_type', '!=', '2')]}"
+                />
+                <field
+                    name="l10n_py_doc_number"
+                    attrs="{'invisible': ['|', ('country_id', '!=', %(base.py)d), ('l10n_py_taxpayer_type', '!=', '2')]}"
+                />
             </xpath>
         </field>
     </record>

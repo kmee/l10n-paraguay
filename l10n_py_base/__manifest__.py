@@ -1,6 +1,6 @@
 {
     "name": "Paraguay - Base Localization",
-    "version": "16.0.1.1.0",
+    "version": "16.0.1.2.0",
     "category": "Localization",
     "summary": "Base localization data for Paraguay",
     "author": "KMEE, Odoo Community Association (OCA)",

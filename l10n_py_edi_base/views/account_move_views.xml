@@ -38,6 +38,16 @@
                             <field name="l10n_py_edi_batch_id" readonly="1" />
                         </group>
                     </group>
+                    <group
+                        string="Nota de Remisión (NRE)"
+                        attrs="{'invisible': [('l10n_py_transaction_type', '!=', '1')]}"
+                        name="nre_section"
+                    >
+                        <field name="l10n_py_nre_motive" />
+                        <field name="l10n_py_nre_estimated_invoice_date" />
+                    </group>
+                    <separator string="Documentos Asociados (Grupo H)" />
+                    <field name="l10n_py_associated_document_ids" />
                 </page>
             </xpath>
 

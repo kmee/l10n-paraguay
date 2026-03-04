@@ -98,6 +98,62 @@ class AccountMove(models.Model):
     # Campos para contingencia
     l10n_py_contingency_motive = fields.Char("Motivo de Contingencia")
 
+    # Documentos asociados (Grupo H SIFEN)
+    l10n_py_associated_document_ids = fields.One2many(
+        "l10n_py.associated.document",
+        "move_id",
+        string="Documentos Asociados",
+        help="Documentos asociados al DTE (Grupo H del SIFEN)",
+    )
+
+    # Campos NRE (Nota de Remisión Electrónica — tipo 7)
+    l10n_py_nre_motive = fields.Selection(
+        [
+            ("1", "Traslado por venta"),
+            ("2", "Traslado por consignación"),
+            ("3", "Traslado por exportación"),
+            ("4", "Traslado por importación"),
+            ("5", "Traslado entre locales"),
+            ("6", "Otros"),
+        ],
+        string="Motivo de Remisión (E501)",
+    )
+
+    l10n_py_nre_estimated_invoice_date = fields.Date(
+        string="Fecha Estimada de Facturación (E506)",
+        help="Fecha estimada de facturación para NRE sin factura asociada",
+    )
+
+    # Campo prazo de transmissão
+    l10n_py_transmission_deadline = fields.Datetime(
+        string="Plazo de Transmisión",
+        compute="_compute_transmission_deadline",
+        store=True,
+        help="Plazo máximo para transmitir el DTE (72 horas desde emisión)",
+    )
+
+    # ============== LIFECYCLE METHODS ==============
+
+    def action_post(self):
+        """Override para configurar estado EDI al confirmar factura."""
+        res = super().action_post()
+        for move in self:
+            if move.move_type in ("out_invoice", "out_refund"):
+                move.l10n_py_edi_status = "to_send"
+        return res
+
+    @api.depends("invoice_date")
+    def _compute_transmission_deadline(self):
+        """Calcular plazo máximo de transmisión (72h desde emisión)"""
+        for move in self:
+            if move.invoice_date:
+                # 72 horas desde el inicio del día de emisión
+                move.l10n_py_transmission_deadline = fields.Datetime.from_string(
+                    str(move.invoice_date) + " 00:00:00"
+                ) + relativedelta(hours=72)
+            else:
+                move.l10n_py_transmission_deadline = False
+
     # ============== ONCHANGE METHODS ==============
 
     @api.onchange("invoice_line_ids")
@@ -183,7 +239,72 @@ class AccountMove(models.Model):
                 "cargo": self.user_id.function or "Vendedor",
             }
 
+        # Documentos asociados (Grupo H)
+        if self.l10n_py_associated_document_ids:
+            document_data["documentosAsociados"] = self._prepare_associated_documents()
+
+        # Campos NRE (tipo=7)
+        doc_type_code = "1"
+        if self.l10n_latam_document_type_id:
+            doc_type_code = self.l10n_latam_document_type_id.code or "1"
+        if doc_type_code == "7":
+            document_data["remision"] = {
+                "motivo": int(self.l10n_py_nre_motive or "1"),
+            }
+            if self.l10n_py_nre_estimated_invoice_date:
+                document_data["remision"][
+                    "fechaEstimada"
+                ] = self.l10n_py_nre_estimated_invoice_date.strftime("%Y-%m-%d")
+
+        # Totales SIFEN
+        document_data["totales"] = {
+            "totalExento": self.l10n_py_amount_exempt,  # F003
+            "totalGravado5": self.l10n_py_amount_subtotal_5,  # F004
+            "totalGravado10": self.l10n_py_amount_subtotal_10,  # F005
+            "totalOperacion": self.l10n_py_total_operation,  # F008
+            "totalIva": self.l10n_py_amount_iva_total,  # F014
+            "liquidacionIva5": self.l10n_py_amount_iva_5,  # F015
+            "liquidacionIva10": self.l10n_py_amount_iva_10,  # F016
+            "baseGravada5": self.l10n_py_base_5,  # F018
+            "baseGravada10": self.l10n_py_base_10,  # F019
+            "totalBaseGravada": self.l10n_py_base_total,  # F020
+        }
+        if self.l10n_py_amount_total_pyg:
+            document_data["totales"]["totalPYG"] = self.l10n_py_amount_total_pyg  # F023
+
         return document_data
+
+    def _prepare_associated_documents(self):
+        """Preparar datos de documentos asociados para JSON EDI."""
+        docs = []
+        for ad in self.l10n_py_associated_document_ids:
+            doc_data = {
+                "tipoAsociacion": int(ad.association_type),
+            }
+            if ad.association_type == "1":
+                doc_data["cdc"] = ad.cdc
+            elif ad.association_type == "2":
+                doc_data.update(
+                    {
+                        "timbrado": ad.timbrado,
+                        "establecimiento": ad.establishment,
+                        "punto": ad.expedition_point,
+                        "numero": ad.doc_number,
+                        "tipoDocumentoImpreso": int(ad.doc_type_code),
+                        "fecha": (
+                            ad.doc_date.strftime("%Y-%m-%d") if ad.doc_date else ""
+                        ),
+                    }
+                )
+            elif ad.association_type == "3":
+                doc_data.update(
+                    {
+                        "constanciaTipo": int(ad.constancia_type),
+                        "constanciaNumero": ad.constancia_number,
+                    }
+                )
+            docs.append(doc_data)
+        return docs
 
     def _prepare_customer_data(self):
         """Preparar datos del cliente"""
@@ -228,6 +349,13 @@ class AccountMove(models.Model):
         # Tipo y número de documento
         if partner.l10n_py_taxpayer_type:
             customer_data["tipoContribuyente"] = 1 if partner.is_company else 2
+
+        # No-contribuyente: incluir documento de identidad (D024/D025)
+        if partner.l10n_py_taxpayer_type == "2":
+            if partner.l10n_py_doc_type:
+                customer_data["documentoTipo"] = int(partner.l10n_py_doc_type)
+            if partner.l10n_py_doc_number:
+                customer_data["documentoNumero"] = partner.l10n_py_doc_number
 
         return customer_data
 
@@ -297,6 +425,13 @@ class AccountMove(models.Model):
                     iva_type = 3  # Exenta
                     iva_rate = 0
 
+            # Calcular base gravable e liquidação IVA por linha (SIFEN)
+            base_gravada = 0.0
+            liquidacion_iva = 0.0
+            if iva_rate > 0 and line.price_total:
+                base_gravada = line.price_total / (1 + iva_rate / 100)
+                liquidacion_iva = line.price_total - base_gravada
+
             item = {
                 "codigo": (
                     line.product_id.default_code or f"PROD-{line.product_id.id}"
@@ -316,6 +451,8 @@ class AccountMove(models.Model):
                 "ivaTipo": iva_type,
                 "ivaBase": 100,
                 "iva": iva_rate,
+                "baseGravada": round(base_gravada, 2),
+                "liquidacionIva": round(liquidacion_iva, 2),
                 "lote": "",
                 "vencimiento": "",
             }
@@ -333,6 +470,96 @@ class AccountMove(models.Model):
             return number.zfill(7)[-7:]
         return "0000001"
 
+    def _validate_edi_document_type(self):
+        """Validar requisitos específicos por tipo de DTE.
+
+        Llamado antes del envío EDI. Retorna lista de errores.
+        """
+        errors = []
+        code = (
+            self.l10n_latam_document_type_id.code
+            if self.l10n_latam_document_type_id
+            else ""
+        )
+        docs = self.l10n_py_associated_document_ids
+
+        # AFE (code=4): exatamente 1 constância
+        if code == "4":
+            if len(docs) != 1:
+                errors.append(
+                    _("Autofactura: debe tener exactamente 1 documento asociado.")
+                )
+            elif docs[0].association_type != "3":
+                errors.append(
+                    _(
+                        "Autofactura: el documento asociado debe "
+                        "ser una constancia electrónica."
+                    )
+                )
+
+        # NCE (code=5): exatamente 1 doc associado
+        elif code == "5":
+            if len(docs) != 1:
+                errors.append(
+                    _(
+                        "Nota de Crédito Electrónica: debe tener "
+                        "exactamente 1 documento asociado."
+                    )
+                )
+
+        # NDE (code=6): exatamente 1 doc associado
+        elif code == "6":
+            if len(docs) != 1:
+                errors.append(
+                    _(
+                        "Nota de Débito Electrónica: debe tener "
+                        "exactamente 1 documento asociado."
+                    )
+                )
+
+        # NRE (code=7): validações NRE
+        elif code == "7":
+            if not self.l10n_py_nre_motive:
+                errors.append(_("Nota de Remisión: el motivo es obligatorio."))
+            # Motivo "1" (traslado por venta) sin doc asociado → requer data estimada
+            if self.l10n_py_nre_motive == "1" and not docs:
+                if not self.l10n_py_nre_estimated_invoice_date:
+                    errors.append(
+                        _(
+                            "NRE traslado por venta sin documento "
+                            "asociado: debe indicar fecha estimada "
+                            "de facturación."
+                        )
+                    )
+            # Data estimada no puede exceder el mes de emisión
+            if self.l10n_py_nre_estimated_invoice_date and self.invoice_date:
+                est_date = self.l10n_py_nre_estimated_invoice_date
+                inv_date = self.invoice_date
+                # La fecha estimada no debe superar el mes siguiente
+                if est_date.month > inv_date.month + 1 or (
+                    est_date.year > inv_date.year
+                    and not (inv_date.month == 12 and est_date.month == 1)
+                ):
+                    errors.append(
+                        _(
+                            "La fecha estimada de facturación no puede "
+                            "exceder el mes siguiente al de emisión."
+                        )
+                    )
+            # Motivo "5" (entre locales) → RUC receptor = RUC emissor
+            if self.l10n_py_nre_motive == "5":
+                partner_ruc = self.partner_id.l10n_py_ruc or ""
+                company_ruc = self.company_id.l10n_py_ruc or ""
+                if partner_ruc != company_ruc:
+                    errors.append(
+                        _(
+                            "Traslado entre locales: el RUC del "
+                            "receptor debe coincidir con el del emisor."
+                        )
+                    )
+
+        return errors
+
     def _validate_edi_data(self):
         """Validar datos antes de enviar a EDI"""
         errors = []
@@ -342,10 +569,17 @@ class AccountMove(models.Model):
         if not company.l10n_py_ruc:
             errors.append(_("Configure el RUC de la empresa"))
 
-        # Validar datos del cliente
+        # Validar datos del cliente (F15)
         partner = self.partner_id
         if partner.l10n_py_taxpayer_type == "1" and not partner.l10n_py_ruc:
             errors.append(_("El cliente contribuyente debe tener RUC"))
+        if partner.l10n_py_taxpayer_type == "2" and not partner.l10n_py_doc_number:
+            errors.append(
+                _(
+                    "El cliente no contribuyente debe tener número "
+                    "de documento de identidad"
+                )
+            )
 
         if not partner.street:
             errors.append(_("La dirección del cliente es obligatoria"))
@@ -368,6 +602,9 @@ class AccountMove(models.Model):
                     errors.append(
                         _("El producto %s no tiene código NCM") % line.product_id.name
                     )
+
+        # Validar requisitos por tipo de documento (F03-F07)
+        errors.extend(self._validate_edi_document_type())
 
         if errors:
             raise UserError("\n".join(errors))
@@ -446,6 +683,12 @@ class AccountMove(models.Model):
             if de_data.get("xml"):
                 self.l10n_py_edi_xml = de_data["xml"].encode("utf-8")
                 self.l10n_py_edi_xml_filename = f"{self.l10n_py_cdc}.xml"
+
+            # Auto-generar KuDE al aceptar
+            try:
+                self._generate_kude()
+            except Exception as e:
+                _logger.warning("Error generando KuDE: %s", str(e))
 
     def action_cancel_edi(self):
         """Cancelar documento electrónico"""
@@ -531,14 +774,40 @@ class AccountMove(models.Model):
         }
 
     def _generate_kude(self):
-        """Generar KUDE (representación impresa)"""
-        # TODO: Implementar generación de KUDE
+        """Generar KUDE (representación gráfica del documento electrónico)."""
+        import base64
+
+        self.ensure_one()
+        if not self.l10n_py_cdc:
+            return
+        report = self.env.ref("l10n_py_edi_base.action_kude_report")
+        pdf_content, _ = report._render_qweb_pdf(self.ids)
+        self.l10n_py_kude_pdf = base64.b64encode(pdf_content)
+        self.l10n_py_kude_filename = f"KUDE_{self.l10n_py_cdc}.pdf"
 
     # ============== CRON METHODS ==============
 
     @api.model
     def _cron_check_edi_status(self):
-        """Verificar estado de documentos enviados"""
+        """Verificar estado de documentos enviados y procesar cola de contingencia.
+
+        Prioriza documentos cercanos al plazo de 72h.
+        """
+        # 1. Procesar cola de contingencia (to_send pendientes)
+        contingency_docs = self.search(
+            [
+                ("l10n_py_edi_status", "=", "to_send"),
+                ("l10n_py_emission_type", "=", "2"),
+            ],
+            order="l10n_py_transmission_deadline asc",
+        )
+        for doc in contingency_docs:
+            try:
+                doc.action_send_edi()
+            except Exception:
+                _logger.warning("Error reenviando doc contingencia %s", doc.name)
+
+        # 2. Verificar estado de documentos ya enviados
         pending_docs = self.search(
             [
                 ("l10n_py_edi_status", "in", ["sent", "processing"]),

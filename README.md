@@ -1,262 +1,172 @@
-# 🇵🇾 Plano de Contas - Paraguay (Odoo 16)
+[![Pre-commit Status](https://github.com/OCA/l10n-paraguay/actions/workflows/pre-commit.yml/badge.svg?branch=16.0)](https://github.com/OCA/l10n-paraguay/actions/workflows/pre-commit.yml?query=branch%3A16.0)
+[![Build Status](https://github.com/OCA/l10n-paraguay/actions/workflows/test.yml/badge.svg?branch=16.0)](https://github.com/OCA/l10n-paraguay/actions/workflows/test.yml?query=branch%3A16.0)
+[![codecov](https://codecov.io/gh/OCA/l10n-paraguay/branch/16.0/graph/badge.svg)](https://codecov.io/gh/OCA/l10n-paraguay)
 
-**Localización contable para Paraguay basada en la Resolución General N° 49/14**
+# Localización Paraguay para Odoo
 
-## 📋 Índice
+Repositorio de módulos para la **localización paraguaya** de Odoo 16.0,
+desarrollado siguiendo las convenciones de la
+[Odoo Community Association (OCA)](https://odoo-community.org/).
 
-- [Descripción](#descripción)
-- [Características](#características)
-- [Instalación](#instalación)
-- [Estructura](#estructura)
-- [Verificación](#verificación)
-- [Problemas Conocidos](#problemas-conocidos)
-- [Soporte](#soporte)
+## Descripción General
 
-## Descripción
+Este repositorio implementa la localización fiscal y contable de Paraguay,
+cubriendo desde el Plan de Cuentas oficial hasta la **Facturación Electrónica
+(SIFEN)** según las normativas de la SET (Subsecretaría de Estado de Tributación)
+y el Decreto 7.795/2017 con sus actualizaciones.
 
-Módulo de localización contable para Paraguay que implementa el Plan de Cuentas oficial según la **Resolución General N° 49/14** del Ministerio de Hacienda.
+### Arquitectura
 
-### Características Principales
-
-- ✅ **222 Cuentas Contables** organizadas jerárquicamente
-- ✅ **45+ Grupos Contables** para estructura completa
-- ✅ **6 Impuestos** preconfigurados (IVA 10%, 5%, Exento)
-- ✅ **3 Grupos de Impuestos** (IVA 10%, IVA 5%, Exento)
-- ✅ **Configuración Automática** de cuentas por defecto
-- ✅ **Moneda Nacional** PYG (Guaraní)
-
-## Características
-
-### Cuentas Contables
+Los módulos están organizados en capas con dependencias claras:
 
 ```
-📊 Estructura Jerárquica (4 niveles)
-├── 1. ACTIVO
-│   ├── 1.01. ACTIVO CORRIENTE
-│   │   ├── 1.01.01. DISPONIBILIDADES
-│   │   │   ├── 1.01.01.01 Recaudaciones a depositar
-│   │   │   ├── 1.01.01.02 Caja
-│   │   │   └── ...
-│   │   └── ...
-│   └── 1.02. ACTIVO NO CORRIENTE
-├── 2. PASIVO
-│   ├── 2.01. PASIVO CORRIENTE
-│   └── 2.02. PASIVO NO CORRIENTE
-├── 3. PATRIMONIO NETO
-│   ├── 3.01. CAPITAL
-│   ├── 3.02. RESERVAS
-│   └── 3.03. RESULTADOS
-├── 4. INGRESOS OPERATIVOS
-├── 5. COSTOS DE VENTAS
-├── 7. INGRESOS POR ACTIVOS BIOLÓGICOS
-└── 8-19. OTROS INGRESOS Y GASTOS
+┌─────────────────────────────────────────────────────┐
+│              Conectores EDI (Proveedores)            │
+│  ┌──────────────────┐  ┌──────────────────────────┐ │
+│  │ l10n_py_edi_     │  │ l10n_py_edi_             │ │
+│  │ factpy           │  │ facturasend              │ │
+│  └────────┬─────────┘  └────────────┬─────────────┘ │
+│           │                         │               │
+│           └───────────┬─────────────┘               │
+│                       ▼                             │
+│           ┌───────────────────────┐                 │
+│           │  l10n_py_edi_base     │  ← Core EDI     │
+│           │  CDC, KuDE, Grupo H,  │                 │
+│           │  Validações, Lifecycle │                 │
+│           └───────────┬───────────┘                 │
+│                       ▼                             │
+│           ┌───────────────────────┐                 │
+│           │  l10n_py_account      │  ← Contabilidad │
+│           │  Timbrado, Numeração, │                 │
+│           │  IVA SIFEN, Demo Data │                 │
+│           └─────┬─────────┬───────┘                 │
+│                 ▼         ▼                         │
+│  ┌──────────────────┐  ┌─────────────────┐         │
+│  │  l10n_py_base    │  │  l10n_py        │         │
+│  │  RUC, Geografía, │  │  Plan de Cuentas│         │
+│  │  Partner, Ciudad │  │  Impuestos PY   │         │
+│  └──────────────────┘  └─────────────────┘         │
+└─────────────────────────────────────────────────────┘
 ```
 
-### Impuestos Configurados
+**Capa Base** — `l10n_py` y `l10n_py_base` proporcionan el Plan de Cuentas
+(RG 49/14), impuestos (IVA 10%, 5%, Exento), datos geográficos (departamentos,
+ciudades, barrios) y extensiones del partner (RUC, tipo de contribuyente).
 
-| Impuesto | Tasa | Tipo | Descripción |
-|----------|------|------|-------------|
-| IVA Venta 10% | 10% | Venta | IVA tasa general |
-| IVA Venta 5% | 5% | Venta | IVA tasa reducida |
-| Exento | 0% | Venta | Operaciones exentas |
-| IVA Compra 10% | 10% | Compra | IVA tasa general |
-| IVA Compra 5% | 5% | Compra | IVA tasa reducida |
-| Exento Compra | 0% | Compra | Operaciones exentas |
+**Capa Contable** — `l10n_py_account` agrega el sistema de timbrado
+(autorización SET), numeración secuencial (XXX-XXX-NNNNNNN), cálculo IVA
+según fórmulas SIFEN v150 (campos F003-F023), y datos demo completos.
+
+**Capa EDI** — `l10n_py_edi_base` implementa el ciclo de vida completo de
+Documentos Tributarios Electrónicos (DTE): generación de CDC (44 dígitos),
+código de seguridad, QR, KuDE (PDF), documentos asociados (Grupo H),
+inutilización de números, y validación por tipo de documento (FE, AFE, NCE,
+NDE, NRE).
+
+**Conectores** — `l10n_py_edi_factpy` y `l10n_py_edi_facturasend` conectan
+con proveedores de servicios EDI homologados por la SET, abstrayendo la
+comunicación con el SIFEN.
+
+## Módulos Disponibles
+
+| Módulo | Versión | Descripción |
+|--------|---------|-------------|
+| [l10n_py](l10n_py/) | 16.0.1.1.0 | Plan de Cuentas Paraguay (RG 49/14) — 222 cuentas, 6 impuestos, 45+ grupos contables |
+| [l10n_py_base](l10n_py_base/) | 16.0.1.2.0 | Datos base: departamentos, ciudades, barrios, validación RUC, extensión de partner |
+| [l10n_py_account](l10n_py_account/) | 16.0.2.0.0 | Timbrado (autorización SET), numeración, fórmulas IVA SIFEN, datos demo |
+| [l10n_py_edi_base](l10n_py_edi_base/) | 16.0.2.1.0 | Core EDI: CDC, KuDE, documentos asociados, inutilización, ciclo de vida DTE |
+| [l10n_py_edi_factpy](l10n_py_edi_factpy/) | 16.0.1.2.0 | Conector EDI para proveedor FactPy |
+| [l10n_py_edi_facturasend](l10n_py_edi_facturasend/) | 16.0.1.2.0 | Conector EDI para proveedor FacturaSend |
+
+## Tipos de Documento Electrónico Soportados
+
+| Código | Tipo | Estado |
+|--------|------|--------|
+| 1 | Factura Electrónica (FE) | Implementado |
+| 4 | Autofactura Electrónica (AFE) | Implementado |
+| 5 | Nota de Crédito Electrónica (NCE) | Implementado |
+| 6 | Nota de Débito Electrónica (NDE) | Implementado |
+| 7 | Nota de Remisión Electrónica (NRE) | Implementado |
 
 ## Instalación
 
-### Método 1: Via Interface (Recomendado)
+### Dependencias Python
 
-1. Activar modo desarrollador
-2. Ir a **Aplicaciones**
-3. Buscar `l10n_py`
-4. Clic en **Instalar**
+```
+num2words
+qrcode
+requests
+cryptography
+```
 
-### Método 2: Via Línea de Comandos
+### Instalación de módulos
 
 ```bash
-# Instalar el módulo
-odoo-bin -d su_base_datos -i l10n_py --stop-after-init
+# Instalar toda la localización con facturación electrónica
+odoo-bin -d mi_base -i l10n_py,l10n_py_base,l10n_py_account,l10n_py_edi_base --stop-after-init
 
-# Actualizar el módulo (si ya está instalado)
-odoo-bin -d su_base_datos -u l10n_py --stop-after-init
+# Instalar conector EDI (elegir uno)
+odoo-bin -d mi_base -i l10n_py_edi_factpy --stop-after-init
+# o
+odoo-bin -d mi_base -i l10n_py_edi_facturasend --stop-after-init
 ```
 
-### Método 3: Instalación Automática
-
-El módulo se instala automáticamente al crear una empresa con país Paraguay (PY).
-
-## Estructura
-
-### Archivos de Datos
-
-```
-l10n_py/
-├── data/
-│   ├── account_tax_group_data.xml          # Grupos de impuestos
-│   ├── account_chart_template_data.xml     # Template principal + impuestos
-│   ├── account.account.template.csv        # 222 cuentas contables
-│   ├── account_group.xml                   # 45+ grupos jerárquicos
-│   ├── account_chart_template_account_account_link.xml  # Links de propiedades
-│   └── account_chart_template_configure_data.xml        # Auto-instalación
-├── security/
-│   └── ir.model.access.csv                 # Permisos
-└── __manifest__.py                         # Manifiesto del módulo
-```
-
-### Orden de Carga (IMPORTANTE)
-
-Los archivos se cargan en este orden específico:
-
-1. `account_tax_group_data.xml` - Grupos de impuestos primero
-2. `account_chart_template_data.xml` - Template y impuestos
-3. `account.account.template.csv` - Cuentas contables
-4. `account_group.xml` - Grupos jerárquicos
-5. `account_chart_template_account_account_link.xml` - Links de propiedades
-6. `account_chart_template_configure_data.xml` - Configuración final
-
-## Verificación
-
-### Verificar Instalación
-
-Después de instalar, verificar:
-
-1. **Cuentas Contables**
-   - Ir a: Contabilidad > Configuración > Plan de Cuentas
-   - Verificar que existen ~227 cuentas (222 + 5 automáticas)
-
-2. **Grupos Contables**
-   - Ir a: Contabilidad > Configuración > Grupos de Cuentas
-   - Verificar estructura jerárquica correcta
-
-3. **Impuestos**
-   - Ir a: Contabilidad > Configuración > Impuestos
-   - Verificar 6 impuestos (3 venta + 3 compra)
-
-### Scripts de Verificación
-
-Se incluyen scripts para verificar la correcta instalación:
-
-#### Verificación SQL
+### Con Doodba (Docker)
 
 ```bash
-cd /ruta/a/l10n-paraguay
-psql su_base_datos -f verificar_codigos.sql
+invoke install -m l10n_py,l10n_py_base,l10n_py_account,l10n_py_edi_base
+invoke test -m l10n_py_account,l10n_py_edi_base
 ```
 
-#### Verificación Python
+## Normativas Implementadas
 
-```bash
-odoo shell -d su_base_datos
->>> exec(open('verificar_codigos.py').read())
-```
+- **RG 49/14** — Plan de Cuentas oficial del Ministerio de Hacienda
+- **Decreto 7.795/2017** — Sistema Integrado de Facturación Electrónica Nacional (SIFEN)
+- **MT SIFEN v150** — Manual Técnico del SIFEN versión 150
+- **Ley 6.380/2019** — Modernización y simplificación del sistema tributario
+- **RG 90/2021** — Formato Marangatú para libros IVA (planificado)
 
-## Problemas Conocidos
+## Roadmap
 
-### 1. Cuentas Automáticas (NORMAL ✅)
+Consulte [PRD_TAREFAS_PENDENTES.md](PRD_TAREFAS_PENDENTES.md) para el detalle
+completo de funcionalidades pendientes con especificaciones BDD (Gherkin),
+incluyendo:
 
-El sistema crea automáticamente estas cuentas:
+- Emisión en lote, B2G, nominación obligatoria (RF-01)
+- Eventos SIFEN: transporte, conformidad, cancelación con plazos (RF-06)
+- Recibo electrónico y comprobantes de retención (RF-07)
+- Libro IVA Ventas/Compras, exportación Marangatú, dashboard (RF-10)
+- Contingencia avanzada con backoff exponencial (RF-12)
 
-- `1.01.01.021` - Cash
-- `1.01.01.031` - Liquidity Transfer
-- `1.01.01.041` - Bank
-- `999997` - Cash Discount Gain
-- `999998` - Cash Discount Loss
+## Contribución
 
-**Esto es NORMAL** y necesario para el funcionamiento de Odoo.
+Este proyecto sigue las
+[directrices de contribución de la OCA](https://github.com/OCA/odoo-community.org/blob/master/website/Ede/Contribute/CONTRIBUTING.rst).
 
-### 2. Códigos en Trial Balance (INVESTIGAR ⚠️)
+Para contribuir:
 
-Algunos usuarios reportan que el Trial Balance muestra códigos con zeros extras:
-- Muestra: `10.020` en lugar de `10.02`
-- Muestra: `4.0300` en lugar de `4.03`
-- Muestra: `190000` en lugar de `19`
+1. Fork del repositorio
+2. Crear branch desde `16.0`
+3. Implementar cambios con tests
+4. Ejecutar `pre-commit run -a`
+5. Abrir Pull Request
 
-**IMPORTANTE:** Los códigos en el CSV están correctos. Este puede ser:
-- Problema de visualización del Odoo (solo visual)
-- Problema de importación (datos incorrectos en BD)
+## Créditos
 
-**Solución:** Usar los scripts de verificación para determinar si es visual o real.
+### Autores
 
-Para más detalles, ver:
-- `ANALISE_TRIAL_BALANCE.md`
-- `VERIFICACAO_CODIGOS.md`
+- [KMEE](https://kmee.com.br)
 
-## Configuración de Empresa
+### Mantenedores
 
-Al aplicar el plan de cuentas a una empresa, se configuran automáticamente:
+Este repositorio es mantenido por la OCA.
 
-- 💰 Cuenta de clientes: `1.01.03.01` - Deudores por ventas
-- 💰 Cuenta de proveedores: `2.01.01.01` - Proveedores locales
-- 📦 Cuenta de gastos: `5.01.01` - Costo de mercaderías
-- 📦 Cuenta de ingresos: `4.01.01` - Ventas de mercaderías
-- 💱 Cuenta de diferencia de cambio (ingreso): `8.05`
-- 💱 Cuenta de diferencia de cambio (gasto): `13.04`
-- 💵 Cuenta de efectivo: `1.01.01.02` - Caja
-- 🏦 Cuenta bancaria: `1.01.01.04` - Bancos
-- 🔄 Cuenta de transferencia: `1.01.01.03` - Fondos fijos
+[![Odoo Community Association](https://odoo-community.org/logo.png)](https://odoo-community.org)
 
-## Dependencias
-
-```python
-{
-    'depends': [
-        'account',  # Contabilidad base de Odoo
-    ],
-}
-```
-
-## Información del Módulo
-
-- **Nombre Técnico:** `l10n_py`
-- **Versión:** 16.0.1.0.0
-- **Categoría:** Accounting/Localizations
-- **Autor:** Tu Nombre / Empresa
-- **Licencia:** LGPL-3
-- **Moneda:** PYG (Guaraní Paraguayo)
-- **País:** Paraguay (PY)
-
-## Estructura de Códigos
-
-El plan de cuentas utiliza códigos jerárquicos con puntos como separadores:
-
-- **1 nivel:** `19` (Impuesto a la Renta)
-- **2 niveles:** `10.02` (Comisiones sobre ventas)
-- **3 niveles:** `10.01.01` (Sueldos y jornales)
-- **4 niveles:** `1.01.01.01` (Recaudaciones a depositar)
-
-**IMPORTANTE:** Se mantiene fidelidad al plan oficial, con niveles variables según la cuenta.
-
-## Soporte
-
-### Documentación Adicional
-
-- `ANALISE_TRIAL_BALANCE.md` - Análisis del problema de visualización
-- `VERIFICACAO_CODIGOS.md` - Guía de verificación detallada
-- `verificar_codigos.sql` - Script SQL de verificación
-- `verificar_codigos.py` - Script Python de verificación
-
-### Reportar Problemas
-
-Si encuentras problemas:
-
-1. Ejecutar scripts de verificación
-2. Revisar logs de instalación
-3. Verificar que todos los archivos fueron cargados
-4. Comparar con instalación limpia
-
-### Referencias
-
-- **Resolución General N° 49/14** - Ministerio de Hacienda
-- **Plan de Cuentas Oficial** - Paraguay
-- [Odoo Documentation](https://www.odoo.com/documentation/16.0/)
+La OCA (Odoo Community Association) es una organización sin fines de lucro cuya
+misión es apoyar el desarrollo colaborativo de las funcionalidades de Odoo y
+promover su uso generalizado.
 
 ## Licencia
 
-LGPL-3
-
----
-
-**Última actualización:** 2025-11-08  
-**Compatible con:** Odoo 16.0  
-**Estado:** ✅ Funcional - Verificación pendiente de códigos
+[LGPL-3](LICENSE)

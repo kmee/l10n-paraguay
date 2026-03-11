@@ -4,3 +4,4 @@ from . import test_edi_log
 from . import test_associated_document
 from . import test_document_type_validation
 from . import test_edi_lifecycle
+from . import test_edi_demo_scenarios

@@ -127,6 +127,7 @@ class TestKudeGeneration(TransactionCase):
                             "quantity": 1,
                             "price_unit": 100000.0,
                             "account_id": self.account_income.id,
+                            "tax_ids": [(6, 0, [])],
                         },
                     )
                 ],
@@ -189,6 +190,7 @@ class TestKudeGeneration(TransactionCase):
                             "quantity": 1,
                             "price_unit": 100000.0,
                             "account_id": self.account_income.id,
+                            "tax_ids": [(6, 0, [])],
                         },
                     )
                 ],

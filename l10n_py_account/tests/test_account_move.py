@@ -335,6 +335,7 @@ class TestAccountMove(TransactionCase):
                             "quantity": 1,
                             "price_unit": 100.0,
                             "account_id": expense_account.id,
+                            "tax_ids": [(6, 0, [])],
                         },
                     )
                 ],

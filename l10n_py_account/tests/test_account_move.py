@@ -23,7 +23,12 @@ class TestAccountMove(TransactionCase):
         cls.country_py = cls.env.ref("base.py")
 
         # Configurar empresa como paraguaya
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
 
         # Tipo de documento factura
         cls.doc_type_invoice = cls.env["l10n_latam.document.type"].search(
@@ -76,20 +81,18 @@ class TestAccountMove(TransactionCase):
                 }
             )
 
-        # Journal de ventas
-        cls.journal = cls.Journal.search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        # Journal de ventas (con LATAM documents habilitado)
+        # Crear journal propio para evitar conflictos con journals que ya
+        # tienen facturas confirmadas (no se puede cambiar use_documents)
+        cls.journal = cls.Journal.create(
+            {
+                "name": "Ventas PY Test",
+                "type": "sale",
+                "code": "VPT",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.Journal.create(
-                {
-                    "name": "Ventas",
-                    "type": "sale",
-                    "code": "VEN",
-                    "company_id": cls.company.id,
-                }
-            )
 
         # Timbrado válido
         today = date.today()
@@ -332,6 +335,7 @@ class TestAccountMove(TransactionCase):
                             "quantity": 1,
                             "price_unit": 100.0,
                             "account_id": expense_account.id,
+                            "tax_ids": [(6, 0, [])],
                         },
                     )
                 ],

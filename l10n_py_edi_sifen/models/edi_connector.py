@@ -1,0 +1,217 @@
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
+
+import logging
+
+from odoo import _, fields, models
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
+
+
+class EDIConnector(models.Model):
+    _inherit = "l10n_py.edi.connector"
+
+    provider_type = fields.Selection(
+        selection_add=[("sifen", "SIFEN Directo")],
+        ondelete={"sifen": "cascade"},
+    )
+
+    # === Override public interface ===
+
+    def send_document(self, invoice_data):
+        if self.provider_type != "sifen":
+            return super().send_document(invoice_data)
+        return self._sifen_send_document(invoice_data)
+
+    def check_status(self, document_id):
+        if self.provider_type != "sifen":
+            return super().check_status(document_id)
+        return self._sifen_check_status(document_id)
+
+    def cancel_document(self, document_id, reason=""):
+        if self.provider_type != "sifen":
+            return super().cancel_document(document_id, reason)
+        return self._sifen_cancel_document(document_id, reason)
+
+    def test_connection(self):
+        if self.provider_type != "sifen":
+            return super().test_connection()
+        return self._sifen_test_connection()
+
+    # === Private SIFEN methods ===
+
+    def _sifen_send_document(self, invoice_data):
+        """Build RDe, sign, and send via SOAP/mTLS."""
+        self.ensure_one()
+        rde = self._sifen_build_rde(invoice_data)
+        transmissao = self._sifen_get_transmissao_de()
+        try:
+            result = transmissao.enviar_de(rde, sign=True)
+            return self._sifen_process_response(result, rde)
+        except Exception as e:
+            _logger.error("SIFEN send error: %s", str(e))
+            return {"success": False, "error": str(e)}
+        finally:
+            transmissao.cleanup()
+
+    def _sifen_check_status(self, cdc):
+        """Check document status via SIFEN consultation."""
+        self.ensure_one()
+        consulta = self._sifen_get_consulta()
+        try:
+            result = consulta.consultar_de(cdc)
+            if hasattr(result, "rProtDe") and result.rProtDe:
+                estado = getattr(result.rProtDe, "dEstRes", "")
+                return {
+                    "success": estado == "Aprobado",
+                    "result": {"status": estado, "cdc": cdc},
+                }
+            return {"success": False, "error": "Sin respuesta del SIFEN"}
+        except Exception as e:
+            _logger.error("SIFEN check_status error: %s", str(e))
+            return {"success": False, "error": str(e)}
+        finally:
+            consulta.cleanup()
+
+    def _sifen_cancel_document(self, cdc, reason=""):
+        """Cancel document via SIFEN cancellation event."""
+        self.ensure_one()
+        evento = self._sifen_get_evento()
+        try:
+            # Build TrGeVeCan cancellation event
+            # TODO: implement cancellation event building with pysifen
+            _logger.info("SIFEN cancel requested for CDC %s: %s", cdc, reason)
+            return {"success": False, "error": "Cancelación SIFEN no implementada aún"}
+        except Exception as e:
+            _logger.error("SIFEN cancel error: %s", str(e))
+            return {"success": False, "error": str(e)}
+        finally:
+            evento.cleanup()
+
+    def _sifen_test_connection(self):
+        """Test mTLS connection by querying company RUC."""
+        self.ensure_one()
+        consulta = self._sifen_get_consulta()
+        try:
+            result = consulta.consultar_ruc(self.company_id.l10n_py_ruc)
+            _logger.info("SIFEN test_connection result: %s", result)
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Conexión Exitosa"),
+                    "message": _("La conexión con SIFEN fue verificada correctamente."),
+                    "type": "success",
+                    "sticky": False,
+                },
+            }
+        except Exception as e:
+            raise UserError(_("Error de conexión con SIFEN: %s") % str(e)) from e
+        finally:
+            consulta.cleanup()
+
+    # === pysifen helpers ===
+
+    def _sifen_get_ambiente(self):
+        from pysifen.transmissao.config import PRODUCCION, TEST
+
+        return PRODUCCION if self.environment == "prod" else TEST
+
+    def _sifen_get_pkcs12(self):
+        return self.company_id._get_pkcs12_data()
+
+    def _sifen_get_transmissao_de(self):
+        from pysifen.transmissao import TransmissaoDE
+
+        cert, pwd = self._sifen_get_pkcs12()
+        return TransmissaoDE(self._sifen_get_ambiente(), cert, pwd)
+
+    def _sifen_get_consulta(self):
+        from pysifen.transmissao import ConsultaSIFEN
+
+        cert, pwd = self._sifen_get_pkcs12()
+        return ConsultaSIFEN(self._sifen_get_ambiente(), cert, pwd)
+
+    def _sifen_get_evento(self):
+        from pysifen.transmissao import TransmissaoEvento
+
+        cert, pwd = self._sifen_get_pkcs12()
+        return TransmissaoEvento(self._sifen_get_ambiente(), cert, pwd)
+
+    def _sifen_build_rde(self, invoice_data):
+        """Build RDe from invoice data using RDeBuilder."""
+        from l10n_py_edi_base.services.cdc_generator import CDCGenerator
+
+        from ..services.rde_builder import RDeBuilder
+
+        company = self.company_id
+        doc_type = invoice_data.get("tipoDocumento", 1)
+        establishment = invoice_data.get("establecimiento", "001")
+        punto = invoice_data.get("punto", "001")
+        numero = invoice_data.get("numero", "0000001")
+
+        cdc = CDCGenerator.generate(
+            company_ruc=company.l10n_py_ruc,
+            doc_type=doc_type,
+            establishment=establishment,
+            expedition_point=punto,
+            sequence=int(numero),
+        )
+
+        company_data = self._sifen_prepare_company_data()
+        return RDeBuilder(invoice_data, company_data, cdc).build()
+
+    def _sifen_prepare_company_data(self):
+        """Prepare company data dict for RDeBuilder."""
+        company = self.company_id
+        partner = company.partner_id
+        return {
+            "ruc": company.l10n_py_ruc,
+            "dv": company.l10n_py_dv,
+            "razonSocial": company.name,
+            "nombreFantasia": company.l10n_py_trade_name or company.name,
+            "actividadEconomica": company.l10n_py_economic_activity or "",
+            "direccion": partner.street or "",
+            "numeroCasa": (
+                partner.street_number if hasattr(partner, "street_number") else "0"
+            )
+            or "0",
+            "departamento": company.l10n_py_department_code or 0,
+            "distrito": company.l10n_py_district_code or 0,
+            "ciudad": company.l10n_py_city_code or "",
+            "telefono": partner.phone or "",
+            "email": partner.email or "",
+        }
+
+    def _sifen_process_response(self, result, rde):
+        """Process RRetEnviDe into standard response dict."""
+        signed_xml = ""
+        if hasattr(rde, "to_xml"):
+            signed_xml = rde.to_xml()
+
+        if (
+            hasattr(result, "rProtDe")
+            and result.rProtDe
+            and getattr(result.rProtDe, "dEstRes", "") == "Aprobado"
+        ):
+            return {
+                "success": True,
+                "result": {
+                    "deList": [
+                        {
+                            "cdc": getattr(result.rProtDe, "Id", ""),
+                            "xml": signed_xml,
+                        }
+                    ],
+                },
+            }
+
+        errors = []
+        if hasattr(result, "rProtDe") and result.rProtDe:
+            if hasattr(result.rProtDe, "gResProc"):
+                for proc in result.rProtDe.gResProc:
+                    errors.append(
+                        f"[{getattr(proc, 'dCodRes', '')}] "
+                        f"{getattr(proc, 'dMsgRes', '')}"
+                    )
+        return {"success": False, "error": "\n".join(errors) or "Error SIFEN"}

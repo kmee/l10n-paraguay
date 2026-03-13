@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="1">
 
-    <!-- 1. Configurar empresa principal como paraguaya -->
+    <!-- Configurar empresa principal como paraguaya.
+         No cambiamos currency_id porque el módulo account puede haber
+         creado journal items con la moneda por defecto, y Odoo bloquea
+         cambios de moneda cuando ya existen asientos. -->
     <record id="base.main_company" model="res.company">
         <field name="name">Empresa Demo Paraguay SRL</field>
         <field name="country_id" ref="base.py" />
-        <field name="currency_id" ref="base.PYG" />
+        <field name="account_fiscal_country_id" ref="base.py" />
         <field name="street">Avda. Mariscal López 3456</field>
         <field name="city">Asunción</field>
         <field name="state_id" ref="l10n_py_base.state_py_asuncion" />
@@ -14,10 +17,5 @@
         <field name="email">info@empresademo.com.py</field>
         <field name="website">https://www.empresademo.com.py</field>
     </record>
-
-    <!-- 2. Instalar plano de contas PY (crea cuentas, impuestos y diarios) -->
-    <function model="account.chart.template" name="try_loading">
-        <value eval="[ref('l10n_py.py_chart_template')]" />
-    </function>
 
 </odoo>

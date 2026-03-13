@@ -1,3 +1,4 @@
+from . import edi_connector
 from . import edi_logging_mixin
 from . import account_move
 from . import res_company

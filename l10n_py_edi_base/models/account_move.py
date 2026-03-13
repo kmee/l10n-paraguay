@@ -613,6 +613,17 @@ class AccountMove(models.Model):
 
     # ============== PUBLIC METHODS ==============
 
+    def _get_edi_connector(self):
+        """Buscar conector EDI de la empresa."""
+        connector = (
+            self.env["l10n_py.edi.connector"]
+            .sudo()
+            .search([("company_id", "=", self.company_id.id)], limit=1)
+        )
+        if not connector:
+            raise UserError(_("No hay un conector EDI configurado para esta empresa"))
+        return connector
+
     def action_send_edi(self):
         """Enviar documento a sistema EDI"""
         self.ensure_one()
@@ -624,23 +635,7 @@ class AccountMove(models.Model):
         document_data = self._prepare_edi_document_data()
 
         # Obtener conector configurado
-        provider = (
-            self.env["ir.config_parameter"].sudo().get_param("l10n_py.edi_provider")
-        )
-
-        if provider == "factpy":
-            connector = (
-                self.env["l10n_py.edi.connector.factpy"].sudo().search([], limit=1)
-            )
-        elif provider == "facturasend":
-            connector = (
-                self.env["l10n_py.edi.connector.facturasend"].sudo().search([], limit=1)
-            )
-        else:
-            raise UserError(_("No hay un proveedor EDI configurado"))
-
-        if not connector:
-            raise UserError(_("No se encontró un conector EDI configurado"))
+        connector = self._get_edi_connector()
 
         try:
             # Enviar documento
@@ -681,7 +676,9 @@ class AccountMove(models.Model):
 
             # Guardar XML si viene
             if de_data.get("xml"):
-                self.l10n_py_edi_xml = de_data["xml"].encode("utf-8")
+                import base64 as b64
+
+                self.l10n_py_edi_xml = b64.b64encode(de_data["xml"].encode("utf-8"))
                 self.l10n_py_edi_xml_filename = f"{self.l10n_py_cdc}.xml"
 
             # Auto-generar KuDE al aceptar
@@ -697,34 +694,13 @@ class AccountMove(models.Model):
         if not self.l10n_py_cdc:
             raise UserError(_("No se puede cancelar un documento sin CDC"))
 
-        # Obtener conector
-        provider = (
-            self.env["ir.config_parameter"].sudo().get_param("l10n_py.edi_provider")
-        )
-
-        if provider == "factpy":
-            connector = (
-                self.env["l10n_py.edi.connector.factpy"].sudo().search([], limit=1)
-            )
-        elif provider == "facturasend":
-            connector = (
-                self.env["l10n_py.edi.connector.facturasend"].sudo().search([], limit=1)
-            )
-        else:
-            raise UserError(_("No hay un proveedor EDI configurado"))
-
-        if connector and hasattr(connector, "cancel_document"):
-            response = connector.cancel_document(self.l10n_py_cdc)
-            if response.get("success"):
-                self.l10n_py_edi_status = "cancelled"
-                self.l10n_py_edi_message = f"Cancelado el {fields.Datetime.now()}"
-            else:
-                raise UserError(
-                    _("Error cancelando documento: %s") % response.get("error")
-                )
-        else:
+        connector = self._get_edi_connector()
+        response = connector.cancel_document(self.l10n_py_cdc)
+        if response.get("success"):
             self.l10n_py_edi_status = "cancelled"
             self.l10n_py_edi_message = f"Cancelado el {fields.Datetime.now()}"
+        else:
+            raise UserError(_("Error cancelando documento: %s") % response.get("error"))
 
     def action_retry_edi(self):
         """Reintentar envío de documento"""
@@ -774,15 +750,18 @@ class AccountMove(models.Model):
         }
 
     def _generate_kude(self):
-        """Generar KUDE (representación gráfica del documento electrónico)."""
+        """Generar KUDE (representación gráfica del documento electrónico) via pykude."""
         import base64
 
         self.ensure_one()
-        if not self.l10n_py_cdc:
+        if not self.l10n_py_edi_xml:
             return
-        report = self.env.ref("l10n_py_edi_base.action_kude_report")
-        pdf_content, _ = report._render_qweb_pdf(self.ids)
-        self.l10n_py_kude_pdf = base64.b64encode(pdf_content)
+        from pykude import auto_kude
+
+        xml_content = base64.b64decode(self.l10n_py_edi_xml).decode("utf-8")
+        kude = auto_kude(xml=xml_content)
+        pdf_bytes = kude.output()
+        self.l10n_py_kude_pdf = base64.b64encode(pdf_bytes)
         self.l10n_py_kude_filename = f"KUDE_{self.l10n_py_cdc}.pdf"
 
     # ============== CRON METHODS ==============
@@ -815,25 +794,15 @@ class AccountMove(models.Model):
             ]
         )
 
-        provider = (
-            self.env["ir.config_parameter"].sudo().get_param("l10n_py.edi_provider")
-        )
-
-        connector = False
-        if provider == "factpy":
-            connector = (
-                self.env["l10n_py.edi.connector.factpy"].sudo().search([], limit=1)
-            )
-        elif provider == "facturasend":
-            connector = (
-                self.env["l10n_py.edi.connector.facturasend"].sudo().search([], limit=1)
-            )
-
-        if not connector:
-            return
-
         for doc in pending_docs:
             try:
+                connector = (
+                    self.env["l10n_py.edi.connector"]
+                    .sudo()
+                    .search([("company_id", "=", doc.company_id.id)], limit=1)
+                )
+                if not connector:
+                    continue
                 response = connector.check_status(doc.l10n_py_edi_batch_id)
                 if response.get("success"):
                     # Actualizar estado según respuesta

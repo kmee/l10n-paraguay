@@ -14,7 +14,12 @@ class TestEDILifecycle(TransactionCase):
         super().setUpClass()
         cls.company = cls.env.ref("base.main_company")
         cls.country_py = cls.env.ref("base.py")
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
 
         cls.doc_type_invoice = cls.env["l10n_latam.document.type"].search(
             [("country_id", "=", cls.country_py.id), ("code", "=", "1")],
@@ -74,19 +79,15 @@ class TestEDILifecycle(TransactionCase):
 
         cls.partner.property_account_receivable_id = cls.account_receivable
 
-        cls.journal = cls.env["account.journal"].search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        cls.journal = cls.env["account.journal"].create(
+            {
+                "name": "Ventas LC Test",
+                "type": "sale",
+                "code": "VLT",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.env["account.journal"].create(
-                {
-                    "name": "Ventas",
-                    "type": "sale",
-                    "code": "VNT",
-                    "company_id": cls.company.id,
-                }
-            )
 
         today = date.today()
         cls.authorization = cls.env["account.authorization"].create(

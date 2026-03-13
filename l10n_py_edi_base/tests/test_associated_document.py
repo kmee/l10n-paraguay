@@ -21,19 +21,15 @@ class TestAssociatedDocument(TransactionCase):
             {"name": "Test Partner PY", "country_id": cls.country_py.id}
         )
 
-        cls.journal = cls.env["account.journal"].search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        cls.journal = cls.env["account.journal"].create(
+            {
+                "name": "Ventas AD Test",
+                "type": "sale",
+                "code": "VAD",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.env["account.journal"].create(
-                {
-                    "name": "Ventas Test",
-                    "type": "sale",
-                    "code": "VT2",
-                    "company_id": cls.company.id,
-                }
-            )
 
         cls.move = cls.env["account.move"].create(
             {

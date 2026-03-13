@@ -82,20 +82,17 @@ class TestAccountMove(TransactionCase):
             )
 
         # Journal de ventas (con LATAM documents habilitado)
-        cls.journal = cls.Journal.search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        # Crear journal propio para evitar conflictos con journals que ya
+        # tienen facturas confirmadas (no se puede cambiar use_documents)
+        cls.journal = cls.Journal.create(
+            {
+                "name": "Ventas PY Test",
+                "type": "sale",
+                "code": "VPT",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.Journal.create(
-                {
-                    "name": "Ventas",
-                    "type": "sale",
-                    "code": "VEN",
-                    "company_id": cls.company.id,
-                }
-            )
-        cls.journal.l10n_latam_use_documents = True
 
         # Timbrado válido
         today = date.today()

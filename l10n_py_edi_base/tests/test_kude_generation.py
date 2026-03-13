@@ -80,20 +80,15 @@ class TestKudeGeneration(TransactionCase):
 
         cls.partner.property_account_receivable_id = cls.account_receivable
 
-        cls.journal = cls.env["account.journal"].search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        cls.journal = cls.env["account.journal"].create(
+            {
+                "name": "Ventas KuDE",
+                "type": "sale",
+                "code": "VKD",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.env["account.journal"].create(
-                {
-                    "name": "Ventas KuDE",
-                    "type": "sale",
-                    "code": "VKD",
-                    "company_id": cls.company.id,
-                }
-            )
-        cls.journal.l10n_latam_use_documents = True
 
         today = date.today()
         cls.authorization = cls.env["account.authorization"].create(

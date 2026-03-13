@@ -94,19 +94,15 @@ class TestEdiDemoScenarios(TransactionCase):
         )
 
         # Journal
-        cls.journal = cls.env["account.journal"].search(
-            [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
-            limit=1,
+        cls.journal = cls.env["account.journal"].create(
+            {
+                "name": "Ventas DS Test",
+                "type": "sale",
+                "code": "VDS",
+                "company_id": cls.company.id,
+                "l10n_latam_use_documents": True,
+            }
         )
-        if not cls.journal:
-            cls.journal = cls.env["account.journal"].create(
-                {
-                    "name": "Ventas",
-                    "type": "sale",
-                    "code": "VEN",
-                    "company_id": cls.company.id,
-                }
-            )
 
         # Authorization
         today = date.today()

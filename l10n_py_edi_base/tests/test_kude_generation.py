@@ -15,7 +15,12 @@ class TestKudeGeneration(TransactionCase):
         super().setUpClass()
         cls.company = cls.env.ref("base.main_company")
         cls.country_py = cls.env.ref("base.py")
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
 
         cls.doc_type_invoice = cls.env["l10n_latam.document.type"].search(
             [("country_id", "=", cls.country_py.id), ("code", "=", "1")],
@@ -88,6 +93,7 @@ class TestKudeGeneration(TransactionCase):
                     "company_id": cls.company.id,
                 }
             )
+        cls.journal.l10n_latam_use_documents = True
 
         today = date.today()
         cls.authorization = cls.env["account.authorization"].create(

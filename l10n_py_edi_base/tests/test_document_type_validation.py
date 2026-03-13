@@ -13,7 +13,12 @@ class TestDocumentTypeValidation(TransactionCase):
         super().setUpClass()
         cls.company = cls.env.ref("base.main_company")
         cls.country_py = cls.env.ref("base.py")
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
         cls.company.l10n_py_ruc = "80009401"
 
         # Document types

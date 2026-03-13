@@ -23,7 +23,12 @@ class TestAccountMove(TransactionCase):
         cls.country_py = cls.env.ref("base.py")
 
         # Configurar empresa como paraguaya
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
 
         # Tipo de documento factura
         cls.doc_type_invoice = cls.env["l10n_latam.document.type"].search(
@@ -76,7 +81,7 @@ class TestAccountMove(TransactionCase):
                 }
             )
 
-        # Journal de ventas
+        # Journal de ventas (con LATAM documents habilitado)
         cls.journal = cls.Journal.search(
             [("type", "=", "sale"), ("company_id", "=", cls.company.id)],
             limit=1,
@@ -90,6 +95,7 @@ class TestAccountMove(TransactionCase):
                     "company_id": cls.company.id,
                 }
             )
+        cls.journal.l10n_latam_use_documents = True
 
         # Timbrado válido
         today = date.today()

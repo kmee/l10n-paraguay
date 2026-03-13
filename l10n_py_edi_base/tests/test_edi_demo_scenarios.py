@@ -20,30 +20,78 @@ class TestEdiDemoScenarios(TransactionCase):
 
         cls.company = cls.env.ref("base.main_company")
         cls.country_py = cls.env.ref("base.py")
-        cls.company.country_id = cls.country_py
+        cls.company.write(
+            {
+                "country_id": cls.country_py.id,
+                "account_fiscal_country_id": cls.country_py.id,
+            }
+        )
         cls.company.l10n_py_ruc = "80009401"
 
-        # Document types
+        # Document types (from data/, always available)
         cls.doc_type_fe = cls.env.ref("l10n_py_account.dc_py_f")
         cls.doc_type_af = cls.env.ref("l10n_py_account.dc_py_af")
         cls.doc_type_nc = cls.env.ref("l10n_py_account.dc_py_nc")
         cls.doc_type_nd = cls.env.ref("l10n_py_account.dc_py_nd")
         cls.doc_type_nr = cls.env.ref("l10n_py_account.dc_py_nr")
 
-        # Partners
-        cls.partner_contribuyente = cls.env.ref(
-            "l10n_py_account.partner_contribuyente_general"
+        # Accounts
+        account_receivable = cls.env["account.account"].search(
+            [
+                ("company_id", "=", cls.company.id),
+                ("account_type", "=", "asset_receivable"),
+            ],
+            limit=1,
         )
-        cls.partner_servicios = cls.env.ref(
-            "l10n_py_account.partner_contribuyente_servicios"
+        if not account_receivable:
+            account_receivable = cls.env["account.account"].create(
+                {
+                    "name": "Cuentas por Cobrar",
+                    "code": "110001",
+                    "account_type": "asset_receivable",
+                    "reconcile": True,
+                    "company_id": cls.company.id,
+                }
+            )
+
+        # Partners (created here, not from demo)
+        cls.partner_contribuyente = cls.env["res.partner"].create(
+            {
+                "name": "Contribuyente General Test",
+                "country_id": cls.country_py.id,
+                "l10n_py_ruc": "80012345",
+                "l10n_py_taxpayer_type": "1",
+                "property_account_receivable_id": account_receivable.id,
+                "property_account_payable_id": account_receivable.id,
+            }
         )
-        cls.partner_no_contribuyente = cls.env.ref(
-            "l10n_py_account.partner_no_contribuyente_ci"
+        cls.partner_servicios = cls.env["res.partner"].create(
+            {
+                "name": "Contribuyente Servicios Test",
+                "country_id": cls.country_py.id,
+                "l10n_py_ruc": "80067890",
+                "l10n_py_taxpayer_type": "1",
+                "property_account_receivable_id": account_receivable.id,
+                "property_account_payable_id": account_receivable.id,
+            }
+        )
+        cls.partner_no_contribuyente = cls.env["res.partner"].create(
+            {
+                "name": "No Contribuyente Test",
+                "country_id": cls.country_py.id,
+                "l10n_py_taxpayer_type": "2",
+                "property_account_receivable_id": account_receivable.id,
+                "property_account_payable_id": account_receivable.id,
+            }
         )
 
         # Products
-        cls.product_10 = cls.env.ref("l10n_py_account.product_iva_10_electronica")
-        cls.product_5 = cls.env.ref("l10n_py_account.product_iva_5_alimento")
+        cls.product_10 = cls.env["product.product"].create(
+            {"name": "Producto IVA 10%", "list_price": 1100000.0}
+        )
+        cls.product_5 = cls.env["product.product"].create(
+            {"name": "Producto IVA 5%", "list_price": 525000.0}
+        )
 
         # Journal
         cls.journal = cls.env["account.journal"].search(

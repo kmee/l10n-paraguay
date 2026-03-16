@@ -34,9 +34,15 @@ class ResCompany(models.Model):
         help="Nombre comercial o de fantasía de la empresa",
     )
 
+    l10n_py_economic_activity_code = fields.Char(
+        string="Código Actividad Económica",
+        size=8,
+        help="Código de actividad económica principal según SET",
+    )
+
     l10n_py_economic_activity = fields.Char(
-        string="Actividad Económica",
-        help="Código de actividad económica principal",
+        string="Descripción Actividad Económica",
+        help="Descripción de la actividad económica principal",
     )
 
     # ============== CAMPOS DE UBICACIÓN (RELACIONADOS) ==============

@@ -45,6 +45,7 @@
         ],
     },
     "demo": [
+        "demo/res_company_edi_demo.xml",
         "demo/account_move_nce_demo.xml",
         "demo/account_move_nde_demo.xml",
         "demo/account_move_nre_demo.xml",

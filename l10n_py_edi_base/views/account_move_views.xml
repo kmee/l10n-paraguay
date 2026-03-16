@@ -54,6 +54,18 @@
             <!-- Header buttons -->
             <xpath expr="//header" position="inside">
                 <button
+                    name="action_preview_xml"
+                    string="Preview XML"
+                    type="object"
+                    attrs="{'invisible': [('l10n_py_edi_status', 'in', ['sent', 'accepted', 'processing'])]}"
+                />
+                <button
+                    name="action_preview_kude"
+                    string="Preview KuDE"
+                    type="object"
+                    attrs="{'invisible': [('l10n_py_edi_status', 'in', ['sent', 'accepted', 'processing'])]}"
+                />
+                <button
                     name="action_send_edi"
                     string="Enviar a EDI"
                     type="object"

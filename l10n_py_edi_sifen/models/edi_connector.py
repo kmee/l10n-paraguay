@@ -2,8 +2,17 @@
 
 import logging
 
+from pysifen.transmissao import ConsultaSIFEN, TransmissaoDE, TransmissaoEvento
+from pysifen.transmissao.config import PRODUCCION, TEST
+from xsdata.formats.dataclass.serializers import XmlSerializer
+from xsdata.formats.dataclass.serializers.config import SerializerConfig
+
 from odoo import _, fields, models
 from odoo.exceptions import UserError
+
+from odoo.addons.l10n_py_edi_base.services.cdc_generator import CDCGenerator
+
+from ..services.rde_builder import RDeBuilder
 
 _logger = logging.getLogger(__name__)
 
@@ -32,6 +41,11 @@ class EDIConnector(models.Model):
         if self.provider_type != "sifen":
             return super().cancel_document(document_id, reason)
         return self._sifen_cancel_document(document_id, reason)
+
+    def preview_document(self, invoice_data):
+        if self.provider_type != "sifen":
+            return super().preview_document(invoice_data)
+        return self._sifen_preview_document(invoice_data)
 
     def test_connection(self):
         if self.provider_type != "sifen":
@@ -113,37 +127,37 @@ class EDIConnector(models.Model):
     # === pysifen helpers ===
 
     def _sifen_get_ambiente(self):
-        from pysifen.transmissao.config import PRODUCCION, TEST
-
         return PRODUCCION if self.environment == "prod" else TEST
 
     def _sifen_get_pkcs12(self):
         return self.company_id._get_pkcs12_data()
 
     def _sifen_get_transmissao_de(self):
-        from pysifen.transmissao import TransmissaoDE
-
         cert, pwd = self._sifen_get_pkcs12()
         return TransmissaoDE(self._sifen_get_ambiente(), cert, pwd)
 
     def _sifen_get_consulta(self):
-        from pysifen.transmissao import ConsultaSIFEN
-
         cert, pwd = self._sifen_get_pkcs12()
         return ConsultaSIFEN(self._sifen_get_ambiente(), cert, pwd)
 
     def _sifen_get_evento(self):
-        from pysifen.transmissao import TransmissaoEvento
-
         cert, pwd = self._sifen_get_pkcs12()
         return TransmissaoEvento(self._sifen_get_ambiente(), cert, pwd)
 
+    def _sifen_preview_document(self, invoice_data):
+        """Build RDe and serialize to XML without signing or sending."""
+        self.ensure_one()
+        rde = self._sifen_build_rde(invoice_data)
+        config = SerializerConfig(pretty_print=True, xml_declaration=True)
+        serializer = XmlSerializer(config=config)
+        ns_map = {
+            "": "http://ekuatia.set.gov.py/sifen/xsd",
+            "ds": "http://www.w3.org/2000/09/xmldsig#",
+        }
+        return serializer.render(rde, ns_map=ns_map)
+
     def _sifen_build_rde(self, invoice_data):
         """Build RDe from invoice data using RDeBuilder."""
-        from l10n_py_edi_base.services.cdc_generator import CDCGenerator
-
-        from ..services.rde_builder import RDeBuilder
-
         company = self.company_id
         doc_type = invoice_data.get("tipoDocumento", 1)
         establishment = invoice_data.get("establecimiento", "001")
@@ -168,17 +182,23 @@ class EDIConnector(models.Model):
         return {
             "ruc": company.l10n_py_ruc,
             "dv": company.l10n_py_dv,
+            "tipoContribuyente": "2" if partner.is_company else "1",
             "razonSocial": company.name,
             "nombreFantasia": company.l10n_py_trade_name or company.name,
+            "actividadEconomicaCodigo": (company.l10n_py_economic_activity_code or ""),
             "actividadEconomica": company.l10n_py_economic_activity or "",
             "direccion": partner.street or "",
             "numeroCasa": (
                 partner.street_number if hasattr(partner, "street_number") else "0"
             )
             or "0",
-            "departamento": company.l10n_py_department_code or 0,
+            "departamento": company.l10n_py_department_code or 1,
+            "departamentoDescripcion": (
+                partner.state_id.name if partner.state_id else ""
+            ),
             "distrito": company.l10n_py_district_code or 0,
             "ciudad": company.l10n_py_city_code or "",
+            "ciudadDescripcion": partner.city or "",
             "telefono": partner.phone or "",
             "email": partner.email or "",
         }

@@ -163,7 +163,9 @@ class AccountMove(models.Model):
             has_products = False
             has_services = False
 
-            for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
+            for line in self.invoice_line_ids.filtered(
+                lambda l: l.display_type not in ("line_section", "line_note")
+            ):
                 if line.product_id:
                     if line.product_id.type in ["consu", "product"]:
                         has_products = True
@@ -193,6 +195,40 @@ class AccountMove(models.Model):
         """Generar código de seguridad aleatorio de 9 dígitos"""
         return "".join(secrets.choice(string.digits) for _ in range(9))
 
+    @staticmethod
+    def _get_country_alpha3(country):
+        """Convert res.country (ISO alpha-2) to ISO alpha-3 for SIFEN PaisType."""
+        if not country or not country.code:
+            return "PRY"
+        # Common countries for Paraguay trade; full table at ISO 3166-1
+        _ALPHA2_TO_3 = {
+            "PY": "PRY",
+            "AR": "ARG",
+            "BR": "BRA",
+            "UY": "URY",
+            "BO": "BOL",
+            "CL": "CHL",
+            "PE": "PER",
+            "US": "USA",
+            "CO": "COL",
+            "EC": "ECU",
+            "VE": "VEN",
+            "MX": "MEX",
+            "ES": "ESP",
+            "DE": "DEU",
+            "CN": "CHN",
+            "JP": "JPN",
+            "KR": "KOR",
+            "TW": "TWN",
+            "IN": "IND",
+            "GB": "GBR",
+            "FR": "FRA",
+            "IT": "ITA",
+            "PT": "PRT",
+            "CA": "CAN",
+        }
+        return _ALPHA2_TO_3.get(country.code, country.code)
+
     def _prepare_edi_document_data(self):
         """Preparar datos del documento electrónico en formato JSON"""
         self.ensure_one()
@@ -205,12 +241,27 @@ class AccountMove(models.Model):
         if self.l10n_latam_document_type_id:
             doc_type_code = self.l10n_latam_document_type_id.code or "1"
 
+        # Datos del timbrado (Grupo B)
+        auth = self.journal_id.l10n_py_authorization_id
+        timbrado_data = {}
+        if auth:
+            timbrado_data = {
+                "timbrado": auth.name or "",
+                "timbradoFechaInicio": (
+                    auth.date_from.strftime("%Y-%m-%d") if auth.date_from else ""
+                ),
+                "timbradoFechaFin": (
+                    auth.date_to.strftime("%Y-%m-%d") if auth.date_to else ""
+                ),
+            }
+
         # Construir estructura de datos según formato requerido
         document_data = {
             "tipoDocumento": int(doc_type_code),
             "establecimiento": (self.journal_id.l10n_py_establishment or "001"),
             "punto": self.journal_id.l10n_py_point or "001",
             "numero": self._get_edi_sequence_number(),
+            **timbrado_data,
             "descripcion": self.name or "",
             "observacion": self.narration or "",
             "fecha": (
@@ -269,8 +320,13 @@ class AccountMove(models.Model):
             "baseGravada10": self.l10n_py_base_10,  # F019
             "totalBaseGravada": self.l10n_py_base_total,  # F020
         }
-        if self.l10n_py_amount_total_pyg:
+        if self.l10n_py_amount_total_pyg is not None:
             document_data["totales"]["totalPYG"] = self.l10n_py_amount_total_pyg  # F023
+        else:
+            # Fallback: use totalOperacion when currency is PYG
+            document_data["totales"]["totalPYG"] = document_data["totales"][
+                "totalOperacion"
+            ]
 
         return document_data
 
@@ -307,21 +363,35 @@ class AccountMove(models.Model):
         return docs
 
     def _prepare_customer_data(self):
-        """Preparar datos del cliente"""
+        """Preparar datos del cliente (Grupo D receptor)"""
         partner = self.partner_id
 
+        # iNatRec: 1=Contribuyente, 2=No Contribuyente
+        nat_rec = partner.l10n_py_taxpayer_type or "1"
+
+        # iTiOpe: 1=B2B, 2=B2C, 3=B2G, 4=B2F (extranjero)
+        if partner.country_id and partner.country_id.code != "PY":
+            ti_ope = "4"  # Extranjero
+        elif nat_rec == "2":
+            ti_ope = "2"  # B2C
+        else:
+            ti_ope = "1"  # B2B
+
         customer_data = {
-            "contribuyente": partner.l10n_py_taxpayer_type == "1",
+            "naturalezaReceptor": nat_rec,
+            "tipoOperacion": ti_ope,
+            "contribuyente": nat_rec == "1",
             "ruc": partner.l10n_py_ruc or "",
+            "dvReceptor": partner.l10n_py_ruc_dv or "",
+            "tipoContribuyente": "2" if partner.is_company else "1",
             "razonSocial": partner.name,
             "nombreFantasia": partner.l10n_py_fantasy_name or partner.name,
-            "tipoOperacion": 1,  # B2B
             "direccion": partner.street or "N/A",
             "numeroCasa": (
                 partner.street_number if hasattr(partner, "street_number") else "0"
             )
             or "0",
-            "pais": partner.country_id.code or "PRY",
+            "pais": self._get_country_alpha3(partner.country_id) or "PRY",
             "paisDescripcion": partner.country_id.name or "Paraguay",
         }
 
@@ -346,12 +416,8 @@ class AccountMove(models.Model):
         if partner.email:
             customer_data["email"] = partner.email
 
-        # Tipo y número de documento
-        if partner.l10n_py_taxpayer_type:
-            customer_data["tipoContribuyente"] = 1 if partner.is_company else 2
-
         # No-contribuyente: incluir documento de identidad (D024/D025)
-        if partner.l10n_py_taxpayer_type == "2":
+        if nat_rec == "2":
             if partner.l10n_py_doc_type:
                 customer_data["documentoTipo"] = int(partner.l10n_py_doc_type)
             if partner.l10n_py_doc_number:
@@ -413,7 +479,9 @@ class AccountMove(models.Model):
         """Preparar líneas de la factura"""
         items = []
 
-        for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
+        for line in self.invoice_line_ids.filtered(
+            lambda l: l.display_type not in ("line_section", "line_note")
+        ):
             # Determinar tasa de IVA
             iva_rate = 10  # Por defecto 10%
             iva_type = 1  # Gravado IVA
@@ -596,7 +664,9 @@ class AccountMove(models.Model):
             errors.append(_("El timbrado está vencido"))
 
         # Validar productos
-        for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
+        for line in self.invoice_line_ids.filtered(
+            lambda l: l.display_type not in ("line_section", "line_note")
+        ):
             if hasattr(line.product_id, "l10n_py_ncm_code"):
                 if not line.product_id.l10n_py_ncm_code:
                     errors.append(
@@ -623,6 +693,74 @@ class AccountMove(models.Model):
         if not connector:
             raise UserError(_("No hay un conector EDI configurado para esta empresa"))
         return connector
+
+    def _target_new_tab(self, attachment_id):
+        """Open an ir.attachment inline in a new browser tab."""
+        if attachment_id:
+            return {
+                "type": "ir.actions.act_url",
+                "url": f"/web/content/{attachment_id.id}/{attachment_id.name}",
+                "target": "new",
+            }
+
+    def action_preview_xml(self):
+        """Generar y mostrar XML sin firmar ni enviar (preview)."""
+        self.ensure_one()
+        self._validate_edi_data()
+        document_data = self._prepare_edi_document_data()
+        connector = self._get_edi_connector()
+        xml_string = connector.preview_document(document_data)
+
+        import base64 as b64
+
+        xml_b64 = b64.b64encode(xml_string.encode("utf-8"))
+        self.l10n_py_edi_xml = xml_b64
+        self.l10n_py_edi_xml_filename = "preview.xml"
+
+        attachment = self.env["ir.attachment"].create(
+            {
+                "name": f"preview_{self.name or self.id}.xml",
+                "datas": xml_b64,
+                "mimetype": "text/xml",
+                "res_model": self._name,
+                "res_id": self.id,
+            }
+        )
+        return self._target_new_tab(attachment)
+
+    def action_preview_kude(self):
+        """Generar KuDE (PDF) a partir del XML preview via pykude."""
+        import base64
+
+        self.ensure_one()
+        if not self.l10n_py_edi_xml:
+            # Generate XML first
+            self.action_preview_xml()
+        if not self.l10n_py_edi_xml:
+            raise UserError(_("No hay XML disponible para generar el KuDE"))
+
+        from pykude import auto_kude
+        from pykude.kude_fe.config import KudeFeConfig
+
+        xml_content = base64.b64decode(self.l10n_py_edi_xml).decode("utf-8")
+
+        config = KudeFeConfig()
+        if self.company_id.logo:
+            config.logo = base64.b64decode(self.company_id.logo)
+
+        kude = auto_kude(xml=xml_content, config=config)
+        pdf_bytes = kude.output()
+
+        attachment = self.env["ir.attachment"].create(
+            {
+                "name": f"KUDE_preview_{self.name or self.id}.pdf",
+                "datas": base64.b64encode(pdf_bytes),
+                "mimetype": "application/pdf",
+                "res_model": self._name,
+                "res_id": self.id,
+            }
+        )
+        return self._target_new_tab(attachment)
 
     def action_send_edi(self):
         """Enviar documento a sistema EDI"""
@@ -757,9 +895,15 @@ class AccountMove(models.Model):
         if not self.l10n_py_edi_xml:
             return
         from pykude import auto_kude
+        from pykude.kude_fe.config import KudeFeConfig
 
         xml_content = base64.b64decode(self.l10n_py_edi_xml).decode("utf-8")
-        kude = auto_kude(xml=xml_content)
+
+        config = KudeFeConfig()
+        if self.company_id.logo:
+            config.logo = base64.b64decode(self.company_id.logo)
+
+        kude = auto_kude(xml=xml_content, config=config)
         pdf_bytes = kude.output()
         self.l10n_py_kude_pdf = base64.b64encode(pdf_bytes)
         self.l10n_py_kude_filename = f"KUDE_{self.l10n_py_cdc}.pdf"

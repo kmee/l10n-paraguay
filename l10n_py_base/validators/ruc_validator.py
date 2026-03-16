@@ -2,7 +2,7 @@
 
 """
 Validador robusto para RUC paraguaio
-Implementa validação completa conforme especificações da SET
+Implementa validação completa conforme especificações da SET (Módulo 11)
 """
 
 import logging
@@ -14,8 +14,8 @@ _logger = logging.getLogger(__name__)
 class RUCValidator:
     """Validador robusto para RUC paraguaio"""
 
-    # Multiplicadores para cálculo do dígito verificador (Módulo 11)
-    MULTIPLIERS = [2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4]
+    # Pesos cíclicos para cálculo do dígito verificador (Módulo 11 SET)
+    WEIGHTS = [2, 3, 4, 5, 6, 7, 8, 9]
 
     @classmethod
     def validate(cls, ruc):
@@ -72,7 +72,15 @@ class RUCValidator:
     @classmethod
     def _calculate_check_digit(cls, ruc_number):
         """
-        Calcular dígito verificador usando módulo 11
+        Calcular dígito verificador usando Módulo 11 (SET Paraguay)
+
+        Algoritmo:
+        1. Preenche o RUC com zeros à esquerda até 9 dígitos
+        2. Aplica pesos [2,3,4,5,6,7,8,9] ciclicamente da esquerda para direita
+        3. Encontra DV (0-9) tal que a soma ponderada total (incluindo DV)
+           mod 11 == 0
+
+        Verificação: RUC 80012345 → DV 6, RUC 4588955 → DV 1
 
         Args:
             ruc_number (str): Número do RUC sem dígito verificador
@@ -80,22 +88,25 @@ class RUCValidator:
         Returns:
             int: Dígito verificador calculado
         """
-        # Ajustar comprimento para 8 dígitos (padding com zeros à esquerda)
-        ruc_padded = ruc_number.zfill(8)
+        # Preencher com zeros à esquerda até 9 dígitos
+        ruc_padded = ruc_number.zfill(9)
 
-        # Calcular soma ponderada
-        total = 0
+        # Calcular soma ponderada parcial (9 dígitos do RUC)
+        partial_sum = 0
         for i, digit in enumerate(ruc_padded):
-            total += int(digit) * cls.MULTIPLIERS[i]
+            partial_sum += int(digit) * cls.WEIGHTS[i % 8]
 
-        # Calcular resto da divisão por 11
-        remainder = total % 11
+        # O DV fica na posição 9 (índice 9), com peso = WEIGHTS[9 % 8] = WEIGHTS[1] = 3
+        # Encontrar DV tal que (partial_sum + DV * 3) % 11 == 0
+        # Usando inverso modular: inv(3, 11) = 4 (pois 3*4 = 12 ≡ 1 mod 11)
+        remainder = partial_sum % 11
+        dv = ((11 - remainder) % 11 * 4) % 11
 
-        # Determinar dígito verificador
-        if remainder < 2:
-            return remainder
-        else:
-            return 11 - remainder
+        # DV deve ser dígito único (0-9)
+        if dv >= 10:
+            dv = 0
+
+        return dv
 
     @classmethod
     def format_ruc(cls, ruc, include_dv=True):

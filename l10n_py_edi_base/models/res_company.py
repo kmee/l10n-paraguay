@@ -86,7 +86,13 @@ class ResCompany(models.Model):
 
     @staticmethod
     def _calculate_dv(ruc):
-        """Calcular dígito verificador del RUC paraguayo"""
+        """Calcular dígito verificador del RUC paraguayo (Módulo 11 SET)
+
+        Algoritmo:
+        1. Pad RUC a 9 dígitos con ceros a la izquierda
+        2. Aplicar pesos [2,3,4,5,6,7,8,9] cíclicamente de izquierda a derecha
+        3. Encontrar DV (0-9) tal que la suma ponderada total mod 11 == 0
+        """
         if not ruc or not ruc.isdigit():
             return False
 
@@ -95,21 +101,20 @@ class ResCompany(models.Model):
         if len(ruc) < 6:
             return False
 
-        base_max = 11
-        k = 2
-        total = 0
+        weights = [2, 3, 4, 5, 6, 7, 8, 9]
+        ruc_padded = ruc.zfill(9)
 
-        for digit in reversed(ruc):
-            total += int(digit) * k
-            k += 1
-            if k > base_max:
-                k = 2
+        partial_sum = 0
+        for i, digit in enumerate(ruc_padded):
+            partial_sum += int(digit) * weights[i % 8]
 
-        remainder = total % base_max
+        # DV en posición 9 tiene peso = weights[9 % 8] = weights[1] = 3
+        # Encontrar DV tal que (partial_sum + DV * 3) % 11 == 0
+        # Inverso modular: inv(3, 11) = 4
+        remainder = partial_sum % 11
+        dv = ((11 - remainder) % 11 * 4) % 11
 
-        if remainder > 1:
-            dv = base_max - remainder
-        else:
+        if dv >= 10:
             dv = 0
 
         return str(dv)

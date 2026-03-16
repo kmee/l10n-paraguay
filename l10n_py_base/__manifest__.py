@@ -14,10 +14,11 @@
     "data": [
         # Security
         "security/ir.model.access.csv",
-        # Views
-        "views/l10n_py_neighborhood_views.xml",
+        # Views (address view must load before res_country_data references it)
         "views/res_partner_address_view.xml",
+        "views/l10n_py_neighborhood_views.xml",
         # Data
+        "data/l10n_latam_identification_type_data.xml",
         "data/res_country_data.xml",
         "data/res_country_state_data.xml",
         "data/res_city_data.xml",

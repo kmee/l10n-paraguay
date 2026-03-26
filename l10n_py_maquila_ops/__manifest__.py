@@ -26,6 +26,7 @@
         "views/maquila_admission_views.xml",
         "views/maquila_export_views.xml",
         "views/maquila_guarantee_views.xml",
+        "views/maquila_program_views.xml",
         "views/purchase_order_views.xml",
         "views/sale_order_views.xml",
         "views/account_payment_views.xml",

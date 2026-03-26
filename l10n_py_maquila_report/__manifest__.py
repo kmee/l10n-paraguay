@@ -19,6 +19,7 @@
         "security/ir.model.access.csv",
         "views/maquila_cnime_report_views.xml",
         "views/maquila_dashboard.xml",
+        "views/maquila_program_views.xml",
         "views/maquila_report_menu.xml",
     ],
     "demo": [

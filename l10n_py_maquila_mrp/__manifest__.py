@@ -21,6 +21,7 @@
         "views/mrp_bom_views.xml",
         "views/mrp_production_views.xml",
         "views/maquila_waste_views.xml",
+        "views/maquila_program_views.xml",
         "wizard/maquila_van_wizard_views.xml",
         "views/maquila_mrp_menu.xml",
     ],

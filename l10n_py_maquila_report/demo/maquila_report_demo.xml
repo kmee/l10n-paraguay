@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="cnime_report_demo_march_2026" model="l10n_py.maquila.cnime.report">
+        <field name="program_id" ref="l10n_py_maquila_base.maquila_program_demo" />
+        <field name="period_start">2026-03-01</field>
+        <field name="period_end">2026-03-31</field>
+        <field name="state">generated</field>
+        <field name="employment_count">150</field>
+    </record>
+
+</odoo>

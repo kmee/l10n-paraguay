@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <menuitem
+        id="menu_maquila_reports"
+        name="Reports"
+        parent="l10n_py_maquila_base.menu_maquila_root"
+        sequence="50"
+    />
+
+    <menuitem
+        id="menu_maquila_cnime_reports"
+        name="CNIME Reports"
+        parent="menu_maquila_reports"
+        action="action_maquila_cnime_report"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_maquila_dashboard"
+        name="Dashboard"
+        parent="menu_maquila_reports"
+        action="action_maquila_dashboard"
+        sequence="20"
+    />
+
+</odoo>

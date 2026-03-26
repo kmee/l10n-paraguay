@@ -1,6 +1,6 @@
 import base64
 from datetime import date, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -154,7 +154,7 @@ class TestKudeGeneration(TransactionCase):
         move = self._create_invoice_with_xml()
         move._generate_kude()
 
-        mock_auto_kude.assert_called_once_with(xml=self.sample_xml)
+        mock_auto_kude.assert_called_once_with(xml=self.sample_xml, config=ANY)
         mock_kude_obj.output.assert_called_once()
 
     @patch("pykude.auto_kude")
@@ -217,7 +217,7 @@ class TestKudeGeneration(TransactionCase):
         move.l10n_py_edi_xml = base64.b64encode(xml_with_accents.encode("utf-8"))
         move._generate_kude()
 
-        mock_auto_kude.assert_called_once_with(xml=xml_with_accents)
+        mock_auto_kude.assert_called_once_with(xml=xml_with_accents, config=ANY)
 
     @patch("pykude.auto_kude")
     def test_generate_kude_error_propagates(self, mock_auto_kude):

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Demo Product Templates -->
+    <record id="product_tmpl_polimero_abs" model="product.template">
+        <field name="name">Polimero ABS</field>
+        <field name="type">consu</field>
+        <field name="default_code">MQ-MAT-ABS</field>
+        <field name="uom_id" ref="uom.product_uom_kgm" />
+        <field name="uom_po_id" ref="uom.product_uom_kgm" />
+    </record>
+
+    <record id="product_tmpl_aditivo_uv" model="product.template">
+        <field name="name">Aditivo UV</field>
+        <field name="type">consu</field>
+        <field name="default_code">MQ-MAT-UV</field>
+        <field name="uom_id" ref="uom.product_uom_kgm" />
+        <field name="uom_po_id" ref="uom.product_uom_kgm" />
+    </record>
+
+    <record id="product_tmpl_parafusos_m4" model="product.template">
+        <field name="name">Parafusos M4</field>
+        <field name="type">consu</field>
+        <field name="default_code">MQ-MAT-PM4</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+    </record>
+
+    <record id="product_tmpl_chicote_eletrico" model="product.template">
+        <field name="name">Chicote Eletrico</field>
+        <field name="type">product</field>
+        <field name="default_code">MQ-PROD-CHE</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="uom_po_id" ref="uom.product_uom_unit" />
+    </record>
+
+    <!-- Demo BOM -->
+    <record id="bom_chicote_demo" model="mrp.bom">
+        <field name="code">BOM-CHICOTE-DEMO</field>
+        <field name="product_tmpl_id" ref="product_tmpl_chicote_eletrico" />
+        <field name="product_qty">1</field>
+        <field
+            name="l10n_py_maquila_program_id"
+            ref="l10n_py_maquila_base.maquila_program_demo"
+        />
+        <field name="l10n_py_intn_certified" eval="True" />
+        <field name="l10n_py_intn_certificate">INTN-DEMO-001</field>
+        <field name="l10n_py_intn_date">2026-01-20</field>
+    </record>
+
+    <!-- BOM Lines -->
+    <record id="bom_line_polimero" model="mrp.bom.line">
+        <field name="bom_id" ref="bom_chicote_demo" />
+        <field name="product_tmpl_id" ref="product_tmpl_polimero_abs" />
+        <field
+            name="product_id"
+            search="[('product_tmpl_id', '=', ref('product_tmpl_polimero_abs'))]"
+            model="product.product"
+        />
+        <field name="product_qty">1.05</field>
+        <field name="product_qty_net">1.00</field>
+        <field name="loss_percentage">4.76</field>
+        <field name="l10n_py_origin_type">temporary_admission</field>
+        <field name="l10n_py_origin_country" ref="base.cn" />
+    </record>
+
+    <record id="bom_line_aditivo" model="mrp.bom.line">
+        <field name="bom_id" ref="bom_chicote_demo" />
+        <field name="product_tmpl_id" ref="product_tmpl_aditivo_uv" />
+        <field
+            name="product_id"
+            search="[('product_tmpl_id', '=', ref('product_tmpl_aditivo_uv'))]"
+            model="product.product"
+        />
+        <field name="product_qty">0.05</field>
+        <field name="product_qty_net">0.048</field>
+        <field name="loss_percentage">4.0</field>
+        <field name="l10n_py_origin_type">temporary_admission</field>
+        <field name="l10n_py_origin_country" ref="base.de" />
+    </record>
+
+    <record id="bom_line_parafusos" model="mrp.bom.line">
+        <field name="bom_id" ref="bom_chicote_demo" />
+        <field name="product_tmpl_id" ref="product_tmpl_parafusos_m4" />
+        <field
+            name="product_id"
+            search="[('product_tmpl_id', '=', ref('product_tmpl_parafusos_m4'))]"
+            model="product.product"
+        />
+        <field name="product_qty">10</field>
+        <field name="l10n_py_origin_type">national_py</field>
+        <field name="l10n_py_origin_country" ref="base.py" />
+    </record>
+
+    <!-- Demo Waste -->
+    <record id="waste_polimero_demo" model="l10n_py.maquila.waste">
+        <field name="program_id" ref="l10n_py_maquila_base.maquila_program_demo" />
+        <field
+            name="product_id"
+            search="[('product_tmpl_id', '=', ref('product_tmpl_polimero_abs'))]"
+            model="product.product"
+        />
+        <field name="quantity">150</field>
+        <field name="waste_type">scrap</field>
+        <field name="destination">destruction</field>
+        <field name="state">pending</field>
+        <field
+            name="justification"
+        >Production scrap from injection molding process</field>
+    </record>
+
+</odoo>

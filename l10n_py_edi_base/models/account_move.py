@@ -106,6 +106,101 @@ class AccountMove(models.Model):
         help="Documentos asociados al DTE (Grupo H del SIFEN)",
     )
 
+    # Operación comercial (Grupo D — gOpeCom)
+    l10n_py_exchange_rate_condition = fields.Selection(
+        [("1", "Global"), ("2", "Por Ítem")],
+        string="Condición Tipo de Cambio",
+        default="1",
+        help="Condición del tipo de cambio (D015)",
+    )
+
+    # Tipo de pago (Grupo E — gPaConEIni)
+    l10n_py_payment_type = fields.Selection(
+        [
+            ("1", "Efectivo"),
+            ("2", "Cheque"),
+            ("3", "Tarjeta de crédito"),
+            ("4", "Tarjeta de débito"),
+            ("5", "Transferencia"),
+            ("6", "Giro"),
+            ("7", "Billetera electrónica"),
+            ("8", "Tarjeta empresarial"),
+            ("9", "Vale"),
+            ("10", "Retención"),
+            ("11", "Anticipo"),
+            ("12", "Valor fiscal"),
+            ("13", "Valor comercial"),
+            ("14", "Compensación"),
+            ("15", "Permuta"),
+            ("16", "Pago bancario"),
+        ],
+        string="Tipo de Pago",
+        default="1",
+        help="Tipo de pago para condición contado (E606)",
+    )
+
+    # Campos AFE — Autofactura Electrónica (Grupo E — gCamAE)
+    l10n_py_afe_constancia_type = fields.Selection(
+        [("1", "No contribuyente"), ("2", "Microproductor")],
+        string="Tipo de Constancia (EA002)",
+    )
+    l10n_py_afe_constancia_number = fields.Char(
+        string="Número de Constancia (EA004)",
+        size=20,
+    )
+    l10n_py_afe_constancia_control = fields.Char(
+        string="Número de Control (EA005)",
+        size=20,
+    )
+    l10n_py_afe_vendor_doc_type = fields.Selection(
+        [
+            ("1", "Cédula paraguaya"),
+            ("2", "Pasaporte"),
+            ("3", "Cédula extranjera"),
+            ("4", "Carnet de residencia"),
+        ],
+        string="Tipo Doc. Vendedor (EA006)",
+    )
+    l10n_py_afe_vendor_doc_number = fields.Char(
+        string="Nro. Doc. Vendedor (EA008)",
+        size=20,
+    )
+    l10n_py_afe_vendor_name = fields.Char(
+        string="Nombre Vendedor (EA009)",
+    )
+    l10n_py_afe_vendor_address = fields.Char(
+        string="Dirección Vendedor (EA010)",
+    )
+    l10n_py_afe_vendor_house = fields.Integer(
+        string="Nro. Casa Vendedor (EA011)",
+    )
+    l10n_py_afe_vendor_department = fields.Integer(
+        string="Departamento Vendedor (EA012)",
+    )
+    l10n_py_afe_vendor_district = fields.Integer(
+        string="Distrito Vendedor (EA014)",
+    )
+    l10n_py_afe_vendor_city = fields.Integer(
+        string="Ciudad Vendedor (EA016)",
+    )
+    l10n_py_afe_provision_address = fields.Char(
+        string="Dirección Provisión (EA018)",
+    )
+    l10n_py_afe_provision_department = fields.Integer(
+        string="Departamento Provisión (EA019)",
+    )
+    l10n_py_afe_provision_district = fields.Integer(
+        string="Distrito Provisión (EA021)",
+    )
+    l10n_py_afe_provision_city = fields.Integer(
+        string="Ciudad Provisión (EA023)",
+    )
+
+    # Campo auxiliar para visibilidad en la vista
+    l10n_py_doc_type_code = fields.Char(
+        compute="_compute_l10n_py_doc_type_code",
+    )
+
     # Campos NRE (Nota de Remisión Electrónica — tipo 7)
     l10n_py_nre_motive = fields.Selection(
         [
@@ -122,6 +217,13 @@ class AccountMove(models.Model):
     l10n_py_nre_estimated_invoice_date = fields.Date(
         string="Fecha Estimada de Facturación (E506)",
         help="Fecha estimada de facturación para NRE sin factura asociada",
+    )
+
+    # Transporte (Grupo G SIFEN — NRE)
+    l10n_py_transport_id = fields.Many2one(
+        "l10n_py.transport",
+        string="Datos de Transporte",
+        help="Datos de transporte para Nota de Remisión (Grupo G SIFEN)",
     )
 
     # Campo prazo de transmissão
@@ -153,6 +255,15 @@ class AccountMove(models.Model):
                 ) + relativedelta(hours=72)
             else:
                 move.l10n_py_transmission_deadline = False
+
+    @api.depends("l10n_latam_document_type_id")
+    def _compute_l10n_py_doc_type_code(self):
+        for move in self:
+            move.l10n_py_doc_type_code = (
+                move.l10n_latam_document_type_id.code
+                if move.l10n_latam_document_type_id
+                else ""
+            )
 
     # ============== ONCHANGE METHODS ==============
 
@@ -273,6 +384,8 @@ class AccountMove(models.Model):
             "tipoTransaccion": int(self.l10n_py_transaction_type),
             "tipoImpuesto": 1,  # IVA
             "moneda": self.currency_id.name,
+            "condicionTipoCambio": int(self.l10n_py_exchange_rate_condition or "1"),
+            "tipoCambio": self.l10n_py_exchange_rate or 0,
             "receiptId": (self.l10n_py_receipt_id or f"{self.company_id.id}-{self.id}"),
             "codigoSeguridadAleatorio": self.l10n_py_security_code,
             "cliente": self._prepare_customer_data(),
@@ -306,6 +419,14 @@ class AccountMove(models.Model):
                 document_data["remision"][
                     "fechaEstimada"
                 ] = self.l10n_py_nre_estimated_invoice_date.strftime("%Y-%m-%d")
+
+        # Campos AFE (tipo=4) — Autofactura Electrónica
+        if doc_type_code == "4":
+            document_data["autofactura"] = self._prepare_autofactura_data()
+
+        # Transporte (tipo=7 — NRE)
+        if doc_type_code == "7" and self.l10n_py_transport_id:
+            document_data["transporte"] = self._prepare_transport_data()
 
         # Totales SIFEN
         document_data["totales"] = {
@@ -466,7 +587,7 @@ class AccountMove(models.Model):
             # Es contado
             payment_condition["entregas"] = [
                 {
-                    "tipo": 1,  # Efectivo
+                    "tipo": int(self.l10n_py_payment_type or "1"),
                     "monto": str(self.amount_total),
                     "moneda": self.currency_id.name,
                     "cambio": 0,
@@ -529,6 +650,92 @@ class AccountMove(models.Model):
 
         return items
 
+    def _prepare_transport_data(self):
+        """Preparar datos de transporte (Grupo G SIFEN)."""
+        t = self.l10n_py_transport_id
+        data = {
+            "modalidad": int(t.transport_mode),
+        }
+        if t.transport_type:
+            data["tipo"] = int(t.transport_type)
+        if t.freight_responsibility:
+            data["responsableFlete"] = int(t.freight_responsibility)
+        if t.incoterm:
+            data["condicionNegociacion"] = t.incoterm
+        if t.manifest_number:
+            data["numeroManifiesto"] = t.manifest_number
+        if t.transport_start_date:
+            data["fechaInicio"] = t.transport_start_date.strftime("%Y-%m-%d")
+        if t.transport_end_date:
+            data["fechaFin"] = t.transport_end_date.strftime("%Y-%m-%d")
+
+        # Departure point
+        if t.departure_address:
+            data["salida"] = {
+                "direccion": t.departure_address,
+                "numeroCasa": t.departure_house or 0,
+                "departamento": t.departure_department or 0,
+                "distrito": t.departure_district or 0,
+                "ciudad": t.departure_city or 0,
+            }
+
+        # Transporter
+        if t.transporter_name:
+            data["transportista"] = {
+                "naturaleza": t.transporter_nature or "1",
+                "nombre": t.transporter_name,
+                "ruc": t.transporter_ruc or "",
+                "dv": t.transporter_dv or "",
+                "choferDocumento": t.driver_doc_number or "",
+                "choferNombre": t.driver_name or "",
+            }
+
+        # Vehicles
+        if t.vehicle_ids:
+            data["vehiculos"] = [
+                {
+                    "tipo": v.vehicle_type,
+                    "marca": v.brand,
+                    "numero": v.plate_number,
+                }
+                for v in t.vehicle_ids
+            ]
+
+        # Deliveries
+        if t.delivery_ids:
+            data["entregas"] = [
+                {
+                    "direccion": d.address,
+                    "numeroCasa": d.house_number or 0,
+                    "departamento": d.department,
+                    "distrito": d.district or 0,
+                    "ciudad": d.city,
+                }
+                for d in t.delivery_ids
+            ]
+
+        return data
+
+    def _prepare_autofactura_data(self):
+        """Preparar datos de Autofactura Electrónica (Grupo E — gCamAE)."""
+        return {
+            "tipoConstancia": int(self.l10n_py_afe_constancia_type or "1"),
+            "numeroConstancia": self.l10n_py_afe_constancia_number or "",
+            "numeroControl": self.l10n_py_afe_constancia_control or "",
+            "tipoDocumentoVendedor": int(self.l10n_py_afe_vendor_doc_type or "1"),
+            "numeroDocumentoVendedor": self.l10n_py_afe_vendor_doc_number or "",
+            "nombreVendedor": self.l10n_py_afe_vendor_name or "",
+            "direccionVendedor": self.l10n_py_afe_vendor_address or "",
+            "numeroCasaVendedor": self.l10n_py_afe_vendor_house or 0,
+            "departamentoVendedor": self.l10n_py_afe_vendor_department or 0,
+            "distritoVendedor": self.l10n_py_afe_vendor_district or 0,
+            "ciudadVendedor": self.l10n_py_afe_vendor_city or 0,
+            "direccionProvision": self.l10n_py_afe_provision_address or "",
+            "departamentoProvision": self.l10n_py_afe_provision_department or 0,
+            "distritoProvision": self.l10n_py_afe_provision_district or 0,
+            "ciudadProvision": self.l10n_py_afe_provision_city or 0,
+        }
+
     def _get_edi_sequence_number(self):
         """Obtener número de secuencia para EDI"""
         if self.l10n_py_invoice_number:
@@ -537,6 +744,33 @@ class AccountMove(models.Model):
             number = "".join(filter(str.isdigit, self.name.split("/")[-1]))
             return number.zfill(7)[-7:]
         return "0000001"
+
+    def _validate_afe_data(self, docs):
+        """Validar datos específicos de Autofactura Electrónica (código 4)."""
+        errors = []
+        if len(docs) != 1:
+            errors.append(
+                _("Autofactura: debe tener exactamente 1 documento asociado.")
+            )
+        elif docs[0].association_type != "3":
+            errors.append(
+                _(
+                    "Autofactura: el documento asociado debe "
+                    "ser una constancia electrónica."
+                )
+            )
+        required_fields = [
+            ("l10n_py_afe_constancia_type", "el tipo de constancia"),
+            ("l10n_py_afe_constancia_number", "el número de constancia"),
+            ("l10n_py_afe_constancia_control", "el número de control"),
+            ("l10n_py_afe_vendor_doc_number", "el número de documento del vendedor"),
+            ("l10n_py_afe_vendor_name", "el nombre del vendedor"),
+            ("l10n_py_afe_vendor_address", "la dirección del vendedor"),
+        ]
+        for field_name, desc in required_fields:
+            if not getattr(self, field_name):
+                errors.append(_("Autofactura: %s es obligatorio.") % desc)
+        return errors
 
     def _validate_edi_document_type(self):
         """Validar requisitos específicos por tipo de DTE.
@@ -551,19 +785,9 @@ class AccountMove(models.Model):
         )
         docs = self.l10n_py_associated_document_ids
 
-        # AFE (code=4): exatamente 1 constância
+        # AFE (code=4): exatamente 1 constância + datos vendedor
         if code == "4":
-            if len(docs) != 1:
-                errors.append(
-                    _("Autofactura: debe tener exactamente 1 documento asociado.")
-                )
-            elif docs[0].association_type != "3":
-                errors.append(
-                    _(
-                        "Autofactura: el documento asociado debe "
-                        "ser una constancia electrónica."
-                    )
-                )
+            errors.extend(self._validate_afe_data(docs))
 
         # NCE (code=5): exatamente 1 doc associado
         elif code == "5":
@@ -675,6 +899,17 @@ class AccountMove(models.Model):
 
         # Validar requisitos por tipo de documento (F03-F07)
         errors.extend(self._validate_edi_document_type())
+
+        # Validar nominación obligatoria (> Gs. 7.000.000)
+        _NOMINACION_THRESHOLD = 7000000
+        if self.currency_id.name == "PYG" and self.amount_total > _NOMINACION_THRESHOLD:
+            if partner.l10n_py_taxpayer_type == "2" and not partner.l10n_py_doc_number:
+                errors.append(
+                    _(
+                        "Facturas superiores a Gs. 7.000.000 no pueden "
+                        "ser innominadas. Debe identificar al receptor."
+                    )
+                )
 
         if errors:
             raise UserError("\n".join(errors))
@@ -825,12 +1060,45 @@ class AccountMove(models.Model):
             except Exception as e:
                 _logger.warning("Error generando KuDE: %s", str(e))
 
+    def _validate_cancel_deadline(self):
+        """Validar plazo de cancelación según tipo de documento SIFEN.
+
+        FE/AFE: 48 horas, NCE/NDE/NRE: 168 horas (7 días).
+        """
+        if not self.invoice_date:
+            return
+        code = (
+            self.l10n_latam_document_type_id.code
+            if self.l10n_latam_document_type_id
+            else ""
+        )
+        # FE(1) y AFE(4): 48h, NCE(5)/NDE(6)/NRE(7): 168h
+        if code in ("1", "4"):
+            max_hours = 48
+        else:
+            max_hours = 168
+
+        emission_dt = fields.Datetime.from_string(str(self.invoice_date) + " 00:00:00")
+        deadline = emission_dt + relativedelta(hours=max_hours)
+        now = fields.Datetime.now()
+        if now > deadline:
+            raise UserError(
+                _(
+                    "El plazo de cancelación ha expirado. "
+                    "Límite: %(deadline)s (%(hours)s horas desde emisión).",
+                    deadline=deadline,
+                    hours=max_hours,
+                )
+            )
+
     def action_cancel_edi(self):
         """Cancelar documento electrónico"""
         self.ensure_one()
 
         if not self.l10n_py_cdc:
             raise UserError(_("No se puede cancelar un documento sin CDC"))
+
+        self._validate_cancel_deadline()
 
         connector = self._get_edi_connector()
         response = connector.cancel_document(self.l10n_py_cdc)

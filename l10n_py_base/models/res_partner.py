@@ -10,6 +10,21 @@ class ResPartner(models.Model):
 
     _inherit = "res.partner"
 
+    # ============== DEFAULT COUNTRY ==============
+
+    country_id = fields.Many2one(
+        comodel_name="res.country",
+        default=lambda self: self._default_country_id(),
+    )
+
+    def _default_country_id(self):
+        """Default country set to Paraguay if the current company is Paraguayan."""
+        return (
+            self.env.ref("base.py", raise_if_not_found=False)
+            if self.env.company.country_id.code == "PY"
+            else False
+        )
+
     # ============== CAMPOS FISCALES PY ==============
 
     l10n_py_ruc = fields.Char(
@@ -282,9 +297,22 @@ class ResPartner(models.Model):
     def _onchange_zip_l10n_py(self):
         """Buscar barrio por código postal y auto-completar ubicación"""
         if self.zip and self.country_id and self.country_id.code == "PY":
+            zipcode = self.zip.strip()
+            # Buscar match exato primeiro, depois por zipcode padded com zeros
             neighborhood = self.env["l10n_py.neighborhood"].search(
-                [("zipcode", "=", self.zip)], limit=1
+                [("zipcode", "=", zipcode)], limit=1
             )
+            if not neighborhood:
+                # Tentar com padding (ex: "1001" → "001001")
+                zipcode_padded = zipcode.zfill(6)
+                neighborhood = self.env["l10n_py.neighborhood"].search(
+                    [("zipcode", "=", zipcode_padded)], limit=1
+                )
+            if not neighborhood:
+                # Tentar busca por prefixo (ex: "1001" encontra "001001")
+                neighborhood = self.env["l10n_py.neighborhood"].search(
+                    [("zipcode", "=like", f"%{zipcode}")], limit=1
+                )
             if neighborhood:
                 self.l10n_py_neighborhood_id = neighborhood
                 self.city_id = neighborhood.city_id

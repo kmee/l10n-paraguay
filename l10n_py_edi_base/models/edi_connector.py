@@ -72,6 +72,13 @@ class EDIConnector(models.Model):
             % self.provider_type
         )
 
+    def inutilize_range(self, data):
+        """Inutilize a range of document numbers. Returns dict."""
+        self.ensure_one()
+        raise UserError(
+            _("El proveedor '%s' no implementa la inutilización") % self.provider_type
+        )
+
     def test_connection(self):
         """Test connectivity. Returns notification action."""
         self.ensure_one()

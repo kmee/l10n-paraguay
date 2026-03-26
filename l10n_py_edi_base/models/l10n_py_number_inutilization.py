@@ -1,7 +1,11 @@
 # l10n_py_edi_base/models/l10n_py_number_inutilization.py
 
+import logging
+
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 MAX_INUTILIZATION_RANGE = 1000
 
@@ -129,3 +133,46 @@ class NumberInutilization(models.Model):
                         count=used,
                     )
                 )
+
+    # ============== ACTIONS ==============
+
+    def action_send(self):
+        """Enviar inutilización al SIFEN a través del conector EDI."""
+        self.ensure_one()
+        if self.state != "draft":
+            raise UserError(
+                _("Solo se pueden enviar inutilizaciones en estado borrador.")
+            )
+
+        connector = (
+            self.env["l10n_py.edi.connector"]
+            .sudo()
+            .search([("company_id", "=", self.company_id.id)], limit=1)
+        )
+        if not connector:
+            raise UserError(_("No hay un conector EDI configurado para esta empresa."))
+
+        auth = self.authorization_id
+        data = {
+            "timbrado": auth.name or "",
+            "establecimiento": auth.l10n_py_establishment or "001",
+            "punto": auth.l10n_py_point or "001",
+            "numeroDesde": str(self.number_from).zfill(7),
+            "numeroHasta": str(self.number_to).zfill(7),
+            "tipoDocumento": 1,  # FE por defecto
+            "motivo": self.motive or "",
+        }
+
+        try:
+            response = connector.inutilize_range(data)
+            if response.get("success"):
+                self.state = "accepted"
+            else:
+                self.state = "rejected"
+                _logger.warning("Inutilización rechazada: %s", response.get("error"))
+                raise UserError(_("Error de inutilización: %s") % response.get("error"))
+        except UserError:
+            raise
+        except Exception as e:
+            self.state = "rejected"
+            raise UserError(_("Error enviando inutilización: %s") % str(e)) from e

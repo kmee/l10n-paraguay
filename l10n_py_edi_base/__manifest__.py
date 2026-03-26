@@ -1,6 +1,6 @@
 {
     "name": "Paraguay - Electronic Invoicing Base",
-    "version": "16.0.2.1.0",
+    "version": "16.0.3.0.0",
     "category": "Accounting/Localizations/EDI",
     "summary": "Base module for Electronic Invoicing in Paraguay",
     "author": "KMEE, Odoo Community Association (OCA)",
@@ -26,6 +26,7 @@
         "views/l10n_py_edi_log_views.xml",
         "views/l10n_py_associated_document_views.xml",
         "views/l10n_py_number_inutilization_views.xml",
+        "views/l10n_py_transport_views.xml",
         # Wizards
         "wizard/account_move_send_edi_views.xml",
         "wizard/l10n_py_edi_cancel_wizard_views.xml",

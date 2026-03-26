@@ -1,7 +1,24 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
 
 import logging
+from datetime import datetime
 
+from pysifen.de.bindings.v150.evento_types_v150 import TiTiDeev
+from pysifen.de.bindings.v150.evento_v150 import (
+    TgGroupEvt,
+    TgGroupGesEve,
+    TrEve,
+    TrGesEve,
+    TrGeVeCan,
+    TrGeVeInu,
+)
+from pysifen.de.bindings.v150.xmldsig_core_schema import (
+    CanonicalizationMethod,
+    Signature,
+    SignatureMethod,
+    SignatureValue,
+    SignedInfo,
+)
 from pysifen.transmissao import ConsultaSIFEN, TransmissaoDE, TransmissaoEvento
 from pysifen.transmissao.config import PRODUCCION, TEST
 from xsdata.formats.dataclass.serializers import XmlSerializer
@@ -15,6 +32,14 @@ from odoo.addons.l10n_py_edi_base.services.cdc_generator import CDCGenerator
 from ..services.rde_builder import RDeBuilder
 
 _logger = logging.getLogger(__name__)
+
+# Map document type code → TiTiDeev enum for inutilization events
+_DOC_TYPE_TO_EVENTO = {
+    1: TiTiDeev.VALUE_1,
+    4: TiTiDeev.VALUE_4,
+    5: TiTiDeev.VALUE_5,
+    6: TiTiDeev.VALUE_6,
+}
 
 
 class EDIConnector(models.Model):
@@ -41,6 +66,11 @@ class EDIConnector(models.Model):
         if self.provider_type != "sifen":
             return super().cancel_document(document_id, reason)
         return self._sifen_cancel_document(document_id, reason)
+
+    def inutilize_range(self, data):
+        if self.provider_type != "sifen":
+            return super().inutilize_range(data)
+        return self._sifen_inutilize_range(data)
 
     def preview_document(self, invoice_data):
         if self.provider_type != "sifen":
@@ -88,16 +118,93 @@ class EDIConnector(models.Model):
             consulta.cleanup()
 
     def _sifen_cancel_document(self, cdc, reason=""):
-        """Cancel document via SIFEN cancellation event."""
+        """Cancel document via SIFEN cancellation event (TrGeVeCan)."""
         self.ensure_one()
         evento = self._sifen_get_evento()
         try:
-            # Build TrGeVeCan cancellation event
-            # TODO: implement cancellation event building with pysifen
-            _logger.info("SIFEN cancel requested for CDC %s: %s", cdc, reason)
-            return {"success": False, "error": "Cancelación SIFEN no implementada aún"}
+            cancel_event = TrGeVeCan(
+                Id=cdc,
+                mOtEve=reason or "Cancelación solicitada por el emisor",
+            )
+            now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            empty_signature = Signature(
+                SignedInfo=SignedInfo(
+                    CanonicalizationMethod=CanonicalizationMethod(Algorithm=""),
+                    SignatureMethod=SignatureMethod(Algorithm=""),
+                ),
+                SignatureValue=SignatureValue(),
+            )
+            r_eve = TrEve(
+                dFecFirma=now_str,
+                dVerFor="150",
+                gGroupTiEvt=TgGroupEvt(rGeVeCan=cancel_event),
+                Id="1",
+            )
+            r_ges_eve = TrGesEve(rEve=r_eve, Signature=empty_signature)
+            grupo = TgGroupGesEve(rGesEve=[r_ges_eve])
+
+            result = evento.enviar_evento(grupo)
+            _logger.info("SIFEN cancel result for CDC %s: %s", cdc, result)
+
+            if hasattr(result, "gResProcEVe") and result.gResProcEVe:
+                proc = result.gResProcEVe
+                if hasattr(proc, "dEstRes") and proc.dEstRes == "Aprobado":
+                    return {"success": True}
+                error_msg = getattr(proc, "dMsgRes", "Error desconocido")
+                return {"success": False, "error": error_msg}
+
+            return {"success": False, "error": "Sin respuesta del SIFEN"}
         except Exception as e:
             _logger.error("SIFEN cancel error: %s", str(e))
+            return {"success": False, "error": str(e)}
+        finally:
+            evento.cleanup()
+
+    def _sifen_inutilize_range(self, data):
+        """Inutilize document number range via SIFEN event (TrGeVeInu)."""
+        self.ensure_one()
+        evento = self._sifen_get_evento()
+        try:
+            doc_type = data.get("tipoDocumento", 1)
+            inu_event = TrGeVeInu(
+                dNumTim=data.get("timbrado", ""),
+                dEst=data.get("establecimiento", "001"),
+                dPunExp=data.get("punto", "001"),
+                dNumIn=data.get("numeroDesde", "0000001"),
+                dNumFin=data.get("numeroHasta", "0000001"),
+                iTiDE=_DOC_TYPE_TO_EVENTO.get(doc_type, TiTiDeev.VALUE_1),
+                mOtEve=data.get("motivo", "Inutilización de números"),
+            )
+            now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            empty_signature = Signature(
+                SignedInfo=SignedInfo(
+                    CanonicalizationMethod=CanonicalizationMethod(Algorithm=""),
+                    SignatureMethod=SignatureMethod(Algorithm=""),
+                ),
+                SignatureValue=SignatureValue(),
+            )
+            r_eve = TrEve(
+                dFecFirma=now_str,
+                dVerFor="150",
+                gGroupTiEvt=TgGroupEvt(rGeVeInu=inu_event),
+                Id="1",
+            )
+            r_ges_eve = TrGesEve(rEve=r_eve, Signature=empty_signature)
+            grupo = TgGroupGesEve(rGesEve=[r_ges_eve])
+
+            result = evento.enviar_evento(grupo)
+            _logger.info("SIFEN inutilize result: %s", result)
+
+            if hasattr(result, "gResProcEVe") and result.gResProcEVe:
+                proc = result.gResProcEVe
+                if hasattr(proc, "dEstRes") and proc.dEstRes == "Aprobado":
+                    return {"success": True}
+                error_msg = getattr(proc, "dMsgRes", "Error desconocido")
+                return {"success": False, "error": error_msg}
+
+            return {"success": False, "error": "Sin respuesta del SIFEN"}
+        except Exception as e:
+            _logger.error("SIFEN inutilize error: %s", str(e))
             return {"success": False, "error": str(e)}
         finally:
             evento.cleanup()

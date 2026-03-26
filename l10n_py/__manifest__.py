@@ -10,15 +10,16 @@
         "account",
     ],
     "data": [
-        # Data - orden importante
+        # Data - orden importante: try_loading debe ser el ÚLTIMO
+        # porque necesita que todos los templates existan antes de ejecutarse
         "data/account_tax_group_data.xml",
         "data/account_chart_template_data.xml",
         "data/account.account.template.csv",
         "data/account_group.xml",
         "data/account_chart_template_account_account_link.xml",
-        "data/account_chart_template_configure_data.xml",
         "data/account_tax_template_data.xml",
         "data/fiscal_position_template_data.xml",
+        "data/account_chart_template_configure_data.xml",
         "data/res_country_data.xml",
         # Views
     ],

@@ -229,8 +229,17 @@ class TestEdiDemoScenarios(TransactionCase):
         self.assertIn("exactamente 1", errors[0])
 
     def test_afe_with_constancia_no_contribuyente_valid(self):
-        """AFE con constancia de no contribuyente → validación OK"""
-        move = self._create_move("4")
+        """AFE con constancia de no contribuyente + datos vendedor → OK"""
+        move = self._create_move(
+            "4",
+            l10n_py_afe_constancia_type="1",
+            l10n_py_afe_constancia_number="00012345678",
+            l10n_py_afe_constancia_control="12345678",
+            l10n_py_afe_vendor_doc_type="1",
+            l10n_py_afe_vendor_doc_number="1234567",
+            l10n_py_afe_vendor_name="Juan Pérez",
+            l10n_py_afe_vendor_address="Calle 1",
+        )
         self.env["l10n_py.associated.document"].create(
             {
                 "move_id": move.id,
@@ -243,8 +252,17 @@ class TestEdiDemoScenarios(TransactionCase):
         self.assertFalse(errors)
 
     def test_afe_with_constancia_microproductor_valid(self):
-        """AFE con constancia de microproductor → validación OK"""
-        move = self._create_move("4")
+        """AFE con constancia de microproductor + datos vendedor → OK"""
+        move = self._create_move(
+            "4",
+            l10n_py_afe_constancia_type="2",
+            l10n_py_afe_constancia_number="00012345678",
+            l10n_py_afe_constancia_control="12345678",
+            l10n_py_afe_vendor_doc_type="1",
+            l10n_py_afe_vendor_doc_number="9876543",
+            l10n_py_afe_vendor_name="María García",
+            l10n_py_afe_vendor_address="Avda Principal",
+        )
         self.env["l10n_py.associated.document"].create(
             {
                 "move_id": move.id,

@@ -20,6 +20,10 @@ class TestSIFENConnector(TransactionCase):
                 "l10n_py_ruc": "80012345",
             }
         )
+        # Remove any existing connector from demo data
+        cls.env["l10n_py.edi.connector"].sudo().search(
+            [("company_id", "=", cls.company.id)]
+        ).unlink()
 
     def test_create_sifen_connector(self):
         """Test creating a SIFEN connector."""
@@ -36,14 +40,21 @@ class TestSIFENConnector(TransactionCase):
 
     def test_company_unique_constraint(self):
         """Test that only one connector per company is allowed."""
-        self.env["l10n_py.edi.connector"].create(
-            {
-                "name": "Connector 1",
-                "company_id": self.company.id,
-                "provider_type": "sifen",
-                "environment": "test",
-            }
+        # Ensure a connector exists for the company
+        existing = (
+            self.env["l10n_py.edi.connector"]
+            .sudo()
+            .search([("company_id", "=", self.company.id)])
         )
+        if not existing:
+            self.env["l10n_py.edi.connector"].create(
+                {
+                    "name": "Connector 1",
+                    "company_id": self.company.id,
+                    "provider_type": "sifen",
+                    "environment": "test",
+                }
+            )
         with self.assertRaises(IntegrityError), self.cr.savepoint():
             self.env["l10n_py.edi.connector"].create(
                 {

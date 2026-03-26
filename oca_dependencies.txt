@@ -1,0 +1,5 @@
+# OCA repositories providing dependencies for l10n-paraguay modules
+agreement https://github.com/OCA/agreement.git
+contract https://github.com/OCA/contract.git
+account-analytic https://github.com/OCA/account-analytic.git
+manufacture https://github.com/OCA/manufacture.git

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Foreign Matrix Partner -->
+    <record id="partner_autoparts_brasil" model="res.partner">
+        <field name="name">AutoParts Brasil Ltda</field>
+        <field name="company_type">company</field>
+        <field name="country_id" ref="base.br" />
+        <field name="city">Sao Paulo</field>
+        <field name="street">Av. Paulista, 1000</field>
+    </record>
+
+    <!-- Set main company as maquiladora -->
+    <record id="base.main_company" model="res.company">
+        <field name="l10n_py_is_maquiladora" eval="True" />
+    </record>
+
+    <!-- Analytic Plan (required in Odoo 16) -->
+    <record id="analytic_plan_maquila_demo" model="account.analytic.plan">
+        <field name="name">Maquila</field>
+    </record>
+
+    <!-- Analytic Account -->
+    <record id="analytic_maquila_demo" model="account.analytic.account">
+        <field name="name">Maquila - Programa Demo</field>
+        <field name="plan_id" ref="analytic_plan_maquila_demo" />
+    </record>
+
+    <!-- CNIME Agreement -->
+    <record id="agreement_cnime_demo" model="agreement">
+        <field name="name">CNIME-DEMO-2026</field>
+        <field name="code">CNIME-DEMO-2026</field>
+        <field name="partner_id" ref="partner_autoparts_brasil" />
+        <field name="start_date">2026-01-15</field>
+        <field name="end_date">2031-01-15</field>
+    </record>
+
+    <!-- Demo Product -->
+    <record id="product_chicote_eletrico" model="product.product">
+        <field name="name">Chicote Eletrico</field>
+        <field name="detailed_type">consu</field>
+        <field name="default_code">MQ-CHE-001</field>
+    </record>
+
+    <!-- Maquila Program -->
+    <record id="maquila_program_demo" model="l10n_py.maquila.program">
+        <field name="name">Programa Demo Maquila Pura</field>
+        <field name="code">RES-BIM-2026-DEMO</field>
+        <field name="state">active</field>
+        <field name="maquila_type">pura</field>
+        <field name="matriz_partner_id" ref="partner_autoparts_brasil" />
+        <field name="company_id" ref="base.main_company" />
+        <field name="agreement_id" ref="agreement_cnime_demo" />
+        <field name="analytic_account_id" ref="analytic_maquila_demo" />
+        <field name="cnime_resolution_date">2026-01-15</field>
+        <field name="cnime_resolution_expiry">2031-01-15</field>
+    </record>
+
+    <!-- Maquila Program Product Line -->
+    <record
+        id="maquila_program_product_chicote"
+        model="l10n_py.maquila.program.product"
+    >
+        <field name="program_id" ref="maquila_program_demo" />
+        <field name="product_id" ref="product_chicote_eletrico" />
+        <field name="intn_certificate">INTN-2026-00123</field>
+        <field name="intn_certificate_date">2026-02-01</field>
+        <field name="intn_expiry_date">2028-02-01</field>
+    </record>
+</odoo>

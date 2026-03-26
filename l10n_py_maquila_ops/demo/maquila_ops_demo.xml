@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Demo Products for Admission -->
+    <record id="product_polimero_abs" model="product.product">
+        <field name="name">Polimero ABS</field>
+        <field name="type">product</field>
+        <field name="default_code">MQ-MP-ABS</field>
+    </record>
+
+    <record id="product_aditivo_uv" model="product.product">
+        <field name="name">Aditivo UV</field>
+        <field name="type">product</field>
+        <field name="default_code">MQ-MP-UV</field>
+    </record>
+
+    <!-- Guarantee -->
+    <record id="guarantee_bank_demo" model="l10n_py.maquila.guarantee">
+        <field name="name">Bank Guarantee - Banco Regional</field>
+        <field name="program_id" ref="l10n_py_maquila_base.maquila_program_demo" />
+        <field name="guarantee_type">bank</field>
+        <field name="issuer">Banco Regional S.A.E.C.A.</field>
+        <field name="amount">200000.00</field>
+        <field name="date_start">2026-01-01</field>
+        <field name="date_end">2027-01-01</field>
+        <field name="state">active</field>
+    </record>
+
+    <!-- Admission -->
+    <record id="admission_demo_001" model="l10n_py.maquila.admission">
+        <field name="name">DI-DEMO-001</field>
+        <field name="program_id" ref="l10n_py_maquila_base.maquila_program_demo" />
+        <field name="cnime_certificate">CNIME-2026-DEMO-001</field>
+        <field name="date_admission">2026-02-01</field>
+        <field name="state">admitted</field>
+        <field name="guarantee_id" ref="guarantee_bank_demo" />
+        <field name="supplier_id" ref="l10n_py_maquila_base.partner_autoparts_brasil" />
+        <field name="amount_cif">50000.00</field>
+    </record>
+
+    <!-- Admission Lines -->
+    <record id="admission_line_abs" model="l10n_py.maquila.admission.line">
+        <field name="admission_id" ref="admission_demo_001" />
+        <field name="product_id" ref="product_polimero_abs" />
+        <field name="quantity">1000.0</field>
+        <field name="uom_id" ref="uom.product_uom_kgm" />
+        <field name="ncm_code">3903.30.00</field>
+        <field name="fob_value">35000.00</field>
+    </record>
+
+    <record id="admission_line_uv" model="l10n_py.maquila.admission.line">
+        <field name="admission_id" ref="admission_demo_001" />
+        <field name="product_id" ref="product_aditivo_uv" />
+        <field name="quantity">200.0</field>
+        <field name="uom_id" ref="uom.product_uom_kgm" />
+        <field name="ncm_code">3812.39.00</field>
+        <field name="fob_value">15000.00</field>
+    </record>
+
+    <!-- Export -->
+    <record id="export_demo_001" model="l10n_py.maquila.export">
+        <field name="name">DE-DEMO-001</field>
+        <field name="program_id" ref="l10n_py_maquila_base.maquila_program_demo" />
+        <field name="date_export">2026-03-15</field>
+        <field name="incoterm">FOB</field>
+        <field name="origin_certificate">CO-PY-2026-DEMO-001</field>
+        <field name="state">draft</field>
+        <field name="admission_ids" eval="[(4, ref('admission_demo_001'))]" />
+    </record>
+
+    <!-- Export Line -->
+    <record id="export_line_chicote" model="l10n_py.maquila.export.line">
+        <field name="export_id" ref="export_demo_001" />
+        <field name="product_id" ref="l10n_py_maquila_base.product_chicote_eletrico" />
+        <field name="quantity">500.0</field>
+        <field name="uom_id" ref="uom.product_uom_unit" />
+        <field name="fob_value">75000.00</field>
+    </record>
+</odoo>

@@ -9,6 +9,18 @@ from odoo.exceptions import UserError
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    @api.constrains("state", "l10n_latam_document_type_id")
+    def _check_l10n_latam_documents(self):
+        """Pular validação de documento LATAM durante instalação de módulos.
+
+        As invoices demo do account padrão são postadas pelo try_loading sem
+        document number, causando ValidationError. Isso é comportamento
+        esperado em todas as localizações LATAM — pulamos durante instalação.
+        """
+        if not self.env.registry.ready:
+            return
+        return super()._check_l10n_latam_documents()
+
     # ============== CAMPOS CONTABILIDAD PARAGUAY ==============
 
     l10n_py_authorization_id = fields.Many2one(
@@ -154,8 +166,13 @@ class AccountMove(models.Model):
                 move.move_type in ("out_invoice", "out_refund")
                 and move.company_id.country_id.code == "PY"
                 and move.journal_id.l10n_latam_use_documents
+                and move.l10n_latam_document_type_id
             ):
                 if not move.l10n_py_authorization_id:
+                    if not self.env.registry.ready:
+                        # Pular durante instalação/demo (invoices genéricas
+                        # criadas pelo account.chart.template.try_loading)
+                        continue
                     raise UserError(
                         _(
                             "Debe seleccionar un timbrado para confirmar "

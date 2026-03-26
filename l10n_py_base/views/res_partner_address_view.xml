@@ -72,41 +72,34 @@
         </field>
     </record>
 
-    <!-- Extensión de la vista de formulario de contacto para campos fiscales PY -->
+    <!-- Extensión de la vista de formulario de contacto para campos PY -->
     <record id="l10n_py_base_res_partner_form" model="ir.ui.view">
         <field name="name">l10n_py_base.res.partner.form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="priority">110</field>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='vat']" position="after">
+            <!-- Nombre de Fantasía después del nombre (patrón l10n_br_base) -->
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
                 <field
-                    name="l10n_py_ruc"
+                    name="l10n_py_fantasy_name"
+                    placeholder="Nombre de Fantasía..."
                     attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
                 />
-                <field
-                    name="l10n_py_ruc_dv"
-                    readonly="1"
-                    attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
-                />
+            </xpath>
+
+            <!-- Campos fiscales PY después del bloque de identificación LATAM -->
+            <xpath
+                expr="//div[field[@name='l10n_latam_identification_type_id']]"
+                position="after"
+            >
                 <field
                     name="l10n_py_taxpayer_type"
                     attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
                 />
                 <field
-                    name="l10n_py_fantasy_name"
-                    attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
-                />
-                <field
                     name="l10n_py_activity_description"
                     attrs="{'invisible': [('country_id', '!=', %(base.py)d)]}"
-                />
-                <field
-                    name="l10n_py_doc_type"
-                    attrs="{'invisible': ['|', ('country_id', '!=', %(base.py)d), ('l10n_py_taxpayer_type', '!=', '2')]}"
-                />
-                <field
-                    name="l10n_py_doc_number"
-                    attrs="{'invisible': ['|', ('country_id', '!=', %(base.py)d), ('l10n_py_taxpayer_type', '!=', '2')]}"
                 />
             </xpath>
         </field>

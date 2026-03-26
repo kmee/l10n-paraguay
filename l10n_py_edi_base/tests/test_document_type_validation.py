@@ -104,8 +104,17 @@ class TestDocumentTypeValidation(TransactionCase):
     # ============== F04: AFE (Autofactura) ==============
 
     def test_afe_with_constancia(self):
-        """F04: AFE com constância → sem erros"""
-        move = self._create_move("4")
+        """F04: AFE com constância + dados vendedor → sem erros"""
+        move = self._create_move(
+            "4",
+            l10n_py_afe_constancia_type="1",
+            l10n_py_afe_constancia_number="00012345678",
+            l10n_py_afe_constancia_control="12345678",
+            l10n_py_afe_vendor_doc_type="1",
+            l10n_py_afe_vendor_doc_number="1234567",
+            l10n_py_afe_vendor_name="Juan Pérez",
+            l10n_py_afe_vendor_address="Calle 1",
+        )
         self.env["l10n_py.associated.document"].create(
             {
                 "move_id": move.id,

@@ -11,3 +11,9 @@ access_l10n_py_number_inutilization_user,l10n_py.number.inutilization.user,model
 access_l10n_py_number_inutilization_manager,l10n_py.number.inutilization.manager,model_l10n_py_number_inutilization,account.group_account_manager,1,1,1,1
 access_edi_connector_user,l10n_py.edi.connector.user,model_l10n_py_edi_connector,base.group_user,1,0,0,0
 access_edi_connector_manager,l10n_py.edi.connector.manager,model_l10n_py_edi_connector,account.group_account_manager,1,1,1,1
+access_l10n_py_transport_user,l10n_py.transport.user,model_l10n_py_transport,base.group_user,1,0,0,0
+access_l10n_py_transport_manager,l10n_py.transport.manager,model_l10n_py_transport,account.group_account_manager,1,1,1,1
+access_l10n_py_transport_vehicle_user,l10n_py.transport.vehicle.user,model_l10n_py_transport_vehicle,base.group_user,1,0,0,0
+access_l10n_py_transport_vehicle_manager,l10n_py.transport.vehicle.manager,model_l10n_py_transport_vehicle,account.group_account_manager,1,1,1,1
+access_l10n_py_transport_delivery_user,l10n_py.transport.delivery.user,model_l10n_py_transport_delivery,base.group_user,1,0,0,0
+access_l10n_py_transport_delivery_manager,l10n_py.transport.delivery.manager,model_l10n_py_transport_delivery,account.group_account_manager,1,1,1,1

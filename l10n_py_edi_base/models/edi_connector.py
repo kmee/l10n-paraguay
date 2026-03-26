@@ -64,6 +64,21 @@ class EDIConnector(models.Model):
             _("El proveedor '%s' no implementa la cancelación") % self.provider_type
         )
 
+    def preview_document(self, invoice_data):
+        """Build XML without signing or sending. Returns XML string."""
+        self.ensure_one()
+        raise UserError(
+            _("El proveedor '%s' no implementa la previsualización")
+            % self.provider_type
+        )
+
+    def inutilize_range(self, data):
+        """Inutilize a range of document numbers. Returns dict."""
+        self.ensure_one()
+        raise UserError(
+            _("El proveedor '%s' no implementa la inutilización") % self.provider_type
+        )
+
     def test_connection(self):
         """Test connectivity. Returns notification action."""
         self.ensure_one()

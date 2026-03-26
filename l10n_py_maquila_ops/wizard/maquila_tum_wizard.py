@@ -39,6 +39,16 @@ class MaquilaTumWizard(models.TransientModel):
         string="TUM Amount",
         compute="_compute_tum",
     )
+    debit_account_id = fields.Many2one(
+        "account.account",
+        string="TUM Expense Account",
+        help="Account to debit for TUM expense",
+    )
+    credit_account_id = fields.Many2one(
+        "account.account",
+        string="TUM Payable Account",
+        help="Account to credit for TUM liability",
+    )
 
     @api.depends("van_amount", "export_invoice_amount", "tum_rate")
     def _compute_tum(self):
@@ -81,17 +91,13 @@ class MaquilaTumWizard(models.TransientModel):
         )
         if not journal:
             raise UserError(_("No miscellaneous journal found."))
-        # Use first debit/credit accounts from journal as defaults
-        accounts = journal.default_account_id
-        if not accounts:
-            raise UserError(
-                _("Journal '%(journal)s' has no default account configured.")
-                % {"journal": journal.name}
-            )
-        ref = _("TUM 1%% - %(program)s - %(period_end)s") % {
-            "program": self.program_id.code,
-            "period_end": self.period_end,
-        }
+        if not self.debit_account_id or not self.credit_account_id:
+            raise UserError(_("Please select both debit and credit accounts."))
+        ref = _(
+            "TUM 1%% - %(program)s - %(period_end)s",
+            program=self.program_id.code,
+            period_end=self.period_end,
+        )
         move_vals = {
             "move_type": "entry",
             "date": self.period_end,
@@ -106,7 +112,7 @@ class MaquilaTumWizard(models.TransientModel):
                         "name": ref,
                         "debit": self.tum_amount,
                         "credit": 0,
-                        "account_id": accounts.id,
+                        "account_id": self.debit_account_id.id,
                     },
                 ),
                 (
@@ -116,7 +122,7 @@ class MaquilaTumWizard(models.TransientModel):
                         "name": ref,
                         "debit": 0,
                         "credit": self.tum_amount,
-                        "account_id": accounts.id,
+                        "account_id": self.credit_account_id.id,
                     },
                 ),
             ],

@@ -11,6 +11,7 @@
     "license": "AGPL-3",
     "depends": [
         "l10n_py_maquila_base",
+        "mail",
         "mrp",
         "mrp_bom_line_net_qty",
         "mrp_account_analytic",

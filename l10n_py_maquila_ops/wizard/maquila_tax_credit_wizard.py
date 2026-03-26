@@ -31,6 +31,14 @@ class MaquilaTaxCreditWizard(models.TransientModel):
         default=lambda self: self.env.ref("base.USD"),
     )
     amount = fields.Monetary(required=True)
+    debit_account_id = fields.Many2one(
+        "account.account",
+        string="Debit Account",
+    )
+    credit_account_id = fields.Many2one(
+        "account.account",
+        string="Credit Account",
+    )
 
     def action_execute(self):
         self.ensure_one()
@@ -39,23 +47,20 @@ class MaquilaTaxCreditWizard(models.TransientModel):
         if not self.amount:
             raise UserError(_("Amount must be greater than zero."))
 
-        ref = _("IVA Credit %(action_type)s - %(program)s - %(date)s") % {
-            "action_type": self.action_type,
-            "program": self.program_id.code,
-            "date": fields.Date.today(),
-        }
+        ref = _(
+            "IVA Credit %(action_type)s - %(program)s - %(date)s",
+            action_type=self.action_type,
+            program=self.program_id.code,
+            date=fields.Date.today(),
+        )
         journal = self.env["account.journal"].search(
             [("type", "=", "general"), ("company_id", "=", self.env.company.id)],
             limit=1,
         )
         if not journal:
             raise UserError(_("No miscellaneous journal found."))
-        account = journal.default_account_id
-        if not account:
-            raise UserError(
-                _("Journal '%(journal)s' has no default account configured.")
-                % {"journal": journal.name}
-            )
+        if not self.debit_account_id or not self.credit_account_id:
+            raise UserError(_("Please select both debit and credit accounts."))
         move_vals = {
             "move_type": "entry",
             "date": fields.Date.today(),
@@ -70,7 +75,7 @@ class MaquilaTaxCreditWizard(models.TransientModel):
                         "name": ref,
                         "debit": self.amount,
                         "credit": 0,
-                        "account_id": account.id,
+                        "account_id": self.debit_account_id.id,
                         "partner_id": self.transfer_partner_id.id
                         if self.action_type == "transfer"
                         else False,
@@ -83,7 +88,7 @@ class MaquilaTaxCreditWizard(models.TransientModel):
                         "name": ref,
                         "debit": 0,
                         "credit": self.amount,
-                        "account_id": account.id,
+                        "account_id": self.credit_account_id.id,
                     },
                 ),
             ],

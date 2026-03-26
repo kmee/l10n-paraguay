@@ -42,6 +42,16 @@
                     />
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="action_generate_simex_payload"
+                            string="Generate SIMEX Payload"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-cloud-upload"
+                            attrs="{'invisible': [('state', 'not in', ['validated', 'submitted'])]}"
+                        />
+                    </div>
                     <group>
                         <group>
                             <field name="program_id" />
@@ -74,16 +84,6 @@
                             <field name="stock_balance" readonly="1" />
                         </page>
                     </notebook>
-                    <div class="oe_button_box" name="button_box">
-                        <button
-                            name="action_generate_simex_payload"
-                            string="Generate SIMEX Payload"
-                            type="object"
-                            class="oe_stat_button"
-                            icon="fa-cloud-upload"
-                            attrs="{'invisible': [('state', 'not in', ['validated', 'submitted'])]}"
-                        />
-                    </div>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" />

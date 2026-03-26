@@ -37,6 +37,7 @@
                 <sheet>
                     <group>
                         <group string="Waste Details">
+                            <field name="date" />
                             <field name="program_id" />
                             <field name="production_id" />
                             <field name="product_id" />
@@ -84,6 +85,7 @@
                 decoration-muted="state == 'completed'"
                 decoration-warning="state == 'in_process'"
             >
+                <field name="date" />
                 <field name="program_id" />
                 <field name="product_id" />
                 <field name="quantity" />

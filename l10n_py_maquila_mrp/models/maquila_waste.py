@@ -9,6 +9,7 @@ class MaquilaWaste(models.Model):
     _description = "Maquila Waste Management"
     _inherit = ["mail.thread", "mail.activity.mixin"]
 
+    date = fields.Date(default=fields.Date.today, required=True)
     production_id = fields.Many2one(
         "mrp.production",
     )

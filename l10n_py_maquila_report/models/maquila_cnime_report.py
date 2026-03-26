@@ -153,8 +153,8 @@ class MaquilaCnimeReport(models.Model):
             wastes = self.env["l10n_py.maquila.waste"].search(
                 [
                     ("program_id", "=", program.id),
-                    ("create_date", ">=", report.period_start),
-                    ("create_date", "<=", report.period_end),
+                    ("date", ">=", report.period_start),
+                    ("date", "<=", report.period_end),
                 ]
             )
             waste_lines = []

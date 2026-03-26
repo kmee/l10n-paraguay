@@ -103,12 +103,10 @@ class MaquilaAdmission(models.Model):
                 raise UserError(
                     _(
                         "Insufficient guarantee. Available: %(available)s,"
-                        " Required: %(required)s"
+                        " Required: %(required)s",
+                        available=rec.guarantee_id.amount_available,
+                        required=rec.amount_cif,
                     )
-                    % {
-                        "available": rec.guarantee_id.amount_available,
-                        "required": rec.amount_cif,
-                    }
                 )
         self.write({"state": "admitted"})
 

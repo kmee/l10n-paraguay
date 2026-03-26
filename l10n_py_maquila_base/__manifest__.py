@@ -13,6 +13,7 @@
         "l10n_py_base",
         "agreement",
         "contract",
+        "mail",
         "product",
     ],
     "data": [

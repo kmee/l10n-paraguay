@@ -1,12 +1,3 @@
-[![Support the OCA](https://odoo-community.org/readme-banner-image)](https://odoo-community.org/get-involved?utm_source=repo-readme)
-
-# Odoo Paraguay Localization
-
-[![Runboat](https://img.shields.io/badge/runboat-Try%20me-875A7B.png)](https://runboat.odoo-community.org/builds?repo=OCA/l10n-paraguay&target_branch=16.0)
-[![Pre-commit Status](https://github.com/OCA/l10n-paraguay/actions/workflows/pre-commit.yml/badge.svg?branch=16.0)](https://github.com/OCA/l10n-paraguay/actions/workflows/pre-commit.yml?query=branch%3A16.0)
-[![Build Status](https://github.com/OCA/l10n-paraguay/actions/workflows/test.yml/badge.svg?branch=16.0)](https://github.com/OCA/l10n-paraguay/actions/workflows/test.yml?query=branch%3A16.0)
-[![codecov](https://codecov.io/gh/OCA/l10n-paraguay/branch/16.0/graph/badge.svg)](https://codecov.io/gh/OCA/l10n-paraguay)
-
 # Localización Paraguay para Odoo
 
 Repositorio de módulos para la **localización paraguaya** de Odoo 16.0,
@@ -17,71 +8,79 @@ desarrollado siguiendo las convenciones de la
 
 Este repositorio implementa la localización fiscal y contable de Paraguay,
 cubriendo desde el Plan de Cuentas oficial hasta la **Facturación Electrónica
-(SIFEN)** según las normativas de la SET (Subsecretaría de Estado de Tributación)
-y el Decreto 7.795/2017 con sus actualizaciones.
+(SIFEN)** y el **Régimen de Maquila** (Ley 1064/97), según las normativas de
+la SET (Subsecretaría de Estado de Tributación), el Decreto 7.795/2017 y la
+legislación de maquila vigente.
 
 ### Arquitectura
 
-Los módulos están organizados en capas con dependencias claras:
-
 ```
-┌─────────────────────────────────────────────────────┐
-│              Conectores EDI (Proveedores)            │
-│  ┌──────────────────┐  ┌──────────────────────────┐ │
-│  │ l10n_py_edi_     │  │ l10n_py_edi_             │ │
-│  │ factpy           │  │ facturasend              │ │
-│  └────────┬─────────┘  └────────────┬─────────────┘ │
-│           │                         │               │
-│           └───────────┬─────────────┘               │
-│                       ▼                             │
-│           ┌───────────────────────┐                 │
-│           │  l10n_py_edi_base     │  ← Core EDI     │
-│           │  CDC, KuDE, Grupo H,  │                 │
-│           │  Validações, Lifecycle │                 │
-│           └───────────┬───────────┘                 │
-│                       ▼                             │
-│           ┌───────────────────────┐                 │
-│           │  l10n_py_account      │  ← Contabilidad │
-│           │  Timbrado, Numeração, │                 │
-│           │  IVA SIFEN, Demo Data │                 │
-│           └─────┬─────────┬───────┘                 │
-│                 ▼         ▼                         │
-│  ┌──────────────────┐  ┌─────────────────┐         │
-│  │  l10n_py_base    │  │  l10n_py        │         │
-│  │  RUC, Geografía, │  │  Plan de Cuentas│         │
-│  │  Partner, Ciudad │  │  Impuestos PY   │         │
-│  └──────────────────┘  └─────────────────┘         │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    Régimen de Maquila                             │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────────┐ │
+│  │ maquila_ops  │ │ maquila_mrp  │ │ maquila_report           │ │
+│  │ Admisión,    │ │ BOM+INTN,    │ │ CNIME, Dashboard,        │ │
+│  │ Exportación, │ │ VAN, Waste   │ │ SIFEN ext, SIMEX         │ │
+│  │ Garantías,   │ └──────┬───────┘ └────────────┬─────────────┘ │
+│  │ TUM, IVA     │        │                      │               │
+│  └──────┬───────┘        │                      │               │
+│         └────────┬───────┘                      │               │
+│                  ▼                              │               │
+│         ┌──────────────────┐                    │               │
+│         │ maquila_base     │◄───────────────────┘               │
+│         │ Programa, CNIME, │                                    │
+│         │ Contratos, INTN  │                                    │
+│         └────────┬─────────┘                                    │
+├──────────────────┼──────────────────────────────────────────────┤
+│                  ▼                                              │
+│              Conectores EDI (Proveedores)                        │
+│  ┌─────────────┐ ┌───────────────┐ ┌──────────────────────────┐│
+│  │ edi_factpy  │ │edi_facturasend│ │ edi_sifen (directo)      ││
+│  └──────┬──────┘ └───────┬───────┘ └────────────┬─────────────┘│
+│         └────────┬───────┘                      │              │
+│                  ▼                              │              │
+│         ┌───────────────────────┐               │              │
+│         │  l10n_py_edi_base     │◄──────────────┘              │
+│         │  CDC, KuDE, Grupo H,  │                              │
+│         │  Validaciones, DTE    │                              │
+│         └───────────┬───────────┘                              │
+│                     ▼                                          │
+│         ┌───────────────────────┐                              │
+│         │  l10n_py_account      │  ← Contabilidad              │
+│         │  Timbrado, Numeración,│                              │
+│         │  IVA SIFEN, Demo      │                              │
+│         └─────┬─────────┬───────┘                              │
+│               ▼         ▼                                      │
+│  ┌──────────────────┐  ┌─────────────────┐                    │
+│  │  l10n_py_base    │  │  l10n_py        │                    │
+│  │  RUC, Geografía, │  │  Plan de Cuentas│                    │
+│  │  Partner, Ciudad │  │  Impuestos PY   │                    │
+│  └──────────────────┘  └─────────────────┘                    │
+└──────────────────────────────────────────────────────────────────┘
 ```
-
-**Capa Base** — `l10n_py` y `l10n_py_base` proporcionan el Plan de Cuentas
-(RG 49/14), impuestos (IVA 10%, 5%, Exento), datos geográficos (departamentos,
-ciudades, barrios) y extensiones del partner (RUC, tipo de contribuyente).
-
-**Capa Contable** — `l10n_py_account` agrega el sistema de timbrado
-(autorización SET), numeración secuencial (XXX-XXX-NNNNNNN), cálculo IVA
-según fórmulas SIFEN v150 (campos F003-F023), y datos demo completos.
-
-**Capa EDI** — `l10n_py_edi_base` implementa el ciclo de vida completo de
-Documentos Tributarios Electrónicos (DTE): generación de CDC (44 dígitos),
-código de seguridad, QR, KuDE (PDF), documentos asociados (Grupo H),
-inutilización de números, y validación por tipo de documento (FE, AFE, NCE,
-NDE, NRE).
-
-**Conectores** — `l10n_py_edi_factpy` y `l10n_py_edi_facturasend` conectan
-con proveedores de servicios EDI homologados por la SET, abstrayendo la
-comunicación con el SIFEN.
 
 ## Módulos Disponibles
 
-| Módulo | Versión | Descripción |
-|--------|---------|-------------|
-| [l10n_py](l10n_py/) | 16.0.1.1.0 | Plan de Cuentas Paraguay (RG 49/14) — 222 cuentas, 6 impuestos, 45+ grupos contables |
-| [l10n_py_base](l10n_py_base/) | 16.0.1.2.0 | Datos base: departamentos, ciudades, barrios, validación RUC, extensión de partner |
-| [l10n_py_account](l10n_py_account/) | 16.0.2.0.0 | Timbrado (autorización SET), numeración, fórmulas IVA SIFEN, datos demo |
-| [l10n_py_edi_base](l10n_py_edi_base/) | 16.0.2.1.0 | Core EDI: CDC, KuDE, documentos asociados, inutilización, ciclo de vida DTE |
-| [l10n_py_edi_factpy](l10n_py_edi_factpy/) | 16.0.1.2.0 | Conector EDI para proveedor FactPy |
-| [l10n_py_edi_facturasend](l10n_py_edi_facturasend/) | 16.0.1.2.0 | Conector EDI para proveedor FacturaSend |
+### Localización Base y EDI
+
+| Módulo | Versión | Licencia | Descripción |
+|--------|---------|----------|-------------|
+| [l10n_py](l10n_py/) | 16.0.1.1.0 | LGPL-3 | Plan de Cuentas Paraguay (RG 49/14) — 222 cuentas, 6 impuestos |
+| [l10n_py_base](l10n_py_base/) | 16.0.1.2.0 | LGPL-3 | Datos base: departamentos, ciudades, barrios, validación RUC |
+| [l10n_py_account](l10n_py_account/) | 16.0.2.0.0 | LGPL-3 | Timbrado (autorización SET), numeración, fórmulas IVA SIFEN |
+| [l10n_py_edi_base](l10n_py_edi_base/) | 16.0.3.0.0 | LGPL-3 | Core EDI: CDC, KuDE, documentos asociados, ciclo de vida DTE |
+| [l10n_py_edi_sifen](l10n_py_edi_sifen/) | 16.0.2.0.0 | LGPL-3 | Conector EDI directo SIFEN via pysifen |
+| [l10n_py_edi_factpy](l10n_py_edi_factpy/) | 16.0.1.2.0 | LGPL-3 | Conector EDI para proveedor FactPy |
+| [l10n_py_edi_facturasend](l10n_py_edi_facturasend/) | 16.0.1.2.0 | LGPL-3 | Conector EDI para proveedor FacturaSend |
+
+### Régimen de Maquila (Ley 1064/97)
+
+| Módulo | Versión | Licencia | Descripción |
+|--------|---------|----------|-------------|
+| [l10n_py_maquila_base](l10n_py_maquila_base/) | 16.0.1.0.0 | AGPL-3 | Programa maquila, contratos CNIME, certificados INTN, alertas |
+| [l10n_py_maquila_ops](l10n_py_maquila_ops/) | 16.0.1.0.0 | AGPL-3 | Admisión temporaria, exportación, garantías, TUM 1%, IVA, remesas |
+| [l10n_py_maquila_mrp](l10n_py_maquila_mrp/) | 16.0.1.0.0 | AGPL-3 | BOM con coeficientes INTN, VAN, contenido regional, residuos |
+| [l10n_py_maquila_report](l10n_py_maquila_report/) | 16.0.1.0.0 | AGPL-3 | Informe CNIME, dashboard, extensión SIFEN, SIMEX stubs |
 
 ## Tipos de Documento Electrónico Soportados
 
@@ -102,46 +101,72 @@ num2words
 qrcode
 requests
 cryptography
+pykude
+sifen
 ```
 
 ### Instalación de módulos
 
 ```bash
-# Instalar toda la localización con facturación electrónica
+# Localización base + facturación electrónica
 odoo-bin -d mi_base -i l10n_py,l10n_py_base,l10n_py_account,l10n_py_edi_base --stop-after-init
 
-# Instalar conector EDI (elegir uno)
-odoo-bin -d mi_base -i l10n_py_edi_factpy --stop-after-init
+# Conector EDI (elegir uno)
+odoo-bin -d mi_base -i l10n_py_edi_sifen --stop-after-init
 # o
-odoo-bin -d mi_base -i l10n_py_edi_facturasend --stop-after-init
+odoo-bin -d mi_base -i l10n_py_edi_factpy --stop-after-init
+
+# Régimen de Maquila (requiere módulos OCA: agreement, contract,
+# stock_analytic, mrp_bom_line_net_qty, mrp_account_analytic)
+odoo-bin -d mi_base -i l10n_py_maquila_base,l10n_py_maquila_ops,l10n_py_maquila_mrp,l10n_py_maquila_report --stop-after-init
 ```
 
 ### Con Doodba (Docker)
 
 ```bash
+# Localización + EDI
 invoke install -m l10n_py,l10n_py_base,l10n_py_account,l10n_py_edi_base
+
+# Maquila
+invoke install -m l10n_py_maquila_base,l10n_py_maquila_ops,l10n_py_maquila_mrp,l10n_py_maquila_report
+
+# Tests
 invoke test -m l10n_py_account,l10n_py_edi_base
 ```
 
 ## Normativas Implementadas
 
+### Tributación y Facturación Electrónica
 - **RG 49/14** — Plan de Cuentas oficial del Ministerio de Hacienda
 - **Decreto 7.795/2017** — Sistema Integrado de Facturación Electrónica Nacional (SIFEN)
 - **MT SIFEN v150** — Manual Técnico del SIFEN versión 150
 - **Ley 6.380/2019** — Modernización y simplificación del sistema tributario
-- **RG 90/2021** — Formato Marangatú para libros IVA (planificado)
+
+### Régimen de Maquila
+- **Ley 1.064/97** — Régimen de Maquila de Exportación
+- **Decreto 9.585/2000** — Reglamentación de la Ley de Maquila
+- **Resoluciones CNIME** — Contratos y programas de maquila
+- **TUM 1%** — Tributo Único de Maquila sobre el Valor Agregado Nacional
 
 ## Roadmap
 
+### EDI / SIFEN
 Consulte [PRD_TAREFAS_PENDENTES.md](PRD_TAREFAS_PENDENTES.md) para el detalle
-completo de funcionalidades pendientes con especificaciones BDD (Gherkin),
-incluyendo:
+completo de funcionalidades EDI pendientes con especificaciones BDD (Gherkin):
 
 - Emisión en lote, B2G, nominación obligatoria (RF-01)
 - Eventos SIFEN: transporte, conformidad, cancelación con plazos (RF-06)
 - Recibo electrónico y comprobantes de retención (RF-07)
 - Libro IVA Ventas/Compras, exportación Marangatú, dashboard (RF-10)
 - Contingencia avanzada con backoff exponencial (RF-12)
+
+### Maquila
+Funcionalidades pendientes del régimen de maquila:
+
+- Integración Purchase/Sale con auto-asignación de posición fiscal
+- Cálculo real de `qty_consumed`/`qty_remaining` en admisiones
+- Tests unitarios para todos los módulos
+- Integración SIMEX online (actualmente genera payload offline)
 
 ## Contribución
 
@@ -168,10 +193,8 @@ Este repositorio es mantenido por la OCA.
 
 [![Odoo Community Association](https://odoo-community.org/logo.png)](https://odoo-community.org)
 
-La OCA (Odoo Community Association) es una organización sin fines de lucro cuya
-misión es apoyar el desarrollo colaborativo de las funcionalidades de Odoo y
-promover su uso generalizado.
-
 ## Licencia
 
-[LGPL-3](LICENSE)
+Módulos base: [LGPL-3](LICENSE)
+Módulos maquila: [AGPL-3](https://www.gnu.org/licenses/agpl-3.0.html)
+(por dependencia en módulos OCA AGPL-3)

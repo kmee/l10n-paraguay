@@ -1,5 +1,5 @@
 # Copyright 2026 KMEE
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
     "name": "Paraguay - Maquila Reports",
@@ -8,7 +8,7 @@
     "category": "Localization",
     "author": "KMEE, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-paraguay",
-    "license": "LGPL-3",
+    "license": "AGPL-3",
     "depends": [
         "l10n_py_maquila_base",
         "l10n_py_maquila_ops",

@@ -41,28 +41,33 @@
             <!-- Add Manufacturing tab -->
             <xpath expr="//page[@name='contracts']" position="before">
                 <page string="Manufacturing" name="manufacturing">
-                    <group string="Bills of Materials">
-                        <field name="bom_ids" nolabel="1" readonly="1">
-                            <tree>
-                                <field name="code" />
-                                <field name="product_tmpl_id" />
-                                <field name="product_qty" />
-                                <field name="l10n_py_intn_certified" />
-                            </tree>
-                        </field>
-                    </group>
-                    <group string="Waste Records">
-                        <field name="waste_ids" nolabel="1" readonly="1">
-                            <tree>
-                                <field name="date" />
-                                <field name="product_id" />
-                                <field name="quantity" />
-                                <field name="waste_type" />
-                                <field name="destination" />
-                                <field name="state" widget="badge" />
-                            </tree>
-                        </field>
-                    </group>
+                    <separator string="Bills of Materials" />
+                    <field name="bom_ids" nolabel="1" readonly="1">
+                        <tree>
+                            <field name="code" />
+                            <field name="product_tmpl_id" />
+                            <field name="product_qty" />
+                            <field name="l10n_py_intn_certified" />
+                            <field name="l10n_py_intn_certificate" />
+                        </tree>
+                    </field>
+                    <separator string="Waste Records" />
+                    <field name="waste_ids" nolabel="1" readonly="1">
+                        <tree>
+                            <field name="date" />
+                            <field name="product_id" />
+                            <field name="quantity" />
+                            <field name="waste_type" />
+                            <field name="destination" />
+                            <field
+                                name="state"
+                                widget="badge"
+                                decoration-info="state == 'pending'"
+                                decoration-warning="state == 'in_process'"
+                                decoration-success="state == 'completed'"
+                            />
+                        </tree>
+                    </field>
                 </page>
             </xpath>
         </field>

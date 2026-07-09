@@ -17,9 +17,12 @@
         <field name="website">https://www.empresademo.com.py</field>
     </record>
 
-    <!-- Aplicar plano de contas PY à empresa demo (padrão l10n_br) -->
+    <!-- Aplicar plano de contas PY à empresa demo (arquitetura Odoo 17+:
+         try_loading recebe o código do template, não mais um xmlid) -->
     <function model="account.chart.template" name="try_loading">
-        <value eval="[ref('l10n_py.py_chart_template')]" />
+        <value eval="[]" />
+        <value>py</value>
         <value model="res.company" eval="obj().env.ref('base.main_company')" />
+        <value name="install_demo" eval="False" />
     </function>
 </odoo>

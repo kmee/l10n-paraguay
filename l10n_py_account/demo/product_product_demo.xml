@@ -5,7 +5,7 @@
     <record id="product_iva_10_electronica" model="product.product">
         <field name="name">Notebook Dell Inspiron</field>
         <field name="categ_id" ref="product.product_category_5" />
-        <field name="detailed_type">consu</field>
+        <field name="type">consu</field>
         <field name="default_code">ELEC-001</field>
         <field name="list_price">5500000.0</field>
         <field name="standard_price">4200000.0</field>
@@ -23,7 +23,7 @@
 
     <record id="product_iva_10_servicio" model="product.product">
         <field name="name">Servicio de Consultoría</field>
-        <field name="detailed_type">service</field>
+        <field name="type">service</field>
         <field name="default_code">SERV-001</field>
         <field name="list_price">1100000.0</field>
         <field name="standard_price">0.0</field>
@@ -44,7 +44,7 @@
     <record id="product_iva_5_alimento" model="product.product">
         <field name="name">Yerba Mate Kurupí 1kg</field>
         <field name="categ_id" ref="product.product_category_5" />
-        <field name="detailed_type">consu</field>
+        <field name="type">consu</field>
         <field name="default_code">ALIM-001</field>
         <field name="list_price">52500.0</field>
         <field name="standard_price">35000.0</field>
@@ -63,7 +63,7 @@
     <record id="product_iva_5_farmacia" model="product.product">
         <field name="name">Medicamento Genérico</field>
         <field name="categ_id" ref="product.product_category_5" />
-        <field name="detailed_type">consu</field>
+        <field name="type">consu</field>
         <field name="default_code">FARM-001</field>
         <field name="list_price">157500.0</field>
         <field name="standard_price">105000.0</field>
@@ -84,7 +84,7 @@
     <record id="product_exento_libro" model="product.product">
         <field name="name">Libro "Historia del Paraguay"</field>
         <field name="categ_id" ref="product.product_category_5" />
-        <field name="detailed_type">consu</field>
+        <field name="type">consu</field>
         <field name="default_code">LIBR-001</field>
         <field name="list_price">120000.0</field>
         <field name="standard_price">80000.0</field>

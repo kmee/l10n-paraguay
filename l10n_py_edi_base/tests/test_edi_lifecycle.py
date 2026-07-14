@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from odoo import Command
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -44,7 +45,7 @@ class TestEDILifecycle(TransactionCase):
 
         cls.account_income = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "income"),
             ],
             limit=1,
@@ -55,13 +56,13 @@ class TestEDILifecycle(TransactionCase):
                     "name": "Ingresos",
                     "code": "400099",
                     "account_type": "income",
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 
         cls.account_receivable = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "asset_receivable"),
             ],
             limit=1,
@@ -73,7 +74,7 @@ class TestEDILifecycle(TransactionCase):
                     "code": "110099",
                     "account_type": "asset_receivable",
                     "reconcile": True,
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 
@@ -104,14 +105,27 @@ class TestEDILifecycle(TransactionCase):
             }
         )
 
-        cls.tax_exempt = cls.env["account.tax"].create(
-            {
-                "name": "Exento",
-                "amount": 0.0,
-                "amount_type": "percent",
-                "type_tax_use": "sale",
-            }
+        # El chart de cuentas PY ya provee un impuesto "Exento" para
+        # type_tax_use=sale — referenciarlo en vez de duplicarlo (el nombre
+        # debe ser único por compañía/tipo/país).
+        cls.tax_exempt = cls.env["account.tax"].search(
+            [
+                ("name", "=", "Exento"),
+                ("type_tax_use", "=", "sale"),
+                ("company_id", "=", cls.company.id),
+            ],
+            limit=1,
         )
+        if not cls.tax_exempt:
+            cls.tax_exempt = cls.env["account.tax"].create(
+                {
+                    "name": "Exento",
+                    "amount": 0.0,
+                    "amount_type": "percent",
+                    "type_tax_use": "sale",
+                    "company_id": cls.company.id,
+                }
+            )
 
     def _create_and_post_invoice(self):
         """Helper: crear e confirmar factura"""

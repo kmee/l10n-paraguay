@@ -2,6 +2,7 @@ import base64
 from datetime import date, timedelta
 from unittest.mock import ANY, MagicMock, patch
 
+from odoo import Command
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -45,7 +46,7 @@ class TestKudeGeneration(TransactionCase):
 
         cls.account_income = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "income"),
             ],
             limit=1,
@@ -56,13 +57,13 @@ class TestKudeGeneration(TransactionCase):
                     "name": "Ingresos",
                     "code": "400098",
                     "account_type": "income",
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 
         cls.account_receivable = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "asset_receivable"),
             ],
             limit=1,
@@ -74,7 +75,7 @@ class TestKudeGeneration(TransactionCase):
                     "code": "110098",
                     "account_type": "asset_receivable",
                     "reconcile": True,
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 

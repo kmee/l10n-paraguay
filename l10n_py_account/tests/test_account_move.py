@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from odoo import Command
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -48,7 +49,7 @@ class TestAccountMove(TransactionCase):
         # Cuentas contables
         cls.account_income = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "income"),
             ],
             limit=1,
@@ -59,13 +60,13 @@ class TestAccountMove(TransactionCase):
                     "name": "Ingresos por Ventas",
                     "code": "400001",
                     "account_type": "income",
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 
         cls.account_receivable = cls.env["account.account"].search(
             [
-                ("company_id", "=", cls.company.id),
+                ("company_ids", "in", cls.company.id),
                 ("account_type", "=", "asset_receivable"),
             ],
             limit=1,
@@ -77,7 +78,7 @@ class TestAccountMove(TransactionCase):
                     "code": "110001",
                     "account_type": "asset_receivable",
                     "reconcile": True,
-                    "company_id": cls.company.id,
+                    "company_ids": [Command.link(cls.company.id)],
                 }
             )
 
@@ -268,7 +269,7 @@ class TestAccountMove(TransactionCase):
         """F02: Factura de compra sin timbrado → OK (no requiere timbrado propio)"""
         account_payable = self.env["account.account"].search(
             [
-                ("company_id", "=", self.company.id),
+                ("company_ids", "in", self.company.id),
                 ("account_type", "=", "liability_payable"),
             ],
             limit=1,
@@ -280,13 +281,13 @@ class TestAccountMove(TransactionCase):
                     "code": "210001",
                     "account_type": "liability_payable",
                     "reconcile": True,
-                    "company_id": self.company.id,
+                    "company_ids": [Command.link(self.company.id)],
                 }
             )
 
         expense_account = self.env["account.account"].search(
             [
-                ("company_id", "=", self.company.id),
+                ("company_ids", "in", self.company.id),
                 ("account_type", "=", "expense"),
             ],
             limit=1,
@@ -297,7 +298,7 @@ class TestAccountMove(TransactionCase):
                     "name": "Gastos",
                     "code": "500001",
                     "account_type": "expense",
-                    "company_id": self.company.id,
+                    "company_ids": [Command.link(self.company.id)],
                 }
             )
 

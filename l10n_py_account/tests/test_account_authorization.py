@@ -204,20 +204,20 @@ class TestAccountAuthorization(TransactionCase):
         auth = self._create_authorization(
             expedition_point="002",
         )
-        name = auth.name_get()[0][1]
+        name = auth.display_name
         self.assertIn("22334455", name)
         self.assertIn("001-002", name)
 
     def test_name_get_with_series(self):
         """F02: name_get incluye serie cuando != AA"""
         auth = self._create_authorization(series="BC")
-        name = auth.name_get()[0][1]
+        name = auth.display_name
         self.assertIn("Serie BC", name)
 
     def test_name_get_default_series_hidden(self):
         """F02: name_get no incluye serie AA (por defecto)"""
         auth = self._create_authorization(series="AA")
-        name = auth.name_get()[0][1]
+        name = auth.display_name
         self.assertNotIn("Serie", name)
 
     # ============== SQL Unique ==============

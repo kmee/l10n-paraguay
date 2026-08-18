@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Registro del método de pago "SIPAP Batch File". Solo outbound:
+         el lote SIPAP se usa para desembolsos (pago a proveedores,
+         nómina, etc.), no para cobranza. -->
+    <record id="account_payment_method_sipap_batch_file" model="account.payment.method">
+        <field name="name">SIPAP Batch File</field>
+        <field name="code">sipap_batch_file</field>
+        <field name="payment_type">outbound</field>
+    </record>
+</odoo>

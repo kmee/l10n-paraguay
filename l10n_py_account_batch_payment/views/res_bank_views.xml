@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record
+        id="view_res_bank_form_inherit_l10n_py_account_batch_payment"
+        model="ir.ui.view"
+    >
+        <field name="name">res.bank.form.inherit.l10n.py.account.batch.payment</field>
+        <field name="model">res.bank</field>
+        <field name="inherit_id" ref="base.view_res_bank_form" />
+        <field name="arch" type="xml">
+            <field name="bic" position="after">
+                <field name="l10n_py_sipap_code" />
+                <field name="l10n_py_batch_export_code" />
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record
+        id="view_company_form_inherit_l10n_py_account_batch_payment_iso20022"
+        model="ir.ui.view"
+    >
+        <field name="name">
+            res.company.form.inherit.l10n.py.account.batch.payment.iso20022
+        </field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <group
+                    string="SIPAP - Exportador ISO 20022"
+                    name="l10n_py_iso20022_sipap"
+                >
+                    <field name="l10n_py_iso20022_spi_lbtr_threshold" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

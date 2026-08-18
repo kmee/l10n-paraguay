@@ -1,8 +1,36 @@
+import contextlib
 from unittest import mock
 
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
+
+
+@contextlib.contextmanager
+def _mock_registered_export_code(selection_field, code, label):
+    """Simula, solo para el test, que un módulo exportador externo
+    registró `code` en el selection `res.bank.l10n_py_batch_export_code`
+    vía `selection_add`.
+
+    Monkeypatch necesario porque Odoo valida los valores de un campo
+    Selection contra `field._selection` (un dict precalculado a partir de
+    `field.selection`), no contra `field.selection` directamente. Por eso
+    se parchean ambos atributos del objeto Field en memoria, y se
+    restauran automáticamente al salir del `with`.
+    """
+    with (
+        mock.patch.object(
+            selection_field,
+            "selection",
+            selection_field.selection + [(code, label)],
+        ),
+        mock.patch.object(
+            selection_field,
+            "_selection",
+            {**selection_field._selection, code: label},
+        ),
+    ):
+        yield
 
 
 @tagged("post_install", "-at_install", "l10n_py")
@@ -71,10 +99,8 @@ class TestAccountBatchPayment(TransactionCase):
         # simular que un módulo exportador registró su código, sin que
         # exista el método `_l10n_py_export_<codigo>` correspondiente
         # (simula un módulo mal instalado/incompleto).
-        with mock.patch.object(
-            selection_field,
-            "selection",
-            selection_field.selection + [("fake_missing", "Fake Missing")],
+        with _mock_registered_export_code(
+            selection_field, "fake_missing", "Fake Missing"
         ):
             self.bank.write({"l10n_py_batch_export_code": "fake_missing"})
             batch = self._new_batch()
@@ -95,10 +121,8 @@ class TestAccountBatchPayment(TransactionCase):
         # de account.batch.payment, simulando la implementación que ese
         # módulo exportador (ej. ISO 20022) proveería.
         with (
-            mock.patch.object(
-                selection_field,
-                "selection",
-                selection_field.selection + [("fake_bank", "Fake Bank Exporter")],
+            _mock_registered_export_code(
+                selection_field, "fake_bank", "Fake Bank Exporter"
             ),
             mock.patch.object(
                 type(self.BatchPayment),

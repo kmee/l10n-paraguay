@@ -83,6 +83,40 @@ class TestBatchFileDispatch(AccountTestInvoicingCommon):
         self.assertTrue(self.sipap_method.payment_order_ok)
         self.assertTrue(self.sipap_method.bank_account_required)
 
+    def test_payment_method_selectable_on_a_bank_journal(self):
+        """Regression test: the data record alone is not enough to make
+        'l10n_py_sipap_batch' selectable in the UI. Odoo's
+        account.journal only considers, for ANY journal, payment methods
+        whose code is a key of
+        account.payment.method._get_payment_method_information() (see
+        account.journal._get_journals_payment_method_information). A
+        method missing from that registry never appears in
+        available_payment_method_ids, and therefore never appears in the
+        'Add a line' search on a journal's Outgoing Payments tab -- even
+        though the method itself, and its `account.payment.method.line`
+        domain, look perfectly valid. This must be verified via
+        `available_payment_method_ids`, not by creating the method line
+        directly through the ORM (as the other tests in this file do),
+        since direct ORM creation bypasses the search domain entirely and
+        would not have caught this bug."""
+        # Force recomputation: available_payment_method_ids is cached on
+        # the (outbound|inbound)_payment_method_line_ids dependency, and
+        # setUpClass already attached a SIPAP method line to this journal.
+        other_bank_journal = self.env["account.journal"].create(
+            {
+                "name": "SIPAP availability check journal",
+                "type": "bank",
+                "company_id": self.company.id,
+            }
+        )
+        self.assertIn(
+            self.sipap_method,
+            other_bank_journal.available_payment_method_ids,
+            "l10n_py_sipap_batch must be registered in "
+            "account.payment.method._get_payment_method_information(), "
+            "otherwise it never becomes selectable on any journal in the UI.",
+        )
+
     def test_missing_bank_on_company_account_raises_clear_error(self):
         """No bank on the company bank account -> explicit UserError."""
         order = self._create_order()

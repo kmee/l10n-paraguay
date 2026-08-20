@@ -14,9 +14,11 @@ full breakdown of the scheme, sourced from the bank's own PDFs.
 """
 
 import base64
+import datetime
 import hashlib
 import json
 
+import requests
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 
@@ -81,3 +83,95 @@ class AtlasApiClient:
         claim -- computed on the body *before* any additional encoding,
         per the bank's spec."""
         return hashlib.sha256(raw_body).hexdigest()
+
+    def __init__(
+        self,
+        api_key: str,
+        environment_url: str,
+        private_key_pem: str,
+        bank_public_key_pem: str | None = None,
+        auth_token: str | None = None,
+    ):
+        self.api_key = api_key
+        self.environment_url = environment_url.rstrip("/")
+        self.private_key_pem = private_key_pem
+        self.bank_public_key_pem = bank_public_key_pem
+        self.auth_token = auth_token
+
+    @classmethod
+    def from_bank_account(cls, bank_account):
+        """Build a client from a Banco-Atlas-enabled ``res.partner.bank``
+        record (fields added in Task 4)."""
+        environment_urls = {
+            "testing": "https://secure2.atlas.com.py:8443",
+            "production": bank_account.atlas_production_url or "",
+        }
+        base_url = environment_urls[bank_account.atlas_environment]
+        return cls(
+            api_key=bank_account.atlas_api_key,
+            environment_url=base_url,
+            private_key_pem=bank_account.atlas_private_key_pem,
+            bank_public_key_pem=bank_account.atlas_bank_public_key_pem,
+            auth_token=bank_account.atlas_auth_token,
+        )
+
+    def call(self, method: str, path: str, body: dict | None = None) -> dict:
+        """Perform one Banco Atlas API call, fully authenticated.
+
+        Raises ``AtlasApiError`` for any HTTP status other than 200. Does
+        not retry -- retry/backoff policy, if any, is the caller's
+        responsibility (this client is a thin, side-effect-transparent
+        transport layer).
+        """
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        content_hash = None
+        raw_body = None
+        if body is not None:
+            raw_body = json.dumps(body, separators=(",", ":")).encode()
+            content_hash = self.sha256_content_hash(raw_body)
+
+        token = self.build_jwt(
+            private_key_pem=self.private_key_pem,
+            timestamp=timestamp,
+            resource=path,
+            auth_token=self.auth_token,
+            content_hash=content_hash,
+        )
+        headers = {
+            "X-RshkMichi-ApiKey": self.api_key,
+            "X-Atl-Timestamp": timestamp,
+            "X-Atl-Auth": token,
+            "Content-Type": "application/json",
+        }
+        response = requests.request(
+            method,
+            f"{self.environment_url}{path}",
+            headers=headers,
+            json=body,
+            timeout=30,
+        )
+        response_json = response.json()
+        if response.status_code != 200:
+            raise AtlasApiError(
+                code=response_json.get("code"),
+                message=response_json.get("message"),
+                error_type=response_json.get("type"),
+            )
+        return response_json
+
+
+class AtlasApiError(Exception):
+    """Raised for any non-200 response from a Banco Atlas API.
+
+    Every Banco Atlas API uses the same error body shape:
+    ``{"code": ..., "message": ..., "type": ..., "useApiMessage": ...}``.
+    There is no exhaustive, bank-published list of ``code`` values (see
+    the spec's pendency list) -- this class always carries the raw values
+    through rather than translating them into a fixed enum.
+    """
+
+    def __init__(self, code, message, error_type):
+        self.code = code
+        self.message = message
+        self.error_type = error_type
+        super().__init__(f"[{error_type}] {code}: {message}")

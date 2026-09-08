@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_partner_bank_form_itau" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.itau</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="base.view_partner_bank_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Banco Itaú (Open Banking)" name="itau_group">
+                    <field name="itau_enabled" />
+                    <group invisible="not itau_enabled">
+                        <field name="itau_environment" />
+                        <field name="itau_production_url" />
+                        <field name="itau_ruc_empresa" />
+                        <field name="itau_codigo_empresa" />
+                        <field
+                            name="itau_client_cert"
+                            filename="itau_client_cert_filename"
+                        />
+                        <field name="itau_client_cert_filename" invisible="1" />
+                        <field
+                            name="itau_client_key"
+                            filename="itau_client_key_filename"
+                        />
+                        <field name="itau_client_key_filename" invisible="1" />
+                        <field name="itau_canal_token" password="True" />
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -35,6 +35,22 @@
         <field name="invoice_date" eval="time.strftime('%Y-%m') + '-23'" />
         <field name="l10n_latam_document_type_id" ref="l10n_py_account.dc_py_af" />
         <field name="l10n_py_authorization_id" ref="demo_authorization_afe" />
+        <!-- Datos del vendedor (requeridos para AFE) -->
+        <field name="l10n_py_afe_constancia_type">1</field>
+        <field name="l10n_py_afe_constancia_number">00000001</field>
+        <field name="l10n_py_afe_constancia_control">12345678</field>
+        <field name="l10n_py_afe_vendor_doc_type">1</field>
+        <field name="l10n_py_afe_vendor_doc_number">1234567</field>
+        <field name="l10n_py_afe_vendor_name">Productor No Contribuyente Demo</field>
+        <field name="l10n_py_afe_vendor_address">Calle Vendedor 100</field>
+        <field name="l10n_py_afe_vendor_house">100</field>
+        <field name="l10n_py_afe_vendor_department">1</field>
+        <field name="l10n_py_afe_vendor_district">1</field>
+        <field name="l10n_py_afe_vendor_city">1</field>
+        <field name="l10n_py_afe_provision_address">Sucursal Asunción</field>
+        <field name="l10n_py_afe_provision_department">1</field>
+        <field name="l10n_py_afe_provision_district">1</field>
+        <field name="l10n_py_afe_provision_city">1</field>
         <field
             name="invoice_line_ids"
             eval="[
@@ -66,6 +82,22 @@
         <field name="invoice_date" eval="time.strftime('%Y-%m') + '-24'" />
         <field name="l10n_latam_document_type_id" ref="l10n_py_account.dc_py_af" />
         <field name="l10n_py_authorization_id" ref="demo_authorization_afe" />
+        <!-- Datos del vendedor (microproductor) -->
+        <field name="l10n_py_afe_constancia_type">2</field>
+        <field name="l10n_py_afe_constancia_number">00000002</field>
+        <field name="l10n_py_afe_constancia_control">87654321</field>
+        <field name="l10n_py_afe_vendor_doc_type">1</field>
+        <field name="l10n_py_afe_vendor_doc_number">7654321</field>
+        <field name="l10n_py_afe_vendor_name">Microproductor Rural Demo</field>
+        <field name="l10n_py_afe_vendor_address">Ruta 2 Km 50</field>
+        <field name="l10n_py_afe_vendor_house">50</field>
+        <field name="l10n_py_afe_vendor_department">1</field>
+        <field name="l10n_py_afe_vendor_district">1</field>
+        <field name="l10n_py_afe_vendor_city">1</field>
+        <field name="l10n_py_afe_provision_address">Centro de Acopio Caaguazú</field>
+        <field name="l10n_py_afe_provision_department">5</field>
+        <field name="l10n_py_afe_provision_district">1</field>
+        <field name="l10n_py_afe_provision_city">1</field>
         <field
             name="invoice_line_ids"
             eval="[

@@ -36,11 +36,11 @@
             <field name="account_journal_suspense_account_id" ref="account_py_103" />
             <field
             name="account_journal_payment_debit_account_id"
-            ref="account_py_301"
+            ref="account_py_105"
         />
             <field
             name="account_journal_payment_credit_account_id"
-            ref="account_py_2001"
+            ref="account_py_106"
         />
             <field name="property_tax_payable_account_id" ref="account_py_220102" />
             <field name="property_tax_receivable_account_id" ref="account_py_30503" />

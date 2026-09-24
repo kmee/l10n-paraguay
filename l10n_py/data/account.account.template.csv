@@ -3,6 +3,8 @@ account_py_101,RECAUDACIONES A DEPOSITAR,1.01.01.01,asset_current,py_chart_templ
 account_py_102,CAJA,1.01.01.02,asset_current,py_chart_template,False
 account_py_103,FONDOS FIJOS,1.01.01.03,asset_current,py_chart_template,False
 account_py_104,BANCOS,1.01.01.04,asset_current,py_chart_template,True
+account_py_105,COBROS PENDIENTES,1.01.01.05,asset_current,py_chart_template,True
+account_py_106,PAGOS PENDIENTES,1.01.01.06,asset_current,py_chart_template,True
 account_py_201,INVERSIONES FINANCIERAS,1.01.02.01,asset_current,py_chart_template,False
 account_py_202,INVERSIONES EN ENTIDADES VINCULADAS,1.01.02.02,asset_current,py_chart_template,False
 account_py_203,OTRAS INVERSIONES,1.01.02.03,asset_current,py_chart_template,False

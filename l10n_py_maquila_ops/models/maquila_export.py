@@ -23,7 +23,21 @@ class MaquilaExport(models.Model):
         default=fields.Date.today,
         tracking=True,
     )
-    incoterm = fields.Char()
+    incoterm = fields.Selection(
+        [
+            ("CFR", "CFR"),
+            ("CIF", "CIF"),
+            ("CIP", "CIP"),
+            ("CPT", "CPT"),
+            ("DAP", "DAP"),
+            ("DAT", "DAT"),
+            ("DDP", "DDP"),
+            ("EXW", "EXW"),
+            ("FAS", "FAS"),
+            ("FCA", "FCA"),
+            ("FOB", "FOB"),
+        ],
+    )
     origin_certificate = fields.Char(
         string="Certificate of Origin",
         tracking=True,

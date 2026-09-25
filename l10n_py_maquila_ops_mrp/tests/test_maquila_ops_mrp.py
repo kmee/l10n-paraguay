@@ -201,20 +201,22 @@ class TestMaquilaOpsMrp(TransactionCase):
         )
         self._make_done_production()
         usd = self.env.ref("base.USD")
-        pyg = self.env.ref("base.PYG")
-        pyg.active = True
+        eur = self.env.ref("base.EUR")
+        wizard_currency = eur if self.company.currency_id == usd else usd
+        wizard_currency.active = True
+        wiz = self._make_tum_wizard()
+        wiz.currency_id = wizard_currency.id
         self.env["res.currency.rate"].create(
             {
-                "currency_id": pyg.id,
+                "currency_id": wizard_currency.id,
                 "rate": 7300.0,
-                "name": "2026-12-31",
+                "name": wiz.period_end,
                 "company_id": self.company.id,
             }
         )
-        self.company.currency_id = pyg.id
-        wiz = self._make_tum_wizard()
-        wiz.currency_id = usd.id
         wiz.action_compute()
-        expected = pyg._convert(7980, usd, self.company, wiz.period_end)
+        expected = self.company.currency_id._convert(
+            7980, wizard_currency, self.company, wiz.period_end
+        )
         self.assertEqual(wiz.van_amount, expected)
         self.assertNotEqual(wiz.van_amount, 7980)

@@ -14,7 +14,10 @@
                 <field name="mercosul_cost" />
                 <field name="imported_cost" />
             </field>
-            <xpath expr="//field[@name='van_amount']/ancestor::group[2]" position="before">
+            <xpath
+                expr="//field[@name='van_amount']/ancestor::group[2]"
+                position="before"
+            >
                 <div
                     class="alert alert-warning"
                     role="alert"

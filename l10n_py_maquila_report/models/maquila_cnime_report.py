@@ -1,6 +1,7 @@
 # Copyright 2026 KMEE
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import base64
 import json
 
 from dateutil.relativedelta import relativedelta
@@ -211,6 +212,8 @@ class MaquilaCnimeReport(models.Model):
         self.write({"state": "validated"})
 
     def action_submit(self):
+        if any(not report.submission_protocol for report in self):
+            raise UserError(_("Set the submission protocol before submitting."))
         self.write(
             {
                 "state": "submitted",
@@ -225,10 +228,25 @@ class MaquilaCnimeReport(models.Model):
         self.write({"state": "draft"})
 
     def action_generate_simex_payload(self):
-        """Generate SIMEX payload (stub for future integration)."""
+        """Generate the SIMEX payloads (stub for future integration).
+
+        Builds two separate payload groups (cuenta corriente and
+        inversion/empleo, per Art. 12) and stores each as a JSON
+        attachment on the report. Regenerating in ``validated`` replaces
+        the previous SIMEX attachments; once ``submitted``, the payload
+        that was actually sent is frozen and generation is blocked.
+        """
         self.ensure_one()
+        if self.state == "submitted":
+            raise UserError(
+                _(
+                    "A submitted report's SIMEX payload is frozen and cannot "
+                    "be regenerated. What was sent stays as is."
+                )
+            )
+        self.check_access("write")
         # SIMEX integration stub - offline payload generation
-        payload = {
+        payload_cuenta_corriente = {
             "programa": self.program_id.code,
             "periodo_inicio": str(self.period_start),
             "periodo_fin": str(self.period_end),
@@ -236,13 +254,56 @@ class MaquilaCnimeReport(models.Model):
             "exportaciones": json.loads(self.export_data or "[]"),
             "produccion": json.loads(self.production_data or "[]"),
             "residuos": json.loads(self.waste_data or "[]"),
+            "stock_balance": json.loads(self.stock_balance or "[]"),
+        }
+        payload_inversion_empleo = {
+            "programa": self.program_id.code,
+            "periodo_inicio": str(self.period_start),
+            "periodo_fin": str(self.period_end),
             "van_total": self.van_total,
             "empleo": self.employment_count,
         }
-        # Log payload for debugging
+
+        existing_attachments = self.env["ir.attachment"].search(
+            [
+                ("res_model", "=", self._name),
+                ("res_id", "=", self.id),
+                ("name", "=like", "simex_%"),
+            ]
+        )
+        existing_attachments.unlink()
+
+        attachments = self.env["ir.attachment"].create(
+            [
+                {
+                    "name": f"simex_cuenta_corriente_{self.period_end}.json",
+                    "res_model": self._name,
+                    "res_id": self.id,
+                    "mimetype": "application/json",
+                    "datas": base64.b64encode(
+                        json.dumps(
+                            payload_cuenta_corriente, indent=2, default=str
+                        ).encode()
+                    ),
+                },
+                {
+                    "name": f"simex_inversion_empleo_{self.period_end}.json",
+                    "res_model": self._name,
+                    "res_id": self.id,
+                    "mimetype": "application/json",
+                    "datas": base64.b64encode(
+                        json.dumps(
+                            payload_inversion_empleo, indent=2, default=str
+                        ).encode()
+                    ),
+                },
+            ]
+        )
+
         self.message_post(
-            body=_("SIMEX payload generated (offline mode):\n%s")
-            % json.dumps(payload, indent=2, default=str),
+            body=_("SIMEX payload generated (offline mode): %s attachments")
+            % len(attachments),
+            attachment_ids=attachments.ids,
         )
         return {
             "type": "ir.actions.client",

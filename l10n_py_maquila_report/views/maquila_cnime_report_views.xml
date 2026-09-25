@@ -27,6 +27,7 @@
                         type="object"
                         class="btn-primary"
                         invisible="state != 'validated'"
+                        help="Sending to SIMEX/VUE is manual. Clicking this button only records that the manual submission was already done, using the submission protocol obtained outside Odoo."
                     />
                     <button
                         name="action_draft"
@@ -49,6 +50,7 @@
                             class="oe_stat_button"
                             icon="fa-cloud-upload"
                             invisible="state not in ['validated', 'submitted']"
+                            help="In 'validated', regenerating replaces the previous SIMEX attachments. In 'submitted', generation is blocked because the payload that was sent is frozen."
                         />
                     </div>
                     <group>

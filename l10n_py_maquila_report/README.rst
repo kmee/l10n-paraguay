@@ -30,14 +30,14 @@ Paraguay - Maquila Reports
 
 Reporting for Paraguay's Maquila regime (Ley 7547/2025):
 
-- **CNIME periodic report**: a snapshot of imports, exports, production,
-  waste, period-end stock balance, VAN and employment for a program and
-  period. The snapshot is compiled by *Generate* and frozen once
-  submitted.
-- **Maquila dashboard** (kanban) of active programs.
-- **SIFEN legend**: adds the maquila legend (Ley 7547/2025) to the
-  electronic document data.
-- **SIMEX payload** generation (offline).
+-  **CNIME periodic report**: a snapshot of imports, exports,
+   production, waste, period-end stock balance, VAN and employment for a
+   program and period. The snapshot is compiled by *Generate* and frozen
+   once submitted.
+-  **Maquila dashboard** (kanban) of active programs.
+-  **SIFEN legend**: adds the maquila legend (Ley 7547/2025) to the
+   electronic document data.
+-  **SIMEX payload** generation (offline).
 
 The VAN reported here uses the same computation as the MRP VAN wizard,
 so both report the same figure for a given program and period.
@@ -57,6 +57,18 @@ Usage
 3. Validate and submit. A submitted report can no longer be regenerated
    or reset to draft.
 4. Optionally generate the SIMEX payload for offline presentation.
+
+Generating the SIMEX payload/attachments and submitting the report are
+restricted to the *Maquila Manager* group; the *Maquila User* group has
+read-only access and cannot perform either action. There is no automatic
+submission to the SIMEX/VUE portal: pressing *Submit* only records, via
+the submission protocol, that the manual submission was already done
+outside Odoo. Regenerating the SIMEX payload while the report is
+*Validated* replaces the two previous ``simex_*`` attachments; once the
+report is *Submitted*, generation is blocked because the payload that
+was actually sent must stay frozen. The Art. 13 periodic report layout
+(Decreto 5714/2026) is out of scope for this version, pending the
+Secretaría Ejecutiva's resolution.
 
 Bug Tracker
 ===========
@@ -79,10 +91,10 @@ Authors
 Contributors
 ------------
 
-- KMEE INFORMÁTICA LTDA
+-  KMEE INFORMÁTICA LTDA
 
-  - Luis Felipe Mileo <mileo@kmee.com.br>
-  - André Marcos Ferreira <andre.ferreira@kmee.com.br>
+   -  Luis Felipe Mileo <mileo@kmee.com.br>
+   -  André Marcos Ferreira <andre.ferreira@kmee.com.br>
 
 Maintainers
 -----------

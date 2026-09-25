@@ -372,10 +372,10 @@ ul.auto-toc {
 <p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/licence-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/l10n-paraguay/tree/18.0/l10n_py_maquila_report"><img alt="OCA/l10n-paraguay" src="https://img.shields.io/badge/github-OCA%2Fl10n--paraguay-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/l10n-paraguay-18-0/l10n-paraguay-18-0-l10n_py_maquila_report"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/l10n-paraguay&amp;target_branch=18.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
 <p>Reporting for Paraguay’s Maquila regime (Ley 7547/2025):</p>
 <ul class="simple">
-<li><strong>CNIME periodic report</strong>: a snapshot of imports, exports, production,
-waste, period-end stock balance, VAN and employment for a program and
-period. The snapshot is compiled by <em>Generate</em> and frozen once
-submitted.</li>
+<li><strong>CNIME periodic report</strong>: a snapshot of imports, exports,
+production, waste, period-end stock balance, VAN and employment for a
+program and period. The snapshot is compiled by <em>Generate</em> and frozen
+once submitted.</li>
 <li><strong>Maquila dashboard</strong> (kanban) of active programs.</li>
 <li><strong>SIFEN legend</strong>: adds the maquila legend (Ley 7547/2025) to the
 electronic document data.</li>
@@ -407,6 +407,17 @@ production, waste, period-end stock balance, VAN, employment).</li>
 or reset to draft.</li>
 <li>Optionally generate the SIMEX payload for offline presentation.</li>
 </ol>
+<p>Generating the SIMEX payload/attachments and submitting the report are
+restricted to the <em>Maquila Manager</em> group; the <em>Maquila User</em> group has
+read-only access and cannot perform either action. There is no automatic
+submission to the SIMEX/VUE portal: pressing <em>Submit</em> only records, via
+the submission protocol, that the manual submission was already done
+outside Odoo. Regenerating the SIMEX payload while the report is
+<em>Validated</em> replaces the two previous <tt class="docutils literal">simex_*</tt> attachments; once the
+report is <em>Submitted</em>, generation is blocked because the payload that
+was actually sent must stay frozen. The Art. 13 periodic report layout
+(Decreto 5714/2026) is out of scope for this version, pending the
+Secretaría Ejecutiva’s resolution.</p>
 </div>
 <div class="section" id="bug-tracker">
 <h1><a class="toc-backref" href="#toc-entry-2">Bug Tracker</a></h1>

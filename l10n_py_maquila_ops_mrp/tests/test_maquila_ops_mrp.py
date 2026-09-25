@@ -201,17 +201,13 @@ class TestMaquilaOpsMrp(TransactionCase):
         )
         self._make_done_production()
         usd = self.env.ref("base.USD")
-        pyg = self.env["res.currency"].search([("name", "=", "PYG")], limit=1)
-        if not pyg:
-            pyg = self.env["res.currency"].create(
-                {"name": "PYG", "symbol": "Gs.", "rounding": 1.0}
-            )
+        pyg = self.env.ref("base.PYG")
         pyg.active = True
         self.env["res.currency.rate"].create(
             {
                 "currency_id": pyg.id,
                 "rate": 7300.0,
-                "name": "2026-06-01",
+                "name": "2026-12-31",
                 "company_id": self.company.id,
             }
         )

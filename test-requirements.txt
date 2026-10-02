@@ -1,2 +1,2 @@
 odoo-addon-l10n_py_base @ git+https://github.com/OCA/l10n-paraguay@refs/pull/49/head#subdirectory=l10n_py_base
-odoo-addon-l10n_py @ git+https://github.com/kmee/l10n-paraguay@19.0-mig-l10n_py#subdirectory=l10n_py
+odoo-addon-l10n_py @ git+https://github.com/OCA/l10n-paraguay@refs/pull/50/head#subdirectory=l10n_py

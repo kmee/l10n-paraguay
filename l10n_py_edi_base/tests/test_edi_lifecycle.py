@@ -4,6 +4,8 @@ from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
+from odoo.addons.l10n_py_account.tests.common import create_py_company
+
 
 @tagged("post_install", "-at_install", "l10n_py")
 class TestEDILifecycle(TransactionCase):
@@ -12,7 +14,7 @@ class TestEDILifecycle(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company = cls.env.ref("base.main_company")
+        cls.company = create_py_company(cls)
         cls.country_py = cls.env.ref("base.py")
         cls.company.write(
             {
@@ -104,12 +106,17 @@ class TestEDILifecycle(TransactionCase):
             }
         )
 
+        # The test company has no chart of accounts, so no default tax group
+        cls.tax_group = cls.env["account.tax.group"].create(
+            {"name": "Exento Test", "country_id": cls.country_py.id}
+        )
         cls.tax_exempt = cls.env["account.tax"].create(
             {
                 "name": "Exento Test",
                 "amount": 0.0,
                 "amount_type": "percent",
                 "type_tax_use": "sale",
+                "tax_group_id": cls.tax_group.id,
             }
         )
 

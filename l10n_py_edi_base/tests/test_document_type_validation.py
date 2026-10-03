@@ -3,6 +3,8 @@ from datetime import date, timedelta
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
+from odoo.addons.l10n_py_account.tests.common import create_py_company
+
 
 @tagged("post_install", "-at_install", "l10n_py")
 class TestDocumentTypeValidation(TransactionCase):
@@ -11,7 +13,7 @@ class TestDocumentTypeValidation(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company = cls.env.ref("base.main_company")
+        cls.company = create_py_company(cls)
         cls.country_py = cls.env.ref("base.py")
         cls.company.write(
             {

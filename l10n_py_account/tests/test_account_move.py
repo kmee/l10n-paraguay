@@ -4,6 +4,8 @@ from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
+from odoo.addons.l10n_py_account.tests.common import create_py_company
+
 
 @tagged("post_install", "-at_install", "l10n_py")
 class TestAccountMove(TransactionCase):
@@ -12,6 +14,7 @@ class TestAccountMove(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.company = create_py_company(cls)
         cls.AccountMove = cls.env["account.move"]
         cls.Authorization = cls.env["account.authorization"]
         cls.Partner = cls.env["res.partner"]
@@ -19,7 +22,6 @@ class TestAccountMove(TransactionCase):
         cls.Tax = cls.env["account.tax"]
         cls.Journal = cls.env["account.journal"]
 
-        cls.company = cls.env.ref("base.main_company")
         cls.country_py = cls.env.ref("base.py")
 
         # Configurar empresa como paraguaya
@@ -120,7 +122,11 @@ class TestAccountMove(TransactionCase):
             }
         )
 
-        # Impuestos (incluidos en el precio para SIFEN)
+        # Impuestos (incluidos en el precio para SIFEN); the test company has no
+        # chart of accounts, so there is no default tax group
+        cls.tax_group = cls.env["account.tax.group"].create(
+            {"name": "IVA Test", "country_id": cls.country_py.id}
+        )
         cls.tax_10 = cls.Tax.create(
             {
                 "name": "IVA 10% Test",
@@ -128,6 +134,7 @@ class TestAccountMove(TransactionCase):
                 "amount_type": "percent",
                 "type_tax_use": "sale",
                 "price_include_override": "tax_included",
+                "tax_group_id": cls.tax_group.id,
             }
         )
         cls.tax_5 = cls.Tax.create(
@@ -137,6 +144,7 @@ class TestAccountMove(TransactionCase):
                 "amount_type": "percent",
                 "type_tax_use": "sale",
                 "price_include_override": "tax_included",
+                "tax_group_id": cls.tax_group.id,
             }
         )
         cls.tax_exempt = cls.Tax.create(
@@ -145,6 +153,7 @@ class TestAccountMove(TransactionCase):
                 "amount": 0.0,
                 "amount_type": "percent",
                 "type_tax_use": "sale",
+                "tax_group_id": cls.tax_group.id,
             }
         )
 

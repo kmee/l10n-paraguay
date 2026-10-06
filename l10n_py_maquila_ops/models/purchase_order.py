@@ -20,7 +20,10 @@ class PurchaseOrder(models.Model):
                 "l10n_py_maquila_ops.fiscal_position_maquila_admission",
                 raise_if_not_found=False,
             )
-            if fp:
+            company = self.company_id or self.env.company
+            # Data record of the company that installed the module: never set
+            # it on an order of another company.
+            if fp and fp.company_id in (company, company.browse()):
                 self.fiscal_position_id = fp
 
     def _prepare_invoice(self):

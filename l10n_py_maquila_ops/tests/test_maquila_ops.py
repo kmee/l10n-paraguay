@@ -309,3 +309,84 @@ class TestMaquilaOps(TransactionCase):
             "2",
             "a maquila export must end with exonerated VAT, not 10%",
         )
+
+    # ---------- intercompany: other companies and users ----------
+    def test_maquila_position_not_set_on_other_company(self):
+        """The maquila fiscal positions are data records of one company: an
+        order of another company must not receive them."""
+        other = self.env["res.company"].create({"name": "Other Maquiladora"})
+        program = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Other Program",
+                "code": "RES-BIM-OPS-OTH",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": other.id,
+                "state": "active",
+            }
+        )
+        sale = self.env["sale.order"].new(
+            {
+                "company_id": other.id,
+                "partner_id": self.matriz.id,
+                "l10n_py_maquila_program_id": program.id,
+            }
+        )
+        sale._onchange_maquila_program()
+        self.assertNotEqual(
+            sale.fiscal_position_id,
+            self.env.ref("l10n_py_maquila_ops.fiscal_position_maquila_export"),
+        )
+        purchase = self.env["purchase.order"].new(
+            {
+                "company_id": other.id,
+                "partner_id": self.matriz.id,
+                "l10n_py_maquila_program_id": program.id,
+            }
+        )
+        purchase._onchange_maquila_program()
+        self.assertNotEqual(
+            purchase.fiscal_position_id,
+            self.env.ref("l10n_py_maquila_ops.fiscal_position_maquila_admission"),
+        )
+        # The company that owns the positions still gets them.
+        own = self.env["sale.order"].new(
+            {
+                "company_id": self.company.id,
+                "partner_id": self.matriz.id,
+                "l10n_py_maquila_program_id": self.program.id,
+            }
+        )
+        own._onchange_maquila_program()
+        self.assertEqual(
+            own.fiscal_position_id,
+            self.env.ref("l10n_py_maquila_ops.fiscal_position_maquila_export"),
+        )
+
+    def test_confirm_by_user_without_maquila_group(self):
+        """A salesman without the maquila groups (e.g. the intercompany user)
+        confirms orders of a program, and the Art. 18 cap is still enforced."""
+        salesman = self.env["res.users"].create(
+            {
+                "name": "Ops Salesman",
+                "login": "ops_salesman",
+                "email": "ops_salesman@example.com",
+                "company_id": self.company.id,
+                "company_ids": [(6, 0, self.company.ids)],
+                "groups_id": [
+                    (
+                        6,
+                        0,
+                        [self.env.ref("sales_team.group_sale_salesman_all_leads").id],
+                    )
+                ],
+            }
+        )
+        self.assertFalse(salesman.has_group("l10n_py_maquila_base.group_maquila_user"))
+        self._prior_year_export(100000)  # cap = 10000
+        within = self._domestic_sale(50)  # 5000
+        within.with_user(salesman).action_confirm()
+        self.assertEqual(within.state, "sale")
+        over = self._domestic_sale(100)  # 5000 + 10000 > 10000
+        with self.assertRaises(UserError):
+            over.with_user(salesman).action_confirm()

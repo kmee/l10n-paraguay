@@ -45,7 +45,9 @@ class SaleOrder(models.Model):
             "l10n_py_maquila_ops.fiscal_position_maquila_export",
             raise_if_not_found=False,
         )
-        if fp:
+        # The position is a data record of the company that installed the
+        # module: never set it on an order of another company.
+        if fp and fp.company_id in (company, company.browse()):
             self.fiscal_position_id = fp
 
     def _prepare_invoice(self):
@@ -57,7 +59,9 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         py_country = self.env.ref("base.py", raise_if_not_found=False)
         for order in self:
-            program = order.l10n_py_maquila_program_id
+            # The order may be confirmed by a user without the maquila groups
+            # (e.g. the intercompany user): read the program as superuser.
+            program = order.l10n_py_maquila_program_id.sudo()
             # Art. 18 caps domestic sales only for the "pura" modality.
             if not (program and py_country and program.maquila_type == "pura"):
                 continue
@@ -75,12 +79,16 @@ class SaleOrder(models.Model):
         today = fields.Date.context_today(self)
         pct = program.internal_sale_pct or 10.0
         year = today.year
-        prior_exports = self.env["l10n_py.maquila.export.line"].search(
-            [
-                ("export_id.program_id", "=", program.id),
-                ("export_id.date_export", ">=", f"{year - 1}-01-01"),
-                ("export_id.date_export", "<=", f"{year - 1}-12-31"),
-            ]
+        prior_exports = (
+            self.env["l10n_py.maquila.export.line"]
+            .sudo()
+            .search(
+                [
+                    ("export_id.program_id", "=", program.id),
+                    ("export_id.date_export", ">=", f"{year - 1}-01-01"),
+                    ("export_id.date_export", "<=", f"{year - 1}-12-31"),
+                ]
+            )
         )
         export_base = sum(
             line.currency_id._convert(

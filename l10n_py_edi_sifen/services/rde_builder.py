@@ -518,7 +518,7 @@ class RDeBuilder:
 
     def _build_gTotSub(self):
         totales = self.data.get("totales", {})
-        return TgTotSub(
+        tot_sub = TgTotSub(
             dSubExe=Decimal(str(totales.get("totalExento", 0))),
             dSubExo=Decimal(str(totales.get("totalExonerado", 0))),
             dSub5=Decimal(str(totales.get("totalGravado5", 0))),
@@ -532,7 +532,9 @@ class RDeBuilder:
             dDescTotal=Decimal("0"),
             dAnticipo=Decimal("0"),
             dRedon=Decimal("0"),
-            dTotGralOpe=Decimal(str(totales.get("totalPYG", 0))),
+            # F014: operation total in the document currency (F008, no
+            # discounts, advances or rounding are sent)
+            dTotGralOpe=Decimal(str(totales.get("totalOperacion", 0))),
             dIVA5=Decimal(str(totales.get("liquidacionIva5", 0))),
             dIVA10=Decimal(str(totales.get("liquidacionIva10", 0))),
             dTotIVA=Decimal(str(totales.get("totalIva", 0))),
@@ -540,6 +542,10 @@ class RDeBuilder:
             dBaseGrav10=Decimal(str(totales.get("baseGravada10", 0))),
             dTBasGraIVA=Decimal(str(totales.get("totalBaseGravada", 0))),
         )
+        if self.data.get("moneda", "PYG") != "PYG":
+            # F023: total in guaraníes, required when the currency is not PYG
+            tot_sub.dTotalGs = Decimal(str(totales.get("totalPYG", 0)))
+        return tot_sub
 
     def _build_gCamDEAsoc(self, docs):
         result = []

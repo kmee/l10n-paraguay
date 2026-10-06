@@ -161,6 +161,27 @@ class TestRDeBuilder(TransactionCase):
         gtotsub = self._build().DE.gTotSub
         self.assertEqual(gtotsub.dSubExo, Decimal("0"))
 
+    def test_build_gtotsub_total_general_in_pyg(self):
+        """F014 dTotGralOpe is the operation total; no F023 in guaraníes."""
+        gtotsub = self._build().DE.gTotSub
+        self.assertEqual(gtotsub.dTotGralOpe, Decimal("200000"))
+        self.assertIsNone(gtotsub.dTotalGs)
+
+    def test_build_gtotsub_foreign_currency(self):
+        """Foreign currency: F014 in the document currency, F023 dTotalGs in
+        guaraníes."""
+        data = self._get_sample_invoice_data()
+        data.update(moneda="USD", tipoCambio=7350)
+        data["totales"].update(
+            totalGravado10=0,
+            totalExonerado=7160,
+            totalOperacion=7160,
+            totalPYG=52626000,
+        )
+        gtotsub = self._build(invoice=data).DE.gTotSub
+        self.assertEqual(gtotsub.dTotGralOpe, Decimal("7160"))
+        self.assertEqual(gtotsub.dTotalGs, Decimal("52626000"))
+
     def test_build_item_exonerado_base_exenta_zero(self):
         """Item exonerado (ivaTipo=2): dBasExe = 0 (NT13, validación 283).
 

@@ -696,13 +696,12 @@ class AccountMove(models.Model):
             "baseGravada10": self.l10n_py_base_10,  # F019
             "totalBaseGravada": self.l10n_py_base_total,  # F020
         }
-        if self.l10n_py_amount_total_pyg is not None:
-            document_data["totales"]["totalPYG"] = self.l10n_py_amount_total_pyg  # F023
-        else:
-            # Fallback: use totalOperacion when currency is PYG
+        if self.currency_id.name == "PYG":
             document_data["totales"]["totalPYG"] = document_data["totales"][
                 "totalOperacion"
             ]
+        else:
+            document_data["totales"]["totalPYG"] = self.l10n_py_amount_total_pyg  # F023
 
         return document_data
 

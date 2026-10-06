@@ -210,6 +210,7 @@ class AccountMove(models.Model):
                         )
                     auth.check_number_available(next_num, exclude_move_id=move.id)
                     move.l10n_py_invoice_number = next_num
+                    move.name = move._l10n_py_get_document_name()
         return super().action_post()
 
     # ============== COMPUTE METHODS ==============
@@ -447,3 +448,14 @@ class AccountMove(models.Model):
                     ),
                 }
             }
+
+    # ============== DOCUMENT NAME ==============
+
+    def _l10n_py_get_document_name(self):
+        """Name of a numbered document: prefix of the document type and the
+        fiscal number, e.g. "FE 001-001-0000001". The LATAM document number
+        is derived from the name, so it holds the fiscal number as well."""
+        self.ensure_one()
+        prefix = self.l10n_latam_document_type_id.doc_code_prefix
+        number = self.l10n_py_full_invoice_number
+        return f"{prefix} {number}" if prefix else number

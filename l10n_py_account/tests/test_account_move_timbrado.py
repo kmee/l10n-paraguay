@@ -10,7 +10,7 @@ from odoo.tests.common import TransactionCase
 
 @tagged("post_install", "-at_install", "l10n_py")
 class TestAccountMoveTimbrado(TransactionCase):
-    """Timbrado of documents created without one"""
+    """Timbrado of documents created without one and fiscal document name"""
 
     @classmethod
     def setUpClass(cls):
@@ -155,3 +155,47 @@ class TestAccountMoveTimbrado(TransactionCase):
             l10n_latam_document_number="001-001-0000123",
         )
         self.assertFalse(bill.l10n_py_authorization_id)
+
+    # ============== Document name ==============
+
+    def test_name_is_fiscal_number(self):
+        """The posted name carries the fiscal number of the timbrado, also in
+        the LATAM document number and in the payment reference"""
+        invoice = self._create_move()
+        invoice.action_post()
+        self.assertEqual(invoice.l10n_py_full_invoice_number, "001-001-0000001")
+        self.assertEqual(invoice.name, "FE 001-001-0000001")
+        self.assertEqual(invoice.l10n_latam_document_number, "001-001-0000001")
+        self.assertEqual(invoice.payment_reference, "FE 001-001-0000001")
+
+    def test_name_follows_timbrado_range(self):
+        """The name follows the numbering of the timbrado, not a journal
+        sequence: a range starting at 51 gives number 51 on the first post"""
+        self.auth_001.invoice_number_from = 51
+        first = self._create_move()
+        first.action_post()
+        second = self._create_move()
+        second.action_post()
+        self.assertEqual(first.name, "FE 001-001-0000051")
+        self.assertEqual(second.name, "FE 001-001-0000052")
+
+    def test_name_per_point_and_document_type(self):
+        """Several expedition points and credit notes in the same journal"""
+        invoice = self._create_move()
+        invoice.action_post()
+        invoice_002 = self._create_move(l10n_py_authorization_id=self.auth_002.id)
+        invoice_002.action_post()
+        credit_note = self._create_move(move_type="out_refund")
+        credit_note.action_post()
+        self.assertEqual(invoice.name, "FE 001-001-0000001")
+        self.assertEqual(invoice_002.name, "FE 001-002-0000001")
+        self.assertEqual(credit_note.name, "NC 001-001-0000001")
+
+    def test_name_kept_on_repost(self):
+        """Reset to draft and post again keeps the number and the name"""
+        invoice = self._create_move()
+        invoice.action_post()
+        invoice.button_draft()
+        invoice.action_post()
+        self.assertEqual(invoice.l10n_py_invoice_number, 1)
+        self.assertEqual(invoice.name, "FE 001-001-0000001")

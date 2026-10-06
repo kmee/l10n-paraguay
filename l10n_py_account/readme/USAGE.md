@@ -41,6 +41,11 @@ XXX-XXX-NNNNNNN
 
 Example: `001-001-0000123`
 
+When the invoice is confirmed, its name becomes the prefix of the document
+type followed by this number (e.g. `FE 001-001-0000123`, `NC 001-001-0000004`),
+so the list, the form, the payment reference and the document number show the
+fiscal number given by the timbrado.
+
 ## Managing Timbrados
 
 ### Checking Timbrado Status

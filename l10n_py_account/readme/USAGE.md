@@ -8,10 +8,26 @@
 2. Click **Create**
 3. Select customer and add invoice lines
 4. The system automatically:
-   - Assigns the active timbrado from the journal
+   - Assigns the timbrado (see below)
    - Generates the next document number
    - Validates timbrado status
 5. Click **Confirm**
+
+### Timbrado of the Document
+
+Customer invoices and credit notes created without a timbrado (by hand or
+from a sale order) get one by this rule:
+
+1. the timbrado of the journal, when it has the document type of the
+   invoice and is valid on the invoice date;
+2. otherwise, the only active timbrado of the company with the document type
+   of the invoice and the establishment and expedition point of the journal,
+   valid on the invoice date (today while the invoice has no date).
+
+When no timbrado or more than one fits, none is chosen: the form warns about
+the ambiguity and the invoice cannot be confirmed until the user selects the
+timbrado. A timbrado chosen by the user is kept while it still fits the
+document type and the date.
 
 ### Invoice Number Format
 

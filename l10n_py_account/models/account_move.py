@@ -25,6 +25,9 @@ class AccountMove(models.Model):
 
     l10n_py_authorization_id = fields.Many2one(
         "account.authorization",
+        compute="_compute_l10n_py_authorization_id",
+        store=True,
+        readonly=False,
         string="Timbrado",
         domain=(
             "[('company_id', '=', company_id), "
@@ -339,3 +342,108 @@ class AccountMove(models.Model):
         """Limpiar número al cambiar timbrado — se asigna en action_post"""
         if self.l10n_py_authorization_id:
             self.l10n_py_invoice_number = 0
+
+    # ============== TIMBRADO SELECTION ==============
+
+    def _l10n_py_requires_authorization(self):
+        """Documents numbered by a timbrado (same rule as action_post)"""
+        self.ensure_one()
+        return bool(
+            self.move_type in ("out_invoice", "out_refund")
+            and self.company_id.country_id.code == "PY"
+            and self.journal_id.l10n_latam_use_documents
+            and self.l10n_latam_document_type_id
+        )
+
+    def _l10n_py_authorization_date(self):
+        self.ensure_one()
+        return self.invoice_date or fields.Date.context_today(self)
+
+    def _l10n_py_authorization_fits(self, authorization):
+        """The timbrado can number this document: same company and document
+        type, active and valid on the document date."""
+        self.ensure_one()
+        ref_date = self._l10n_py_authorization_date()
+        return bool(
+            authorization.active
+            and authorization.company_id == self.company_id
+            and authorization.l10n_latam_document_type_id
+            == self.l10n_latam_document_type_id
+            and authorization.date_from <= ref_date <= authorization.date_to
+        )
+
+    def _l10n_py_get_authorization_candidates(self):
+        """Timbrados that can number this document, in this order:
+
+        1. the timbrado of the journal, when it fits the document;
+        2. otherwise the active timbrados of the company for the document
+           type, the establishment and the expedition point of the journal,
+           valid on the document date.
+        """
+        self.ensure_one()
+        journal = self.journal_id
+        if journal.l10n_py_authorization_id and self._l10n_py_authorization_fits(
+            journal.l10n_py_authorization_id
+        ):
+            return journal.l10n_py_authorization_id
+        ref_date = self._l10n_py_authorization_date()
+        return self.env["account.authorization"].search(
+            [
+                ("company_id", "=", self.company_id.id),
+                (
+                    "l10n_latam_document_type_id",
+                    "=",
+                    self.l10n_latam_document_type_id.id,
+                ),
+                ("establishment", "=", journal.l10n_py_establishment),
+                ("expedition_point", "=", journal.l10n_py_point),
+                ("date_from", "<=", ref_date),
+                ("date_to", ">=", ref_date),
+            ]
+        )
+
+    @api.depends(
+        "company_id",
+        "journal_id",
+        "move_type",
+        "l10n_latam_document_type_id",
+        "invoice_date",
+    )
+    def _compute_l10n_py_authorization_id(self):
+        """Default the timbrado of documents created without one (e.g. from a
+        sale order). A timbrado that still fits the document is kept, so a
+        manual choice survives; numbered documents are never touched. With no
+        candidate, or more than one, the field stays empty instead of
+        guessing: the user chooses and action_post asks for it."""
+        for move in self:
+            authorization = move.l10n_py_authorization_id
+            if (
+                move.state == "draft"
+                and not move.l10n_py_invoice_number
+                and move._l10n_py_requires_authorization()
+                and not (
+                    authorization and move._l10n_py_authorization_fits(authorization)
+                )
+            ):
+                candidates = move._l10n_py_get_authorization_candidates()
+                authorization = candidates if len(candidates) == 1 else False
+            move.l10n_py_authorization_id = authorization
+
+    @api.onchange("journal_id", "l10n_latam_document_type_id", "invoice_date")
+    def _onchange_l10n_py_authorization_ambiguous(self):
+        """Warn instead of picking one of several fitting timbrados"""
+        if (
+            self.state == "draft"
+            and not self.l10n_py_authorization_id
+            and self._l10n_py_requires_authorization()
+            and len(self._l10n_py_get_authorization_candidates()) > 1
+        ):
+            return {
+                "warning": {
+                    "title": _("Timbrado"),
+                    "message": _(
+                        "More than one timbrado fits this journal, document "
+                        "type and date. Select the timbrado to use."
+                    ),
+                }
+            }

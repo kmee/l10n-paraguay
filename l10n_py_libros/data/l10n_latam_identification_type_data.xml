@@ -87,4 +87,12 @@
         />
         <field name="codigo_tabla3">17</field>
     </record>
+
+    <record
+        id="identification_type_map_latam_pasaporte"
+        model="l10n_py.libro.identification.type.map"
+    >
+        <field name="l10n_latam_identification_type_id" ref="l10n_latam_base.it_pass" />
+        <field name="codigo_tabla3">13</field>
+    </record>
 </odoo>

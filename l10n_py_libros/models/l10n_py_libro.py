@@ -219,9 +219,14 @@ class L10nPyLibro(models.Model):
                 self._convert_amount_to_pyg(move, move.l10n_py_amount_subtotal_5 or 0)
             )
         )
-        exento = int(
-            round(self._convert_amount_to_pyg(move, move.l10n_py_amount_exempt or 0))
+        # Campo 11 "monto no gravado o exento" (especificacion tecnica del
+        # Registro de Comprobantes, DNIT 06/2021): incluye lo exonerado
+        # (Art. 100 Ley 6380/2019, p. ej. exportacion), que el SIFEN separa
+        # en dSubExo pero el registro no distingue.
+        no_gravado = (move.l10n_py_amount_exempt or 0) + (
+            move.l10n_py_amount_exonerado or 0
         )
+        exento = int(round(self._convert_amount_to_pyg(move, no_gravado)))
         # D1 item 3 - cada balde é convertido/arredondado independentemente,
         # o que pode deixar um resíduo de arredondamento (moeda estrangeira,
         # múltiplos baldes). O resíduo é absorvido pelo maior balde não-zero
@@ -241,6 +246,30 @@ class L10nPyLibro(models.Model):
     def _get_total_in_pyg(self, move):
         return int(round(self._convert_amount_to_pyg(move, move.amount_total or 0)))
 
+    def _is_domestic_partner(self, move):
+        country = move.commercial_partner_id.country_id
+        return not country or country == move.company_id.country_id
+
+    def _skip_move_reason(self, move, target):
+        """Return why a document of the period does not enter the register,
+        or False."""
+        if target == "ventas" and move.l10n_py_edi_status == "accepted":
+            # Documentos del SIFEN: los obtiene el Marangatu (especificacion
+            # tecnica, consideraciones generales).
+            return "electronic"
+        if target == "compras" and move.l10n_py_libro_electronic:
+            return "electronic"
+        if (
+            target == "compras"
+            and not self._is_domestic_partner(move)
+            and self._get_codigo_tabla4(move) != "107"
+        ):
+            # Compras exige RUC y timbrado salvo 101 y 107: el comprobante
+            # de un proveedor del exterior no tiene timbrado; la importacion
+            # se registra con su despacho (107).
+            return "foreign"
+        return False
+
     def _build_line_vals(self, move, target_tipo):
         is_own = move.move_type in ("out_invoice", "out_refund")
         partner = move.partner_id
@@ -249,12 +278,17 @@ class L10nPyLibro(models.Model):
 
         id_map = self.env["l10n_py.libro.identification.type.map"]
         tipo_ident = id_map._get_codigo(partner.l10n_latam_identification_type_id)
+        if not tipo_ident:
+            # Tabla 3: un tipo sin mapeo (p. ej. el VAT generico de
+            # l10n_latam_base) es RUC para el contribuyente local y
+            # 17 (identificacion tributaria) para el del exterior.
+            tipo_ident = "11" if self._is_domestic_partner(move) else "17"
 
         vals = {
             "f_tipo_comprobante": codigo_tabla4,
             "f_fecha_emision": move.invoice_date or move.date,
             "f_nombre_razon_social": partner.name,
-            "f_tipo_identificacion": tipo_ident or "11",
+            "f_tipo_identificacion": tipo_ident,
             "f_numero_identificacion": partner.l10n_py_ruc or (partner.vat or ""),
             "f_moneda_extranjera": (
                 "S" if move.currency_id != company.currency_id else "N"
@@ -348,13 +382,15 @@ class L10nPyLibro(models.Model):
 
             existing_by_move = {line.move_id.id: line for line in candidate_lines}
             keep_move_ids = set()
+            foreign = self.env["account.move"]
             for move in moves:
                 target = libro._get_move_target_tipo_registro(move)
                 if target != libro.tipo_registro:
                     continue
-                if target == "ventas" and move.l10n_py_edi_status == "accepted":
-                    continue
-                if target == "compras" and move.l10n_py_libro_electronic:
+                reason = libro._skip_move_reason(move, target)
+                if reason == "foreign":
+                    foreign |= move
+                if reason:
                     continue
                 vals = libro._build_line_vals(move, target)
                 keep_move_ids.add(move.id)
@@ -371,6 +407,15 @@ class L10nPyLibro(models.Model):
                 lambda line, keep=keep_move_ids: line.move_id.id not in keep
             )
             stale.unlink()
+            if foreign and not line_ids:
+                libro.message_post(
+                    body=_(
+                        "Not included (foreign supplier documents without "
+                        "timbrado; the import is registered with its customs "
+                        "dispatch, type 107): %(moves)s",
+                        moves=", ".join(foreign.mapped("display_name")),
+                    )
+                )
 
             if libro.state == "draft":
                 libro.state = "generated"

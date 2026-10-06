@@ -39,9 +39,49 @@
                         string="Guarantees"
                     />
                 </button>
+                <button
+                    class="oe_stat_button"
+                    type="object"
+                    name="action_view_tum_declarations"
+                    icon="fa-file-text-o"
+                >
+                    <field
+                        name="tum_declaration_count"
+                        widget="statinfo"
+                        string="TUM Declarations"
+                    />
+                </button>
             </xpath>
             <!-- Add Operations tab in the notebook -->
             <xpath expr="//page[@name='contracts']" position="before">
+                <page string="Single Tax (TUM)" name="tum">
+                    <group>
+                        <group string="Value added sources (Ley 7547/2025 Art. 37)">
+                            <field
+                                name="tum_salary_account_ids"
+                                widget="many2many_tags"
+                            />
+                            <field
+                                name="tum_depreciation_account_ids"
+                                widget="many2many_tags"
+                            />
+                        </group>
+                        <group string="Journal entry">
+                            <field name="tum_expense_account_id" />
+                            <field name="tum_payable_account_id" />
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        Goods (a) and services (b) come from posted vendor bills of
+                        domestic suppliers, and the maquila service remuneration (e)
+                        from posted customer invoices of service products, when the
+                        entry carries this program or its lines are distributed to
+                        the program analytic account. Salaries (c) and depreciation
+                        (d) come from the accounts above. Anything without an
+                        accounting source is entered as a manual line in the
+                        monthly declaration.
+                    </div>
+                </page>
                 <page string="Operations" name="operations">
                     <separator string="Admissions" />
                     <field name="admission_ids" nolabel="1" readonly="1">

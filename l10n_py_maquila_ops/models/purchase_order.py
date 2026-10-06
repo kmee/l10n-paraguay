@@ -23,6 +23,12 @@ class PurchaseOrder(models.Model):
             if fp:
                 self.fiscal_position_id = fp
 
+    def _prepare_invoice(self):
+        vals = super()._prepare_invoice()
+        if self.l10n_py_maquila_program_id:
+            vals["l10n_py_maquila_program_id"] = self.l10n_py_maquila_program_id.id
+        return vals
+
 
 class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"

@@ -26,4 +26,13 @@
             ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
         </field>
     </record>
+
+    <record id="ir_rule_maquila_tum_declaration_company" model="ir.rule">
+        <field name="name">Maquila TUM Declaration: multi-company</field>
+        <field name="model_id" ref="model_l10n_py_maquila_tum_declaration" />
+        <field name="global" eval="True" />
+        <field name="domain_force">
+            [('company_id', 'in', company_ids)]
+        </field>
+    </record>
 </odoo>

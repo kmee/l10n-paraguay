@@ -37,6 +37,12 @@
                         class="btn-primary"
                     />
                     <button
+                        name="action_open_declaration"
+                        string="Monthly Declaration"
+                        type="object"
+                        class="btn-secondary"
+                    />
+                    <button
                         name="action_generate_move"
                         string="Generate Entry"
                         type="object"

@@ -36,8 +36,15 @@ Operations of Paraguay's Maquila regime (Ley 7547/2025):
 - **Customs guarantees** (bank, insurance, deposit, mortgage) with
   available balance control.
 - **Fiscal positions** for temporary admission and exempt export.
-- Wizards for the **Tributo Único Maquilador (TUM, 1%)**, the **IVA
-  credit** (compensate/transfer) and the **VAN** period computation.
+- **Tributo Único Maquila (TUM)** monthly declaration (Ley 7547/2025
+  Art. 37, Decreto 5714/2026 Art. 43): value added in the national
+  territory by component, each line traced to its accounting source, and
+  the 1% over the greater of the value added and the export invoice
+  value. Components without an accounting source are entered as manual
+  lines with their supporting document. Printable summary (PDF). The
+  official DNIT form is not modelled.
+- Wizards for the **TUM** and the **IVA credit** (compensate/transfer).
+- The program of a sale or purchase order is carried to its invoices.
 - **Domestic-market sales** control (Art. 18): pure maquila may sell up
   to 10% of the prior-year exported value.
 
@@ -53,14 +60,34 @@ Usage
 =====
 
 1. Register a **customs guarantee** for the program.
+
 2. Create a **temporary admission** with its CIF amount and lines;
    admitting it checks the CNIME certificate and that the guarantee
    covers the CIF (converted to the guarantee currency). Use *Extend 12
    Months* for the Art. 14 extension.
+
 3. Create an **export** and link it to its source admissions before
    confirming.
-4. Use the **TUM**, **IVA credit** and **VAN** wizards to compute and
-   post the corresponding entries.
+
+4. On the program, tab *Single Tax (TUM)*, set the salary and
+   depreciation accounts and the TUM expense and payable accounts.
+
+5. Every month, create a **TUM Monthly Declaration** (Maquila > Fiscal),
+   run *Compute*, add manual lines for what has no accounting source
+   (for example salaries without payroll, with the payroll reference as
+   support), *Confirm* (also when there were no exports), print the
+   summary and generate the journal entry. The value added comes from:
+
+   - a) and b): posted vendor bills of suppliers of the company country,
+     goods and services (lines without product count as services);
+   - c) and d): journal items on the program salary and depreciation
+     accounts;
+   - e): posted customer invoices of service products;
+
+   always limited to entries that carry the program or lines distributed
+   to the program analytic account (by its percentage).
+
+6. Use the **IVA credit** wizard to compute and post its entry.
 
 The two fiscal positions shipped in this module (temporary admission and
 exempt export) carry no tax mapping: the actual IVA/customs tax mapping

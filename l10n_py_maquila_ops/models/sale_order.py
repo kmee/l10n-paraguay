@@ -31,6 +31,12 @@ class SaleOrder(models.Model):
             if fp:
                 self.fiscal_position_id = fp
 
+    def _prepare_invoice(self):
+        vals = super()._prepare_invoice()
+        if self.l10n_py_maquila_program_id:
+            vals["l10n_py_maquila_program_id"] = self.l10n_py_maquila_program_id.id
+        return vals
+
     def action_confirm(self):
         py_country = self.env.ref("base.py", raise_if_not_found=False)
         for order in self:

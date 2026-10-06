@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="action_report_tum_declaration" model="ir.actions.report">
+        <field name="name">TUM Monthly Declaration Summary</field>
+        <field name="model">l10n_py.maquila.tum.declaration</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_py_maquila_ops.report_tum_declaration</field>
+        <field name="report_file">l10n_py_maquila_ops.report_tum_declaration</field>
+        <field name="print_report_name">'%s' % object.name</field>
+        <field name="binding_model_id" ref="model_l10n_py_maquila_tum_declaration" />
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_tum_declaration_document">
+        <t t-call="web.external_layout">
+            <t t-set="company" t-value="o.company_id" />
+            <div class="page">
+                <h3>
+                    Tributo Unico Maquila - <span t-field="o.name" />
+                </h3>
+                <p class="text-muted small">
+                    Supporting summary of the monthly sworn declaration (Ley
+                    7547/2025 Art. 37, Decreto 5714/2026 Art. 43). It does not
+                    replace the form filed with the DNIT.
+                </p>
+                <table class="table table-sm">
+                    <tr>
+                        <td>Program</td>
+                        <td><span t-field="o.program_id.code" /> - <span
+                            t-field="o.program_id.name"
+                        /></td>
+                        <td>Period</td>
+                        <td><span t-field="o.date_from" /> - <span
+                            t-field="o.date_to"
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Maquiladora</td>
+                        <td>
+                            <span t-field="o.company_id.name" />
+                            <span t-field="o.company_id.vat" />
+                        </td>
+                        <td>Status</td>
+                        <td>
+                            <span t-field="o.state" />
+                            <span t-field="o.dnit_reference" />
+                        </td>
+                    </tr>
+                </table>
+                <h5>Value added in the national territory (Art. 37)</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <td>a) Goods acquired in the country</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_a" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>b) Services contracted in the country</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_b" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>c) Salaries and remunerations, incl. social security</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_c" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>d) Depreciation of the maquiladora's capital goods</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_d" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>e) Remuneration received for the maquila service</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_e" />
+                        </td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Value added</td>
+                        <td class="text-end">
+                            <span t-field="o.value_added_amount" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Of which entered manually</td>
+                        <td class="text-end">
+                            <span t-field="o.amount_manual" />
+                        </td>
+                    </tr>
+                </table>
+                <h5>Single tax</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <td>Export invoice value</td>
+                        <td class="text-end">
+                            <span t-field="o.export_invoice_amount" />
+                        </td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Tax base (the greater: <span
+                            t-field="o.tax_base_origin"
+                        />)</td>
+                        <td class="text-end">
+                            <span t-field="o.tax_base" />
+                        </td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Tributo Unico (<span t-field="o.tax_rate" />%)</td>
+                        <td class="text-end">
+                            <span t-field="o.tax_amount" />
+                        </td>
+                    </tr>
+                </table>
+                <h5>Detail</h5>
+                <table class="table table-sm small">
+                    <thead>
+                        <tr>
+                            <th>Comp.</th>
+                            <th>Source</th>
+                            <th>Description</th>
+                            <th>Partner</th>
+                            <th>Criterion / support</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.line_ids" t-as="line">
+                            <td>
+                                <span t-esc="line.component" />
+                            </td>
+                            <td>
+                                <span t-field="line.source" />
+                            </td>
+                            <td>
+                                <span t-field="line.name" />
+                            </td>
+                            <td>
+                                <span t-field="line.partner_id.name" />
+                            </td>
+                            <td>
+                                <span t-esc="line.criterion or line.note" />
+                            </td>
+                            <td class="text-end">
+                                <span t-field="line.amount" />
+                            </td>
+                        </tr>
+                        <tr t-foreach="o.export_invoice_ids" t-as="inv">
+                            <td>exp</td>
+                            <td>Accounting</td>
+                            <td>
+                                <span t-field="inv.name" />
+                            </td>
+                            <td>
+                                <span t-field="inv.partner_id.name" />
+                            </td>
+                            <td>Export invoice</td>
+                            <td class="text-end">
+                                <span t-field="inv.amount_total_signed" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_tum_declaration">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="l10n_py_maquila_ops.report_tum_declaration_document" />
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_maquila_tum_declaration_list" model="ir.ui.view">
+        <field name="name">l10n_py.maquila.tum.declaration.list</field>
+        <field name="model">l10n_py.maquila.tum.declaration</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="program_id" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <field name="date_from" />
+                <field name="date_to" />
+                <field name="currency_id" column_invisible="1" />
+                <field name="value_added_amount" sum="Total" />
+                <field name="export_invoice_amount" sum="Total" />
+                <field name="tax_base" />
+                <field name="tax_amount" sum="Total" />
+                <field name="dnit_reference" optional="show" />
+                <field
+                    name="state"
+                    widget="badge"
+                    decoration-info="state == 'draft'"
+                    decoration-success="state == 'confirmed'"
+                />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_maquila_tum_declaration_form" model="ir.ui.view">
+        <field name="name">l10n_py.maquila.tum.declaration.form</field>
+        <field name="model">l10n_py.maquila.tum.declaration</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="action_compute"
+                        string="Compute"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'draft'"
+                    />
+                    <button
+                        name="action_confirm"
+                        string="Confirm"
+                        type="object"
+                        invisible="state != 'draft' or not computed_on"
+                    />
+                    <button
+                        name="action_generate_move"
+                        string="Generate Entry"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'confirmed' or move_id or not tax_amount"
+                    />
+                    <button
+                        name="action_draft"
+                        string="Reset to Draft"
+                        type="object"
+                        invisible="state != 'confirmed'"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            class="oe_stat_button"
+                            type="object"
+                            name="action_view_move"
+                            icon="fa-book"
+                            invisible="not move_id"
+                            string="Journal Entry"
+                        />
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" />
+                        </h1>
+                    </div>
+                    <div
+                        class="alert alert-warning"
+                        role="alert"
+                        invisible="not warning_message"
+                    >
+                        <field name="warning_message" />
+                    </div>
+                    <group>
+                        <group>
+                            <field name="program_id" readonly="state != 'draft'" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                            <field name="date_from" readonly="state != 'draft'" />
+                            <field name="date_to" />
+                            <field name="computed_on" />
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1" />
+                            <field name="dnit_reference" />
+                            <field name="expense_account_id" />
+                            <field name="payable_account_id" />
+                            <field name="move_id" />
+                        </group>
+                    </group>
+                    <group string="Ley 7547/2025 Art. 37">
+                        <group string="Value added in the national territory">
+                            <field name="amount_a" />
+                            <field name="amount_b" />
+                            <field name="amount_c" />
+                            <field name="amount_d" />
+                            <field name="amount_e" />
+                            <field name="value_added_amount" class="fw-bold" />
+                            <field name="amount_manual" />
+                        </group>
+                        <group string="Single tax">
+                            <field name="export_invoice_amount" />
+                            <field name="tax_base" class="fw-bold" />
+                            <field name="tax_base_origin" />
+                            <field name="tax_rate" />
+                            <field name="tax_amount" class="fw-bold" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Value Added Detail" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="component" />
+                                    <field name="source" readonly="1" force_save="1" />
+                                    <field name="name" readonly="source == 'auto'" />
+                                    <field name="move_id" />
+                                    <field name="partner_id" optional="show" />
+                                    <field name="criterion" optional="show" />
+                                    <field
+                                        name="note"
+                                        readonly="source == 'auto'"
+                                        required="source == 'manual'"
+                                    />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field
+                                        name="amount"
+                                        sum="Total"
+                                        readonly="source == 'auto'"
+                                    />
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Export Invoices" name="invoices">
+                            <field name="export_invoice_ids">
+                                <list>
+                                    <field name="name" />
+                                    <field name="invoice_date" />
+                                    <field name="partner_id" />
+                                    <field name="move_type" />
+                                    <field name="currency_id" column_invisible="1" />
+                                    <field name="amount_total_signed" sum="Total" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="view_maquila_tum_declaration_search" model="ir.ui.view">
+        <field name="name">l10n_py.maquila.tum.declaration.search</field>
+        <field name="model">l10n_py.maquila.tum.declaration</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="program_id" />
+                <field name="date_from" />
+                <filter
+                    name="draft"
+                    string="Draft"
+                    domain="[('state', '=', 'draft')]"
+                />
+                <filter
+                    name="confirmed"
+                    string="Confirmed"
+                    domain="[('state', '=', 'confirmed')]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_program"
+                        string="Program"
+                        context="{'group_by': 'program_id'}"
+                    />
+                    <filter
+                        name="group_period"
+                        string="Period"
+                        context="{'group_by': 'date_from:year'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_maquila_tum_declaration" model="ir.actions.act_window">
+        <field name="name">TUM Monthly Declarations</field>
+        <field name="res_model">l10n_py.maquila.tum.declaration</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

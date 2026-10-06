@@ -37,6 +37,13 @@
         sequence="30"
     />
     <menuitem
+        id="menu_maquila_tum_declaration"
+        name="TUM Monthly Declarations"
+        parent="menu_maquila_fiscal"
+        action="action_maquila_tum_declaration"
+        sequence="5"
+    />
+    <menuitem
         id="menu_maquila_tum"
         name="TUM Calculation"
         parent="menu_maquila_fiscal"

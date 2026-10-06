@@ -378,8 +378,15 @@ customs guarantee, CIF control and per-line remaining balance.</li>
 <li><strong>Customs guarantees</strong> (bank, insurance, deposit, mortgage) with
 available balance control.</li>
 <li><strong>Fiscal positions</strong> for temporary admission and exempt export.</li>
-<li>Wizards for the <strong>Tributo Único Maquilador (TUM, 1%)</strong>, the <strong>IVA
-credit</strong> (compensate/transfer) and the <strong>VAN</strong> period computation.</li>
+<li><strong>Tributo Único Maquila (TUM)</strong> monthly declaration (Ley 7547/2025
+Art. 37, Decreto 5714/2026 Art. 43): value added in the national
+territory by component, each line traced to its accounting source, and
+the 1% over the greater of the value added and the export invoice
+value. Components without an accounting source are entered as manual
+lines with their supporting document. Printable summary (PDF). The
+official DNIT form is not modelled.</li>
+<li>Wizards for the <strong>TUM</strong> and the <strong>IVA credit</strong> (compensate/transfer).</li>
+<li>The program of a sale or purchase order is carried to its invoices.</li>
 <li><strong>Domestic-market sales</strong> control (Art. 18): pure maquila may sell up
 to 10% of the prior-year exported value.</li>
 </ul>
@@ -400,16 +407,37 @@ company currency.</p>
 </div>
 <div class="section" id="usage">
 <h1><a class="toc-backref" href="#toc-entry-1">Usage</a></h1>
-<ol class="arabic simple">
-<li>Register a <strong>customs guarantee</strong> for the program.</li>
-<li>Create a <strong>temporary admission</strong> with its CIF amount and lines;
+<ol class="arabic">
+<li><p class="first">Register a <strong>customs guarantee</strong> for the program.</p>
+</li>
+<li><p class="first">Create a <strong>temporary admission</strong> with its CIF amount and lines;
 admitting it checks the CNIME certificate and that the guarantee
 covers the CIF (converted to the guarantee currency). Use <em>Extend 12
-Months</em> for the Art. 14 extension.</li>
-<li>Create an <strong>export</strong> and link it to its source admissions before
-confirming.</li>
-<li>Use the <strong>TUM</strong>, <strong>IVA credit</strong> and <strong>VAN</strong> wizards to compute and
-post the corresponding entries.</li>
+Months</em> for the Art. 14 extension.</p>
+</li>
+<li><p class="first">Create an <strong>export</strong> and link it to its source admissions before
+confirming.</p>
+</li>
+<li><p class="first">On the program, tab <em>Single Tax (TUM)</em>, set the salary and
+depreciation accounts and the TUM expense and payable accounts.</p>
+</li>
+<li><p class="first">Every month, create a <strong>TUM Monthly Declaration</strong> (Maquila &gt; Fiscal),
+run <em>Compute</em>, add manual lines for what has no accounting source
+(for example salaries without payroll, with the payroll reference as
+support), <em>Confirm</em> (also when there were no exports), print the
+summary and generate the journal entry. The value added comes from:</p>
+<ul class="simple">
+<li>a) and b): posted vendor bills of suppliers of the company country,
+goods and services (lines without product count as services);</li>
+<li>c) and d): journal items on the program salary and depreciation
+accounts;</li>
+<li>e): posted customer invoices of service products;</li>
+</ul>
+<p>always limited to entries that carry the program or lines distributed
+to the program analytic account (by its percentage).</p>
+</li>
+<li><p class="first">Use the <strong>IVA credit</strong> wizard to compute and post its entry.</p>
+</li>
 </ol>
 <p>The two fiscal positions shipped in this module (temporary admission and
 exempt export) carry no tax mapping: the actual IVA/customs tax mapping

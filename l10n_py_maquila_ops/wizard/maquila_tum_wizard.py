@@ -21,8 +21,11 @@ class MaquilaTumWizard(models.TransientModel):
         default=lambda self: self.env.ref("base.USD"),
     )
     van_amount = fields.Monetary(
-        string="VAN Amount",
+        string="Value Added (Art. 37)",
         readonly=True,
+        help="Value added in the national territory, Ley 7547/2025 Art. 37: "
+        "goods and services acquired in the country, salaries with social "
+        "security, depreciation and the maquila service remuneration.",
     )
     export_invoice_amount = fields.Monetary(
         readonly=True,
@@ -57,27 +60,49 @@ class MaquilaTumWizard(models.TransientModel):
             wiz.tum_amount = wiz.tum_base * wiz.tum_rate / 100
 
     def action_compute(self):
-        """Compute VAN and export invoice amounts for the period."""
+        """Compute the value added (Ley 7547/2025 Art. 37) and the export
+        invoice amount of the period, converted to the wizard currency."""
         self.ensure_one()
-        # Export invoices for the period
-        invoices = self.env["account.move"].search(
-            [
-                ("l10n_py_maquila_program_id", "=", self.program_id.id),
-                ("move_type", "=", "out_invoice"),
-                ("state", "=", "posted"),
-                ("invoice_date", ">=", self.period_start),
-                ("invoice_date", "<=", self.period_end),
-            ]
+        values = self.program_id._l10n_py_maquila_tum_values(
+            self.period_start, self.period_end
         )
-        self.export_invoice_amount = sum(invoices.mapped("amount_total"))
-        # VAN would come from maquila_mrp module if installed
-        # For now, keep the manually entered value
+        company = self.program_id.company_id
+        self.van_amount = company.currency_id._convert(
+            values["value_added_amount"], self.currency_id, company, self.period_end
+        )
+        self.export_invoice_amount = company.currency_id._convert(
+            values["export_invoice_amount"],
+            self.currency_id,
+            company,
+            self.period_end,
+        )
         return {
             "type": "ir.actions.act_window",
             "res_model": self._name,
             "res_id": self.id,
             "view_mode": "form",
             "target": "new",
+        }
+
+    def action_open_declaration(self):
+        """Open (or create) the monthly declaration of the period start month,
+        which keeps the value added detail by component and document."""
+        self.ensure_one()
+        date_from = self.period_start.replace(day=1)
+        declaration = self.env["l10n_py.maquila.tum.declaration"].search(
+            [("program_id", "=", self.program_id.id), ("date_from", "=", date_from)],
+            limit=1,
+        )
+        if not declaration:
+            declaration = self.env["l10n_py.maquila.tum.declaration"].create(
+                {"program_id": self.program_id.id, "date_from": date_from}
+            )
+            declaration.action_compute()
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": declaration._name,
+            "res_id": declaration.id,
+            "view_mode": "form",
         }
 
     def action_generate_move(self):

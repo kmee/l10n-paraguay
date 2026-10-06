@@ -6,7 +6,7 @@ import json
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -59,6 +59,16 @@ class MaquilaCnimeReport(models.Model):
         related="program_id.company_id",
         store=True,
     )
+
+    @api.depends("program_id.code", "period_start", "period_end")
+    def _compute_display_name(self):
+        for report in self:
+            parts = ["CNIME", report.program_id.code or ""]
+            if report.period_start:
+                start = report.period_start.strftime("%Y-%m")
+                end = report.period_end and report.period_end.strftime("%Y-%m")
+                parts.append(f"{start} / {end}" if end and end != start else start)
+            report.display_name = " ".join(part for part in parts if part)
 
     def _generate_report_data(self):
         """Compile the report snapshot. Called explicitly by action_generate,

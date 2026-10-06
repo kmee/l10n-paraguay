@@ -120,6 +120,15 @@ class TestMaquilaReport(TransactionCase):
             }
         )
 
+    def test_display_name(self):
+        """The record title names the program and the period, not the
+        technical model name and id."""
+        self.assertEqual(
+            self.report.display_name, "CNIME RES-BIM-REP-001 2026-01 / 2026-12"
+        )
+        self.report.period_end = fields.Date.to_date("2026-01-31")
+        self.assertEqual(self.report.display_name, "CNIME RES-BIM-REP-001 2026-01")
+
     def test_report_data_populated(self):
         # Data is compiled by action_generate(), not by a compute.
         self.report.action_generate()

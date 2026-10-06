@@ -13,6 +13,7 @@ class SaleOrder(models.Model):
         string="Maquila Program",
     )
     l10n_py_is_maquila_export = fields.Boolean(
+        string="Maquila Export",
         compute="_compute_is_maquila_export",
     )
 

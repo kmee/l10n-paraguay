@@ -45,6 +45,20 @@ class TestMaquilaOps(TransactionCase):
             }
         )
 
+    def test_fields_have_own_label(self):
+        """Every field added by the maquila modules has a label of its own:
+        without string= Odoo shows the technical name, e.g. "L10N Py Is
+        Maquila Export", and there is nothing to translate."""
+        xmlids = self.env["ir.model.data"].search(
+            [("model", "=", "ir.model.fields"), ("module", "=like", "l10n_py_maquila%")]
+        )
+        fields_ = self.env["ir.model.fields"].browse(xmlids.mapped("res_id"))
+        self.assertTrue(fields_)
+        auto = fields_.filtered(
+            lambda field: field.field_description.startswith("L10N Py")
+        )
+        self.assertFalse(auto, auto.mapped(lambda f: f"{f.model}.{f.name}"))
+
     def test_admission_deadline(self):
         adm = self._admission()
         expected = adm.date_admission + relativedelta(months=12)

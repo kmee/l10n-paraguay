@@ -212,6 +212,7 @@ class TestMaquilaReport(TransactionCase):
                 "importaciones",
                 "exportaciones",
                 "produccion",
+                "consumo",
                 "residuos",
                 "stock_balance",
             },

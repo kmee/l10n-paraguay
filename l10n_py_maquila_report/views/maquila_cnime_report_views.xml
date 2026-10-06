@@ -78,6 +78,9 @@
                         <page string="Production" name="production">
                             <field name="production_data" readonly="1" />
                         </page>
+                        <page string="Consumption" name="consumption">
+                            <field name="consumption_data" readonly="1" />
+                        </page>
                         <page string="Waste" name="waste">
                             <field name="waste_data" readonly="1" />
                         </page>

@@ -39,6 +39,12 @@ class MaquilaCnimeReport(models.Model):
     import_data = fields.Text(readonly=True)
     export_data = fields.Text(readonly=True)
     production_data = fields.Text(readonly=True)
+    consumption_data = fields.Text(
+        readonly=True,
+        help="Raw material used per product (Decreto 5714/2026 Art. 15 b): "
+        "quantity consumed by the completed manufacturing orders of the period "
+        "against the bill of materials, and the waste recorded for it.",
+    )
     waste_data = fields.Text(readonly=True)
     stock_balance = fields.Text(readonly=True)
     employment_count = fields.Integer()
@@ -123,7 +129,7 @@ class MaquilaCnimeReport(models.Model):
                     {
                         "reference": prod.name,
                         "product": prod.product_id.name,
-                        "quantity": prod.product_qty,
+                        "quantity": prod.qty_produced,
                     }
                 )
             report.production_data = (
@@ -150,6 +156,10 @@ class MaquilaCnimeReport(models.Model):
                 )
             report.waste_data = (
                 json.dumps(waste_lines, indent=2) if waste_lines else False
+            )
+            consumption = report._consumption_lines(productions, wastes)
+            report.consumption_data = (
+                json.dumps(consumption, indent=2) if consumption else False
             )
 
             # Stock balance at period_end (historical), from done stock moves
@@ -199,6 +209,55 @@ class MaquilaCnimeReport(models.Model):
             except UserError:
                 # No analytic account or no completed production in the period.
                 report.van_total = 0.0
+
+    def _consumption_lines(self, productions, wastes):
+        """Raw material consumed by the given done manufacturing orders,
+        grouped by product, in the product unit of measure, with the
+        quantity expected by the bill of materials for what was produced and
+        the waste recorded for the product (Decreto 5714/2026 Art. 15 b-d)."""
+        totals = {}
+        for prod in productions:
+            bom = prod.bom_id
+            factor = (
+                prod.product_uom_id._compute_quantity(
+                    prod.qty_produced, bom.product_uom_id
+                )
+                / bom.product_qty
+                if bom and bom.product_qty
+                else 0.0
+            )
+            for move in prod.move_raw_ids.filtered(lambda m: m.state == "done"):
+                product = move.product_id
+                item = totals.setdefault(
+                    product,
+                    {
+                        "product": product.display_name,
+                        "uom": product.uom_id.name,
+                        "origin": False,
+                        "consumed": 0.0,
+                        "bom_quantity": 0.0,
+                    },
+                )
+                item["consumed"] += move.product_uom._compute_quantity(
+                    move.quantity, product.uom_id
+                )
+                bom_line = move.bom_line_id
+                if bom_line:
+                    item["origin"] = bom_line.l10n_py_origin_type
+                    item["bom_quantity"] += bom_line.product_uom_id._compute_quantity(
+                        bom_line.product_qty * factor, product.uom_id
+                    )
+        for product, item in totals.items():
+            waste = sum(
+                wastes.filtered(lambda w, p=product: w.product_id == p).mapped(
+                    "quantity"
+                )
+            )
+            item["waste_quantity"] = waste
+            item["waste_pct"] = (
+                round(waste / item["consumed"] * 100, 2) if item["consumed"] else 0.0
+            )
+        return list(totals.values())
 
     def action_generate(self):
         """Compile the snapshot and move to the generated state."""
@@ -253,6 +312,7 @@ class MaquilaCnimeReport(models.Model):
             "importaciones": json.loads(self.import_data or "[]"),
             "exportaciones": json.loads(self.export_data or "[]"),
             "produccion": json.loads(self.production_data or "[]"),
+            "consumo": json.loads(self.consumption_data or "[]"),
             "residuos": json.loads(self.waste_data or "[]"),
             "stock_balance": json.loads(self.stock_balance or "[]"),
         }

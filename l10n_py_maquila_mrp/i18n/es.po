@@ -1,0 +1,686 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_py_maquila_mrp
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-06 06:01+0000\n"
+"PO-Revision-Date: 2026-10-06 05:54+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_needaction
+msgid "Action Needed"
+msgstr "Acción necesaria"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoración de actividad de excepción"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_state
+msgid "Activity State"
+msgstr "Estado de la actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono del tipo de actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_attachment_count
+msgid "Attachment Count"
+msgstr "Número de adjuntos"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "BOMs"
+msgstr "Listas de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_mrp_bom
+msgid "Bill of Material"
+msgstr "Lista de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_mrp_bom_line
+msgid "Bill of Material Line"
+msgstr "Línea de lista de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program_product__bom_id
+msgid "Bill of Materials"
+msgstr "Lista de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__bom_ids
+#: model:ir.ui.menu,name:l10n_py_maquila_mrp.menu_maquila_bom
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "Bills of Materials"
+msgstr "Listas de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__bom_count
+msgid "Bom Count"
+msgstr "Cantidad de listas de materiales"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__waste_type__byproduct
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Byproduct"
+msgstr "Subproducto"
+
+#. module: l10n_py_maquila_mrp
+#. odoo-python
+#: code:addons/l10n_py_maquila_mrp/models/maquila_program.py:0
+msgid "Cannot compute the VAN for program %(program)s: there is no completed production in the period, so the origin split of the cost cannot be determined."
+msgstr "No se puede calcular el VAN del programa %(program)s: no hay producción completada en el período, por lo que no se puede determinar la distribución del costo por origen."
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Classification"
+msgstr "Clasificación"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Complete"
+msgstr "Completar"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__state__completed
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Completed"
+msgstr "Completado"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "Compute"
+msgstr "Calcular"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "Cost Breakdown"
+msgstr "Desglose de costos"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__date
+msgid "Date"
+msgstr "Fecha"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__waste_type__defective
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Defective"
+msgstr "Defectuoso"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__destination
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Destination"
+msgstr "Destino"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__destination__destruction
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Destruction"
+msgstr "Destrucción"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__seam_approval
+msgid "Environmental clearance (MADES, ex-SEAM per Ley 6123/2018)"
+msgstr "Habilitación ambiental (MADES, ex SEAM según la Ley 6123/2018)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Contactos)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icono de Font Awesome, p. ej. fa-tasks"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom_line__diff_product_qty_gross_net
+msgid "Gross/Net Difference"
+msgstr "Diferencia bruto/neto"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__has_message
+msgid "Has Message"
+msgstr "Tiene un mensaje"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__id
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__id
+msgid "ID"
+msgstr "ID"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom__l10n_py_intn_certificate
+msgid "INTN Certificate Number"
+msgstr "Número del certificado INTN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom__l10n_py_intn_date
+msgid "INTN Certification Date"
+msgstr "Fecha de certificación INTN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom__l10n_py_intn_certified
+msgid "INTN Certified"
+msgstr "Certificado INTN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__destruction_certificate
+msgid "INTN Destruction Certificate"
+msgstr "Certificado de destrucción INTN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icono que indica una actividad de excepción."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si está marcado, hay mensajes nuevos que requieren su atención."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si está marcado, algunos mensajes tienen error de entrega."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__mrp_bom_line__l10n_py_origin_type__imported
+msgid "Imported (Other)"
+msgstr "Importado (Otros)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__imported_cost
+msgid "Imported Cost"
+msgstr "Costo importado"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__state__in_process
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "In Process"
+msgstr "En proceso"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__justification
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Justification"
+msgstr "Justificación"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom_line__loss_percentage
+msgid "Loss %"
+msgstr "% de pérdida"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__lot_id
+msgid "Lot/Serial"
+msgstr "Lote/Serie"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__seam_approval
+msgid "MADES Dictamen"
+msgstr "Dictamen MADES"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.ui.menu,name:l10n_py_maquila_mrp.menu_maquila_manufacturing
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "Manufacturing"
+msgstr "Fabricación"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_mrp_production
+msgid "Manufacturing Order"
+msgstr "Orden de fabricación"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.mrp_bom_form_view_inherit_maquila
+msgid "Maquila"
+msgstr "Maquila"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_l10n_py_maquila_program
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom__l10n_py_maquila_program_id
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_production__l10n_py_maquila_program_id
+msgid "Maquila Program"
+msgstr "Programa de maquila"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_l10n_py_maquila_program_product
+msgid "Maquila Program Product"
+msgstr "Producto del programa de maquila"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Maquila Waste"
+msgstr "Merma de maquila"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_l10n_py_maquila_waste
+msgid "Maquila Waste Management"
+msgstr "Gestión de mermas de maquila"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__company_id
+msgid "Maquiladora"
+msgstr "Maquiladora"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__mercosul_content
+msgid "Mercosul Content %"
+msgstr "% de contenido Mercosur"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__mercosul_cost
+msgid "Mercosul Cost"
+msgstr "Costo Mercosur"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de entrega del mensaje"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Fecha límite de mi actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__mrp_bom_line__l10n_py_origin_type__national_mercosul
+msgid "National (Mercosul)"
+msgstr "Nacional (Mercosur)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__mrp_bom_line__l10n_py_origin_type__national_py
+msgid "National (Paraguay)"
+msgstr "Nacional (Paraguay)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__national_cost
+msgid "National Cost (PY)"
+msgstr "Costo nacional (PY)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__destination__nationalization
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Nationalization"
+msgstr "Nacionalización"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__nationalization_move_id
+msgid "Nationalization Entry"
+msgstr "Asiento de nacionalización"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom_line__product_qty_net
+msgid "Net Quantity"
+msgstr "Cantidad neta"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Fecha límite de la próxima actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resumen de la próxima actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_type_id
+msgid "Next Activity Type"
+msgstr "Tipo de la próxima actividad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren una acción"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de entrega"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom_line__l10n_py_origin_country
+msgid "Origin Country"
+msgstr "País de origen"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_mrp_bom_line__l10n_py_origin_type
+msgid "Origin Type"
+msgstr "Tipo de origen"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "Parameters"
+msgstr "Parámetros"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__state__pending
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Pending"
+msgstr "Pendiente"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_mrp_bom_line__loss_percentage
+msgid "Percentage loss during process (INTN waste coefficient)"
+msgstr "Porcentaje de pérdida durante el proceso (coeficiente de merma INTN)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__period_end
+msgid "Period End"
+msgstr "Fin del período"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__period_start
+msgid "Period Start"
+msgstr "Inicio del período"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Process"
+msgstr "Proceso"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__production_id
+msgid "Production"
+msgstr "Producción"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__production_count
+msgid "Production Count"
+msgstr "Cantidad de producciones"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__production_ids
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "Productions"
+msgstr "Producciones"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__program_id
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__program_id
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Program"
+msgstr "Programa"
+
+#. module: l10n_py_maquila_mrp
+#. odoo-python
+#: code:addons/l10n_py_maquila_mrp/models/maquila_program.py:0
+msgid "Program %(program)s has no analytic account configured."
+msgstr "El programa %(program)s no tiene una cuenta analítica configurada."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__quantity
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_mrp_bom_line__product_qty_net
+msgid "Quantity after process (INTN net coefficient)"
+msgstr "Cantidad después del proceso (coeficiente neto INTN)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__destination__reexport
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Re-export"
+msgstr "Reexportación"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.actions.act_window,help:l10n_py_maquila_mrp.action_maquila_waste
+msgid "Register a new waste record"
+msgstr "Registrar un nuevo registro de merma"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Regulatory"
+msgstr "Regulatorio"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Reset to Pending"
+msgstr "Restablecer a pendiente"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_user_id
+msgid "Responsible User"
+msgstr "Usuario responsable"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__scrap_id
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__l10n_py_maquila_waste__waste_type__scrap
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Scrap"
+msgstr "Desperdicio"
+
+#. module: l10n_py_maquila_mrp
+#. odoo-python
+#: code:addons/l10n_py_maquila_mrp/models/mrp_bom.py:0
+msgid ""
+"Setting gross quantity with 100%% loss makes no sense.\n"
+"Change this value."
+msgstr ""
+"Definir la cantidad bruta con 100%% de pérdida no tiene sentido.\n"
+"Cambie este valor."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__state
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "State"
+msgstr "Estado"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Estado basado en actividades\n"
+"Vencida: la fecha límite ya pasó\n"
+"Hoy: la fecha de la actividad es hoy\n"
+"Planificada: actividades futuras."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields.selection,name:l10n_py_maquila_mrp.selection__mrp_bom_line__l10n_py_origin_type__temporary_admission
+msgid "Temporary Admission"
+msgstr "Admisión temporal"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__total_cost
+msgid "Total Cost"
+msgstr "Costo total"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.actions.act_window,help:l10n_py_maquila_mrp.action_maquila_waste
+msgid ""
+"Track scrap, byproducts, and defective materials from\n"
+"                maquila production processes."
+msgstr ""
+"Registre las mermas, subproductos y materiales defectuosos de los\n"
+"                procesos de producción de maquila."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipo de la actividad de excepción en el registro."
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__van_percentage
+msgid "VAN %"
+msgstr "% VAN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model,name:l10n_py_maquila_mrp.model_l10n_py_maquila_van_wizard
+msgid "VAN (National Added Value) Calculation Wizard"
+msgstr "Asistente de cálculo del VAN (Valor Agregado Nacional)"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_van_wizard__van_amount
+msgid "VAN Amount"
+msgstr "Monto del VAN"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.actions.act_window,name:l10n_py_maquila_mrp.action_maquila_van_wizard
+#: model:ir.ui.menu,name:l10n_py_maquila_mrp.menu_maquila_van
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "VAN Calculation"
+msgstr "Cálculo del VAN"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_van_wizard_form
+msgid "VAN Results"
+msgstr "Resultados del VAN"
+
+#. module: l10n_py_maquila_mrp
+#. odoo-python
+#: code:addons/l10n_py_maquila_mrp/models/maquila_waste.py:0
+#: model:ir.ui.menu,name:l10n_py_maquila_mrp.menu_maquila_waste
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "Waste"
+msgstr "Merma"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__waste_count
+msgid "Waste Count"
+msgstr "Cantidad de mermas"
+
+#. module: l10n_py_maquila_mrp
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_form
+msgid "Waste Details"
+msgstr "Detalle de la merma"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.actions.act_window,name:l10n_py_maquila_mrp.action_maquila_waste
+msgid "Waste Management"
+msgstr "Gestión de mermas"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__product_id
+msgid "Waste Product"
+msgstr "Producto de merma"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_program__waste_ids
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_program_form_inherit_mrp_stats
+msgid "Waste Records"
+msgstr "Registros de merma"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__waste_type
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_mrp.view_maquila_waste_search
+msgid "Waste Type"
+msgstr "Tipo de merma"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,field_description:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: l10n_py_maquila_mrp
+#: model:ir.model.fields,help:l10n_py_maquila_mrp.field_l10n_py_maquila_waste__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"

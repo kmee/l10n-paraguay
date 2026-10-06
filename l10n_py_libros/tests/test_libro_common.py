@@ -14,17 +14,38 @@ class LibroCommonCase(TransactionCase):
     TEST_DATE = date(TEST_YEAR, TEST_MONTH, 15)
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.company = cls.env.ref("base.main_company")
-        cls.country_py = cls.env.ref("base.py")
-        cls.company.write(
+    def _create_py_company(cls):
+        """Paraguayan company with the py chart, made the current company.
+
+        The suite must not rely on the chart of ``base.main_company``: it only
+        is Paraguayan when the localization demo data puts it there.
+        """
+        country_py = cls.env.ref("base.py")
+        currency_pyg = cls.env.ref("base.PYG")
+        currency_pyg.active = True
+        company = cls.env["res.company"].create(
             {
-                "country_id": cls.country_py.id,
-                "account_fiscal_country_id": cls.country_py.id,
-                "l10n_py_ruc": "80009401",
+                "name": "Empresa Libros Test SA",
+                "country_id": country_py.id,
+                "account_fiscal_country_id": country_py.id,
+                "currency_id": currency_pyg.id,
             }
         )
+        cls.env.user.company_ids |= company
+        cls.env = cls.env(
+            context=dict(cls.env.context, allowed_company_ids=[company.id]),
+        )
+        cls.env["account.chart.template"].try_loading(
+            "py", company, install_demo=False
+        )
+        return cls.env["res.company"].browse(company.id)
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.country_py = cls.env.ref("base.py")
+        cls.company = cls._create_py_company()
+        cls.company.write({"l10n_py_ruc": "80009401"})
 
         cls.doc_type_factura = cls.env.ref("l10n_py_account.dc_py_f")
         cls.doc_type_autofactura = cls.env.ref("l10n_py_account.dc_py_af")

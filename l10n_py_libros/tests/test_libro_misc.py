@@ -92,6 +92,17 @@ class TestLibroMisc(LibroCommonCase):
         line.unlink()
         self.assertEqual(len(libro.line_ids), 0)
 
+    def test_form_uses_chatter_tag(self):
+        """The form must use the Odoo 18 <chatter/> tag: the legacy
+        oe_chatter div renders the mail fields as plain lists and squeezes
+        the sheet, hiding the header with the ZIP button."""
+        arch = self.env["l10n_py.libro"].get_view(
+            self.env.ref("l10n_py_libros.view_l10n_py_libro_form").id, "form"
+        )["arch"]
+        self.assertIn("<chatter", arch)
+        self.assertNotIn("oe_chatter", arch)
+        self.assertIn('name="action_download_zip"', arch)
+
     def test_no_ai_attribution(self):
         module_dir = Path(__file__).resolve().parent.parent
         self_file = Path(__file__).resolve()

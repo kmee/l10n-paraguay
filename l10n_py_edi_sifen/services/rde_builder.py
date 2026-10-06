@@ -72,6 +72,8 @@ from pysifen.de.bindings.de_v150.xmldsig_core_schema import (
     SignedInfo,
 )
 
+from odoo.tools import html2plaintext
+
 _logger = logging.getLogger(__name__)
 
 # === Lookup tables for SIFEN description enums ===
@@ -212,11 +214,17 @@ class RDeBuilder:
 
     def _build_gOpeDE(self):
         tip_emi = self.data.get("tipoEmision", 1)
-        return TgCopeDe(
+        gopede = TgCopeDe(
             iTipEmi=tip_emi,
             dDesTipEmi=_TIP_EMI_DESC.get(tip_emi, TdDesTipEmi.NORMAL),
             dCodSeg=self.data.get("codigoSeguridadAleatorio", "000000000"),
         )
+        # B006: invoice notes (HTML in Odoo) plus legends added by other
+        # modules, as plain text
+        info = " ".join(html2plaintext(self.data.get("observacion") or "").split())
+        if info:
+            gopede.dInfoEmi = info[:3000]
+        return gopede
 
     def _build_gTimb(self):
         ti_de = self.data.get("tipoDocumento", 1)

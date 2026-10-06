@@ -103,6 +103,25 @@ class TestRDeBuilder(TransactionCase):
         self.assertEqual(rde.DE.dDVId, _CDC[-1])
         self.assertEqual(rde.DE.dSisFact, 1)
 
+    def test_build_observation_in_info_emisor(self):
+        """The observation (invoice notes plus the legends added by other
+        modules, such as the maquila one) goes to B006 dInfoEmi as text."""
+        data = self._get_sample_invoice_data()
+        data["observacion"] = (
+            "<p>Entrega FCA</p> | Producto Maquila - Ley 7547/2025 - RES-1"
+        )
+        gopede = self._build(invoice=data).DE.gOpeDE
+        self.assertEqual(
+            gopede.dInfoEmi,
+            "Entrega FCA | Producto Maquila - Ley 7547/2025 - RES-1",
+        )
+
+    def test_build_without_observation(self):
+        """No observation: B006 is left out (it has a minimum length of 1)."""
+        data = self._get_sample_invoice_data()
+        data["observacion"] = "<p><br></p>"
+        self.assertIsNone(self._build(invoice=data).DE.gOpeDE.dInfoEmi)
+
     def test_build_timbrado(self):
         """gTimb refleja establecimiento, punto y número."""
         gtimb = self._build().DE.gTimb

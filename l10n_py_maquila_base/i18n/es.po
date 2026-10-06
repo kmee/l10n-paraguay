@@ -1,0 +1,607 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_py_maquila_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-06 06:01+0000\n"
+"PO-Revision-Date: 2026-10-06 05:54+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_needaction
+msgid "Action Needed"
+msgstr "Acción necesaria"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Activate"
+msgstr "Activar"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__active
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__state__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Active Programs"
+msgstr "Programas activos"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoración de actividad de excepción"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_state
+msgid "Activity State"
+msgstr "Estado de la actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono del tipo de actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__analytic_account_id
+msgid "Analytic Account"
+msgstr "Cuenta analítica"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__analytic_account_id
+msgid "Analytic account for accounting segregation of this program"
+msgstr "Cuenta analítica para la segregación contable de este programa"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_attachment_count
+msgid "Attachment Count"
+msgstr "Número de adjuntos"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__benefit_duration_years
+msgid "Benefit Duration Years"
+msgstr "Duración del beneficio en años"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__benefit_expiry
+msgid "Benefit Expiry"
+msgstr "Vencimiento del beneficio"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__benefit_duration_years
+msgid "Benefit term in years (Ley 7547/2025 Art. 13: 20 years, renewable)."
+msgstr "Plazo del beneficio en años (Ley 7547/2025 Art. 13: 20 años, renovable)."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__code
+msgid "Biministerial Resolution"
+msgstr "Resolución biministerial"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__agreement_id
+msgid "CNIME Contract"
+msgstr "Contrato CNIME"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "CNIME Resolution"
+msgstr "Resolución CNIME"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__cnime_resolution_date
+msgid "CNIME Resolution Date"
+msgstr "Fecha de la resolución CNIME"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__cnime_resolution_expiry
+msgid "CNIME Resolution Expiry"
+msgstr "Vencimiento de la resolución CNIME"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__ociosidad
+msgid "Capacidad Ociosa"
+msgstr "Capacidad Ociosa"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_res_company__l10n_py_is_maquiladora
+msgid "Check if this company operates under Maquila regime (Ley 7547/2025)"
+msgstr "Marque si esta compañía opera bajo el régimen de Maquila (Ley 7547/2025)"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__state__closed
+msgid "Closed"
+msgstr "Cerrado"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__coexistencia
+msgid "Coexistencia (régimen ordinario)"
+msgstr "Coexistencia (régimen ordinario)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model,name:l10n_py_maquila_base.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Company"
+msgstr "Compañía"
+
+#. module: l10n_py_maquila_base
+#: model:ir.ui.menu,name:l10n_py_maquila_base.menu_maquila_config
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: l10n_py_maquila_base
+#. odoo-python
+#: code:addons/l10n_py_maquila_base/models/maquila_program.py:0
+msgid "Contract for program %(code)s expires on %(date)s"
+msgstr "El contrato del programa %(code)s vence el %(date)s"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Contracts"
+msgstr "Contratos"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.actions.act_window,help:l10n_py_maquila_base.action_maquila_program
+msgid "Create your first Maquila Program"
+msgstr "Cree su primer Programa de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__create_uid
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__create_date
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__display_name
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Documents"
+msgstr "Documentos"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__state__draft
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__benefit_expiry
+msgid "End of the benefit term, computed from the resolution date."
+msgstr "Fin del plazo del beneficio, calculado a partir de la fecha de la resolución."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (Contactos)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icono de Font Awesome, p. ej. fa-tasks"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__matriz_partner_id
+msgid "Foreign Matrix"
+msgstr "Matriz extranjera"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__matriz_partner_id
+msgid "Foreign parent company (owner of temporary goods)"
+msgstr "Empresa matriz extranjera (propietaria de las mercaderías en admisión temporal)"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__has_message
+msgid "Has Message"
+msgstr "Tiene un mensaje"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__id
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__id
+msgid "ID"
+msgstr "ID"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__intn_certificate
+msgid "INTN Certificate"
+msgstr "Certificado INTN"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__intn_certificate_date
+msgid "INTN Certificate Date"
+msgstr "Fecha del certificado INTN"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__intn_expiry_date
+msgid "INTN Expiry Date"
+msgstr "Fecha de vencimiento INTN"
+
+#. module: l10n_py_maquila_base
+#. odoo-python
+#: code:addons/l10n_py_maquila_base/models/maquila_program.py:0
+msgid "INTN certificate for %(product)s expires on %(date)s"
+msgstr "El certificado INTN de %(product)s vence el %(date)s"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program_product__intn_expiry_date
+msgid "INTN certificate validity (typically 2 years)"
+msgstr "Vigencia del certificado INTN (normalmente 2 años)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icono que indica una actividad de excepción."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si está marcado, hay mensajes nuevos que requieren su atención."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si está marcado, algunos mensajes tienen error de entrega."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__internal_sale_pct
+msgid "Internal Market %"
+msgstr "% mercado interno"
+
+#. module: l10n_py_maquila_base
+#. odoo-python
+#: code:addons/l10n_py_maquila_base/models/maquila_program.py:0
+msgid "Internal market %% must be between 0 and 100."
+msgstr "El %% de mercado interno debe estar entre 0 y 100."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_res_company__l10n_py_is_maquiladora
+msgid "Is Maquiladora"
+msgstr "Es maquiladora"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__write_uid
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__write_date
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__legal_regime
+msgid "Legacy 1064/97 programs keep prior conditions for 12 months, then migrate to Ley 7547/2025 (Art. 42)."
+msgstr "Los programas de la Ley 1064/97 (heredados) mantienen las condiciones anteriores durante 12 meses y luego migran a la Ley 7547/2025 (Art. 42)."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__legal_regime
+msgid "Legal Regime"
+msgstr "Régimen legal"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__maquila_type
+msgid "Legal modalities under Ley 7547/2025 (Arts. 3, 25-27). 'abrigo' is kept for the textile/garment rubro."
+msgstr "Modalidades legales según la Ley 7547/2025 (Arts. 3, 25-27). 'abrigo' se mantiene para el rubro textil/confección."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__legal_regime__ley_1064
+msgid "Ley 1064/97 (legacy)"
+msgstr "Ley 1064/97 (heredada)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__legal_regime__ley_7547
+msgid "Ley 7547/2025"
+msgstr "Ley 7547/2025"
+
+#. module: l10n_py_maquila_base
+#: model:ir.ui.menu,name:l10n_py_maquila_base.menu_maquila_root
+msgid "Maquila"
+msgstr "Maquila"
+
+#. module: l10n_py_maquila_base
+#: model:res.groups,name:l10n_py_maquila_base.group_maquila_manager
+msgid "Maquila Manager"
+msgstr "Gerente de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model,name:l10n_py_maquila_base.model_l10n_py_maquila_program
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Maquila Program"
+msgstr "Programa de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model,name:l10n_py_maquila_base.model_l10n_py_maquila_program_product
+msgid "Maquila Program Product"
+msgstr "Producto del programa de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.actions.act_window,name:l10n_py_maquila_base.action_maquila_program
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Maquila Programs"
+msgstr "Programas de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__pura
+msgid "Maquila Pura"
+msgstr "Maquila Pura"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__maquila_type
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Maquila Type"
+msgstr "Tipo de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:res.groups,name:l10n_py_maquila_base.group_maquila_user
+msgid "Maquila User"
+msgstr "Usuario de maquila"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__abrigo
+msgid "Maquila de Abrigo"
+msgstr "Maquila de Abrigo"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__servicio
+msgid "Maquila de Servicios"
+msgstr "Maquila de Servicios"
+
+#. module: l10n_py_maquila_base
+#: model:ir.actions.server,name:l10n_py_maquila_base.ir_cron_maquila_expiry_check_ir_actions_server
+msgid "Maquila: Check Expiry Dates"
+msgstr "Maquila: verificar fechas de vencimiento"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__company_id
+msgid "Maquiladora"
+msgstr "Maquiladora"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de entrega del mensaje"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Fecha límite de mi actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Fecha límite de la próxima actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_summary
+msgid "Next Activity Summary"
+msgstr "Resumen de la próxima actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_type_id
+msgid "Next Activity Type"
+msgstr "Tipo de la próxima actividad"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren una acción"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de entrega"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__agreement_id
+msgid "OCA Agreement linked to CNIME contract"
+msgstr "Convenio OCA vinculado al contrato CNIME"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__internal_sale_pct
+msgid "Percentage allowed for domestic sale (capacidad ociosa type)"
+msgstr "Porcentaje permitido para la venta en el mercado interno (tipo capacidad ociosa)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__product_id
+msgid "Product"
+msgstr "Producto"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__product_line_ids
+msgid "Product Lines"
+msgstr "Líneas de producto"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Products"
+msgstr "Productos"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program_product__program_id
+msgid "Program"
+msgstr "Programa"
+
+#. module: l10n_py_maquila_base
+#. odoo-python
+#: code:addons/l10n_py_maquila_base/models/maquila_program.py:0
+msgid "Program %(code)s expires on %(date)s"
+msgstr "El programa %(code)s vence el %(date)s"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Program Name"
+msgstr "Nombre del programa"
+
+#. module: l10n_py_maquila_base
+#: model:ir.ui.menu,name:l10n_py_maquila_base.menu_maquila_programs
+msgid "Programs"
+msgstr "Programas"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.actions.act_window,help:l10n_py_maquila_base.action_maquila_program
+msgid ""
+"Register and manage programs under Paraguay's Maquila regime\n"
+"                (Ley 7547/2025)."
+msgstr ""
+"Registre y gestione los programas bajo el régimen de Maquila del Paraguay\n"
+"                (Ley 7547/2025)."
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Reset to Draft"
+msgstr "Restablecer a borrador"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__code
+msgid "Resolucion biministerial (e.g. RES-BIM-2026-001)"
+msgstr "Resolución biministerial (p. ej. RES-BIM-2026-001)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__resolution_attachment_name
+msgid "Resolution Attachment Name"
+msgstr "Nombre del adjunto de la resolución"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__resolution_attachment
+msgid "Resolution PDF"
+msgstr "PDF de la resolución"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_user_id
+msgid "Responsible User"
+msgstr "Usuario responsable"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__shelter
+msgid "Shelter / Albergue"
+msgstr "Albergue (Shelter)"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__state
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "State"
+msgstr "Estado"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Estado basado en actividades\n"
+"Vencida: la fecha límite ya pasó\n"
+"Hoy: la fecha de la actividad es hoy\n"
+"Planificada: actividades futuras."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__maquila_type__sub_maquila
+msgid "Sub-Maquila (Sub-contratación)"
+msgstr "Submaquila (Subcontratación)"
+
+#. module: l10n_py_maquila_base
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_form
+msgid "Suspend"
+msgstr "Suspender"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields.selection,name:l10n_py_maquila_base.selection__l10n_py_maquila_program__state__suspended
+#: model_terms:ir.ui.view,arch_db:l10n_py_maquila_base.view_maquila_program_search
+msgid "Suspended"
+msgstr "Suspendido"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.constraint,message:l10n_py_maquila_base.constraint_l10n_py_maquila_program_code_company_uniq
+msgid "The resolution code must be unique per company."
+msgstr "El código de la resolución debe ser único por compañía."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipo de la actividad de excepción en el registro."
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,field_description:l10n_py_maquila_base.field_l10n_py_maquila_program__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: l10n_py_maquila_base
+#: model:ir.model.fields,help:l10n_py_maquila_base.field_l10n_py_maquila_program__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"

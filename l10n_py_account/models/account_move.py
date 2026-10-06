@@ -4,6 +4,7 @@ from num2words import num2words
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 
 class AccountMove(models.Model):
@@ -136,7 +137,13 @@ class AccountMove(models.Model):
     l10n_py_exchange_rate = fields.Float(
         string="Tipo de Cambio",
         digits=(16, 4),
-        help="Tipo de cambio a guaraníes (PYG) para facturación en moneda extranjera",
+        compute="_compute_l10n_py_exchange_rate",
+        inverse="_inverse_l10n_py_exchange_rate",
+        store=True,
+        readonly=False,
+        help="Tipo de cambio a guaraníes (PYG) para facturación en moneda "
+        "extranjera. Se calcula con la cotización de la moneda en la fecha de la "
+        "factura y puede editarse.",
     )
 
     l10n_py_amount_total_pyg = fields.Monetary(
@@ -280,6 +287,44 @@ class AccountMove(models.Model):
             move.l10n_py_amount_iva_total = iva_10 + iva_5  # F014
             move.l10n_py_base_total = base_10 + base_5  # F020
             move.l10n_py_total_operation = exempt + subtotal_5 + subtotal_10  # F008
+
+    def _l10n_py_needs_exchange_rate(self):
+        """Foreign currency document of a company that keeps its books in PYG"""
+        self.ensure_one()
+        return (
+            self.company_currency_id.name == "PYG"
+            and self.currency_id
+            and self.currency_id != self.company_currency_id
+        )
+
+    @api.depends("currency_id", "company_currency_id", "invoice_currency_rate")
+    def _compute_l10n_py_exchange_rate(self):
+        """PYG per unit of the document currency, from the rate the invoice is
+        booked with (core invoice_currency_rate: rate of the currency at the
+        invoice date, editable)."""
+        for move in self:
+            if not move._l10n_py_needs_exchange_rate():
+                if move.currency_id == move.company_currency_id:
+                    move.l10n_py_exchange_rate = 0.0
+                continue
+            if move.invoice_currency_rate:
+                move.l10n_py_exchange_rate = 1.0 / move.invoice_currency_rate
+
+    def _inverse_l10n_py_exchange_rate(self):
+        """A rate typed on a draft invoice is also the booking rate, so the
+        amounts in PYG of the entry match the rate declared to SIFEN."""
+        for move in self:
+            if (
+                move.state == "draft"
+                and move.l10n_py_exchange_rate > 0
+                and move._l10n_py_needs_exchange_rate()
+                and move.is_invoice(include_receipts=True)
+            ):
+                current = move.invoice_currency_rate
+                if not current or float_compare(
+                    1.0 / current, move.l10n_py_exchange_rate, precision_digits=4
+                ):
+                    move.invoice_currency_rate = 1.0 / move.l10n_py_exchange_rate
 
     @api.depends("amount_total", "l10n_py_exchange_rate")
     def _compute_l10n_py_total_pyg(self):

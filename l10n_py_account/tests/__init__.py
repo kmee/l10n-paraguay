@@ -4,3 +4,4 @@ from . import test_account_move_timbrado
 from . import test_account_journal
 from . import test_res_company
 from . import test_demo_data
+from . import test_account_move_exchange_rate

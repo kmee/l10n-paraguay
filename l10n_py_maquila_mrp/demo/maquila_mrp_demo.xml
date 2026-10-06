@@ -3,9 +3,17 @@
     <!-- ============================================================ -->
     <!-- BOMs - Program 1: Chicote Eléctrico                           -->
     <!-- ============================================================ -->
+    <!-- The BoMs belong to the company of their maquila program, the
+         company of the program products (the maquiladora demo company
+         when l10n_py_maquila_base provides one). -->
 
     <record id="bom_chicote" model="mrp.bom">
         <field name="code">BOM-CHE-001</field>
+        <field
+            name="company_id"
+            model="l10n_py.maquila.program"
+            eval="obj(ref('l10n_py_maquila_base.maquila_program_demo')).company_id.id"
+        />
         <field
             name="product_tmpl_id"
             search="[('default_code', '=', 'MQ-PA-CHE')]"
@@ -89,6 +97,11 @@
 
     <record id="bom_panel" model="mrp.bom">
         <field name="code">BOM-PPI-001</field>
+        <field
+            name="company_id"
+            model="l10n_py.maquila.program"
+            eval="obj(ref('l10n_py_maquila_base.maquila_program_ociosidad')).company_id.id"
+        />
         <field
             name="product_tmpl_id"
             search="[('default_code', '=', 'MQ-PA-PPI')]"

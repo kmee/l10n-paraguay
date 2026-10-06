@@ -3,17 +3,15 @@ Bridge module between Paraguay's Maquila operations and MRP modules
 
 - Auto-installs when both modules are present, so no manual configuration is
   needed to link them.
-- Extends the **TUM 1% wizard**'s ``action_compute`` to also compute the VAN
-  (national added value) for the period, via the program's shared
-  ``_maquila_van_for_period`` method, so the TUM and VAN wizards always
-  report the same figures for the same program and period.
-- The VAN amounts (``total_cost``, ``national_cost``, ``mercosul_cost``,
-  ``imported_cost``, ``van_amount``) are stored in the company currency by
-  ``_maquila_van_for_period`` and are converted to the wizard's currency
-  before being displayed.
-- If there is no completed manufacturing order in the period, the origin
-  split of the cost cannot be determined: the VAN is left at zero, a warning
-  is shown on the wizard, and the TUM base falls back to the export invoice
-  amount only (the same behavior as without this module installed). A
-  missing analytic account on the program is still a blocking configuration
-  error.
+- The TUM base keeps the value added of Ley 7547/2025 Art. 37, computed by
+  ``l10n_py_maquila_ops`` from the accounting (goods and services acquired in
+  the country, salaries with social security, depreciation and the maquila
+  service remuneration).
+- This module adds to the **TUM 1% wizard**, for information, the origin split
+  of the inputs consumed by the completed manufacturing orders of the period
+  (national, Mercosur and imported cost, and the national content), via the
+  shared ``_maquila_van_for_period`` method of the program used by the VAN wizard
+  and the CNIME report. The amounts are converted to the currency of the wizard.
+- Without an analytic account on the program or a completed manufacturing
+  order in the period, the split stays at zero and a notice is shown. It never
+  changes the TUM base.

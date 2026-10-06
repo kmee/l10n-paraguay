@@ -3,12 +3,11 @@
 
 from odoo import _, fields, models
 
-VAN_FIELDS = (
+MRP_FIELDS = (
     "total_cost",
     "national_cost",
     "mercosul_cost",
     "imported_cost",
-    "van_amount",
 )
 
 
@@ -22,20 +21,24 @@ class MaquilaTumWizard(models.TransientModel):
     )
     mercosul_cost = fields.Monetary(readonly=True)
     imported_cost = fields.Monetary(readonly=True)
+    mrp_van_amount = fields.Monetary(
+        string="MRP National Content",
+        readonly=True,
+        help="Program analytic cost minus Mercosul and imported inputs "
+        "consumed by the completed manufacturing orders. Informative: the "
+        "TUM base uses the value added of Ley 7547/2025 Art. 37.",
+    )
     van_warning = fields.Char(readonly=True)
 
     def action_compute(self):
-        """Extend the base computation to derive van_amount from
-        l10n_py_maquila_mrp's shared VAN calculation, so the TUM wizard and
-        the VAN wizard always report the same figure for the same period.
-        """
+        """Keep the Art. 37 value added computed by l10n_py_maquila_ops as the
+        TUM base and add, for information, the origin split of the inputs
+        consumed by the completed manufacturing orders of the period."""
         self.ensure_one()
         result = super().action_compute()
         program = self.program_id
-        if not program.analytic_account_id:
-            # Let the shared method raise its own configuration error, with
-            # the same message used by the VAN wizard.
-            program._maquila_van_for_period(self.period_start, self.period_end)
+        for field_name in MRP_FIELDS + ("mrp_van_amount",):
+            self[field_name] = 0.0
         has_completed_production = bool(
             self.env["mrp.production"].search_count(
                 [
@@ -46,25 +49,23 @@ class MaquilaTumWizard(models.TransientModel):
                 ]
             )
         )
-        if not has_completed_production:
-            # No completed production in the period: the origin split of the
-            # cost cannot be determined, so the VAN is left at zero and the
-            # TUM base falls back to the export invoice amount, matching the
-            # behavior of l10n_py_maquila_ops without this bridge installed.
-            for field_name in VAN_FIELDS:
-                self[field_name] = 0.0
+        if not program.analytic_account_id or not has_completed_production:
             self.van_warning = _(
-                "No completed production was found for program %(program)s in "
-                "the selected period, so the VAN could not be determined. The "
-                "TUM base uses the export invoice amount only.",
+                "The MRP origin split of the inputs needs an analytic account "
+                "on program %(program)s and a completed manufacturing order in "
+                "the period. It is informative only and does not change the "
+                "TUM base.",
                 program=program.code,
             )
             return result
         self.van_warning = False
         vals = program._maquila_van_for_period(self.period_start, self.period_end)
-        company = self.env.company
-        for field_name in VAN_FIELDS:
+        company = program.company_id
+        for field_name in MRP_FIELDS:
             self[field_name] = company.currency_id._convert(
                 vals[field_name], self.currency_id, company, self.period_end
             )
+        self.mrp_van_amount = company.currency_id._convert(
+            vals["van_amount"], self.currency_id, company, self.period_end
+        )
         return result

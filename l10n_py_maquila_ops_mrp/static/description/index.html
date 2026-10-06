@@ -375,20 +375,19 @@ ul.auto-toc {
 <ul class="simple">
 <li>Auto-installs when both modules are present, so no manual
 configuration is needed to link them.</li>
-<li>Extends the <strong>TUM 1% wizard</strong>’s <tt class="docutils literal">action_compute</tt> to also compute
-the VAN (national added value) for the period, via the program’s
-shared <tt class="docutils literal">_maquila_van_for_period</tt> method, so the TUM and VAN wizards
-always report the same figures for the same program and period.</li>
-<li>The VAN amounts (<tt class="docutils literal">total_cost</tt>, <tt class="docutils literal">national_cost</tt>,
-<tt class="docutils literal">mercosul_cost</tt>, <tt class="docutils literal">imported_cost</tt>, <tt class="docutils literal">van_amount</tt>) are stored in
-the company currency by <tt class="docutils literal">_maquila_van_for_period</tt> and are converted
-to the wizard’s currency before being displayed.</li>
-<li>If there is no completed manufacturing order in the period, the
-origin split of the cost cannot be determined: the VAN is left at
-zero, a warning is shown on the wizard, and the TUM base falls back
-to the export invoice amount only (the same behavior as without this
-module installed). A missing analytic account on the program is still
-a blocking configuration error.</li>
+<li>The TUM base keeps the value added of Ley 7547/2025 Art. 37, computed
+by <tt class="docutils literal">l10n_py_maquila_ops</tt> from the accounting (goods and services
+acquired in the country, salaries with social security, depreciation
+and the maquila service remuneration).</li>
+<li>This module adds to the <strong>TUM 1% wizard</strong>, for information, the origin
+split of the inputs consumed by the completed manufacturing orders of
+the period (national, Mercosur and imported cost, and the national
+content), via the shared <tt class="docutils literal">_maquila_van_for_period</tt> method of the
+program used by the VAN wizard and the CNIME report. The amounts are
+converted to the currency of the wizard.</li>
+<li>Without an analytic account on the program or a completed
+manufacturing order in the period, the split stays at zero and a
+notice is shown. It never changes the TUM base.</li>
 </ul>
 <p><strong>Table of contents</strong></p>
 <div class="contents local topic" id="contents">
@@ -408,14 +407,13 @@ a blocking configuration error.</li>
 <ol class="arabic simple">
 <li>Install both <tt class="docutils literal">l10n_py_maquila_ops</tt> and <tt class="docutils literal">l10n_py_maquila_mrp</tt>;
 this module installs itself automatically.</li>
-<li>Open the <strong>TUM 1%</strong> wizard from a program with an analytic account
-configured, and run <strong>Compute</strong>. The VAN fields (national, Mercosur
-and imported cost, and the VAN amount) are filled in alongside the
-export invoice amount, and the TUM base uses whichever of the two is
-higher.</li>
-<li>If the selected period has no completed manufacturing order, the VAN
-fields stay at zero and a warning is shown; the TUM base then uses
-the export invoice amount only.</li>
+<li>Open the <strong>TUM 1%</strong> wizard and run <strong>Compute</strong>. The value added (Art.
+37) and the export invoice amount are filled in by
+<tt class="docutils literal">l10n_py_maquila_ops</tt>, and the TUM base uses whichever of the two
+is higher.</li>
+<li>With an analytic account on the program and a completed manufacturing
+order in the period, the <em>Input origin (MRP, informative)</em> group
+shows the origin split of the consumed inputs.</li>
 </ol>
 </div>
 <div class="section" id="bug-tracker">

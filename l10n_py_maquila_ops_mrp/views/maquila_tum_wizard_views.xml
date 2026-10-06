@@ -8,23 +8,29 @@
             ref="l10n_py_maquila_ops.view_maquila_tum_wizard_form"
         />
         <field name="arch" type="xml">
-            <field name="van_amount" position="after">
-                <field name="total_cost" />
-                <field name="national_cost" />
-                <field name="mercosul_cost" />
-                <field name="imported_cost" />
-            </field>
             <xpath
                 expr="//field[@name='van_amount']/ancestor::group[2]"
-                position="before"
+                position="after"
             >
-                <div
-                    class="alert alert-warning"
-                    role="alert"
-                    invisible="not van_warning"
-                >
-                    <field name="van_warning" />
-                </div>
+                <group string="Input origin (MRP, informative)">
+                    <div
+                        class="alert alert-info"
+                        role="alert"
+                        invisible="not van_warning"
+                        colspan="2"
+                    >
+                        <field name="van_warning" />
+                    </div>
+                    <group>
+                        <field name="total_cost" />
+                        <field name="national_cost" />
+                    </group>
+                    <group>
+                        <field name="mercosul_cost" />
+                        <field name="imported_cost" />
+                        <field name="mrp_van_amount" />
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>

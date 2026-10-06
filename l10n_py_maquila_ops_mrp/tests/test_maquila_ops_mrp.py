@@ -1,7 +1,6 @@
 # Copyright 2026 KMEE
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo.exceptions import UserError
 from odoo.tests import Form, tagged
 from odoo.tests.common import TransactionCase
 
@@ -87,6 +86,14 @@ class TestMaquilaOpsMrp(TransactionCase):
         cls.export_product = cls.env["product.product"].create(
             {"name": "Bridge Export Product", "is_storable": False}
         )
+        # With the Paraguayan localization installed (as when the whole
+        # repository is tested) a sale journal of a PY company requires a
+        # timbrado; the export invoice here only feeds the TUM amounts.
+        cls.sale_journal = cls.env["account.journal"].create(
+            {"name": "Bridge Sales", "code": "BRGS", "type": "sale"}
+        )
+        if "l10n_latam_use_documents" in cls.sale_journal._fields:
+            cls.sale_journal.l10n_latam_use_documents = False
 
     def _make_done_production(self):
         mo_form = Form(self.env["mrp.production"])
@@ -105,6 +112,7 @@ class TestMaquilaOpsMrp(TransactionCase):
         move = self.env["account.move"].create(
             {
                 "move_type": "out_invoice",
+                "journal_id": self.sale_journal.id,
                 "partner_id": self.matriz.id,
                 "invoice_date": invoice_date,
                 "l10n_py_maquila_program_id": self.program.id,
@@ -131,27 +139,15 @@ class TestMaquilaOpsMrp(TransactionCase):
                 "program_id": self.program.id,
                 "period_start": "2026-01-01",
                 "period_end": "2026-12-31",
+                # Amounts below are in company currency (PYG when the
+                # Paraguayan chart is loaded, USD otherwise).
+                "currency_id": self.company.currency_id.id,
             }
         )
 
-    def test_action_compute_requires_analytic(self):
-        wiz = self._make_tum_wizard()
-        with self.assertRaises(UserError):
-            wiz.action_compute()
-
-    def test_action_compute_no_production_falls_back_to_export_invoice(self):
-        self.program.analytic_account_id = self.analytic.id
-        self._make_export_invoice(5000)
-        wiz = self._make_tum_wizard()
-        wiz.action_compute()
-        self.assertEqual(wiz.van_amount, 0)
-        self.assertEqual(wiz.total_cost, 0)
-        self.assertTrue(wiz.van_warning)
-        self.assertEqual(wiz.export_invoice_amount, 5000)
-        self.assertEqual(wiz.tum_base, wiz.export_invoice_amount)
-
-    def test_action_compute_with_production_van_above_export(self):
-        self.program.analytic_account_id = self.analytic.id
+    def _cost_line(self):
+        # Analytic cost without a journal item: it feeds the MRP split only,
+        # it is not value added under Ley 7547/2025 Art. 37.
         self.env["account.analytic.line"].create(
             {
                 "name": "total cost",
@@ -160,6 +156,31 @@ class TestMaquilaOpsMrp(TransactionCase):
                 "date": "2026-06-01",
             }
         )
+
+    def test_action_compute_without_analytic_is_informative(self):
+        self._make_export_invoice(5000)
+        wiz = self._make_tum_wizard()
+        wiz.action_compute()
+        self.assertTrue(wiz.van_warning)
+        self.assertEqual(wiz.total_cost, 0)
+        self.assertEqual(wiz.export_invoice_amount, 5000)
+        self.assertEqual(wiz.tum_base, 5000)
+
+    def test_action_compute_no_production(self):
+        self.program.analytic_account_id = self.analytic.id
+        self._cost_line()
+        self._make_export_invoice(5000)
+        wiz = self._make_tum_wizard()
+        wiz.action_compute()
+        self.assertTrue(wiz.van_warning)
+        self.assertEqual(wiz.total_cost, 0)
+        self.assertEqual(wiz.mrp_van_amount, 0)
+        self.assertEqual(wiz.van_amount, 0)
+        self.assertEqual(wiz.tum_base, wiz.export_invoice_amount)
+
+    def test_action_compute_with_production_does_not_change_base(self):
+        self.program.analytic_account_id = self.analytic.id
+        self._cost_line()
         self._make_done_production()
         self._make_export_invoice(5000)
         wiz = self._make_tum_wizard()
@@ -168,37 +189,16 @@ class TestMaquilaOpsMrp(TransactionCase):
         self.assertEqual(wiz.total_cost, 8000)
         self.assertEqual(wiz.imported_cost, 20)
         self.assertEqual(wiz.national_cost, 60)
-        self.assertEqual(wiz.van_amount, 7980)
-        self.assertEqual(wiz.tum_base, wiz.van_amount)
-        self.assertEqual(wiz.tum_amount, wiz.tum_base * wiz.tum_rate / 100)
-
-    def test_action_compute_export_above_van(self):
-        self.program.analytic_account_id = self.analytic.id
-        self.env["account.analytic.line"].create(
-            {
-                "name": "total cost",
-                "account_id": self.analytic.id,
-                "amount": -8000,
-                "date": "2026-06-01",
-            }
-        )
-        self._make_done_production()
-        self._make_export_invoice(10000)
-        wiz = self._make_tum_wizard()
-        wiz.action_compute()
-        self.assertEqual(wiz.van_amount, 7980)
-        self.assertEqual(wiz.tum_base, wiz.export_invoice_amount)
+        self.assertEqual(wiz.mrp_van_amount, 7980)
+        # The TUM base is the Art. 37 value added (nothing booked here) or the
+        # export invoice value, never the MRP national content.
+        self.assertEqual(wiz.van_amount, 0)
+        self.assertEqual(wiz.tum_base, 5000)
+        self.assertEqual(wiz.tum_amount, 50)
 
     def test_action_compute_converts_to_wizard_currency(self):
         self.program.analytic_account_id = self.analytic.id
-        self.env["account.analytic.line"].create(
-            {
-                "name": "total cost",
-                "account_id": self.analytic.id,
-                "amount": -8000,
-                "date": "2026-06-01",
-            }
-        )
+        self._cost_line()
         self._make_done_production()
         usd = self.env.ref("base.USD")
         eur = self.env.ref("base.EUR")
@@ -218,5 +218,5 @@ class TestMaquilaOpsMrp(TransactionCase):
         expected = self.company.currency_id._convert(
             7980, wizard_currency, self.company, wiz.period_end
         )
-        self.assertEqual(wiz.van_amount, expected)
-        self.assertNotEqual(wiz.van_amount, 7980)
+        self.assertEqual(wiz.mrp_van_amount, expected)
+        self.assertNotEqual(wiz.mrp_van_amount, 7980)

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Load the Paraguayan chart of accounts in the demo company only.
+         install_demo=True is what allows the call while the registry is still
+         loading (no try_loading warning), and also loads the Odoo core
+         accounting demo data on the chart. This file comes after the
+         timbrados: the core demo invoices are posted during the call and
+         take their timbrado and number from them (see
+         account.chart.template _get_demo_data_move). -->
+    <function model="account.chart.template" name="try_loading">
+        <value eval="[]" />
+        <value>py</value>
+        <value
+            model="res.company"
+            eval="obj().env.ref('l10n_py_account.demo_company_py')"
+        />
+        <value name="install_demo" eval="True" />
+    </function>
+</odoo>

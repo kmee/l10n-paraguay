@@ -42,17 +42,18 @@
         <field name="active" eval="True" />
     </record>
 
-    <!-- Timbrado para notas de crédito -->
+    <!-- Timbrado para notas de crédito. Valid since 90 days ago: the credit
+         notes of the Odoo accounting demo are dated up to two months back -->
     <record id="demo_authorization_credit_note" model="account.authorization">
         <field name="company_id" ref="demo_company_py" />
         <field name="name">11223344</field>
         <field
             name="date_from"
-            eval="(datetime.now() - timedelta(days=20)).strftime('%Y-%m-%d')"
+            eval="(datetime.now() - timedelta(days=90)).strftime('%Y-%m-%d')"
         />
         <field
             name="date_to"
-            eval="(datetime.now() + timedelta(days=345)).strftime('%Y-%m-%d')"
+            eval="(datetime.now() + timedelta(days=275)).strftime('%Y-%m-%d')"
         />
         <field name="invoice_number_from">1</field>
         <field name="invoice_number_to">1000</field>

@@ -40,18 +40,4 @@
         />
         <value eval="{'company_ids': [(4, ref('demo_company_py'))]}" />
     </function>
-
-    <!-- Load the Paraguayan chart of accounts in the demo company only.
-         install_demo=True is what allows the call while the registry is still
-         loading (no try_loading warning), and also loads the Odoo core
-         accounting demo data on the chart. -->
-    <function model="account.chart.template" name="try_loading">
-        <value eval="[]" />
-        <value>py</value>
-        <value
-            model="res.company"
-            eval="obj().env.ref('l10n_py_account.demo_company_py')"
-        />
-        <value name="install_demo" eval="True" />
-    </function>
 </odoo>

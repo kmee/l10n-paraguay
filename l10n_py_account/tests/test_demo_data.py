@@ -57,6 +57,50 @@ class TestDemoData(TransactionCase):
             )
         )
 
+    def test_demo_company_customer_documents_have_timbrado(self):
+        """Every posted customer document of the PY demo company, the ones of
+        the Odoo accounting demo included, has a timbrado and a fiscal number"""
+        company = _ref_or_skip(self, "l10n_py_account.demo_company_py")
+        documents = self.env["account.move"].search(
+            [
+                ("company_id", "=", company.id),
+                ("move_type", "in", ("out_invoice", "out_refund")),
+                ("state", "=", "posted"),
+            ]
+        )
+        # 6 invoices of this module, 4 invoices and 5 credit notes of the
+        # Odoo accounting demo
+        self.assertGreaterEqual(len(documents), 15)
+        for document in documents:
+            self.assertTrue(document.l10n_py_authorization_id, document.name)
+            self.assertTrue(document.l10n_py_full_invoice_number, document.name)
+        credit_notes = documents.filtered(lambda m: m.move_type == "out_refund")
+        self.assertEqual(len(credit_notes), 5)
+        self.assertEqual(
+            credit_notes.l10n_latam_document_type_id,
+            self.env.ref("l10n_py_account.dc_py_nc"),
+        )
+        self.assertEqual(
+            credit_notes.l10n_py_authorization_id,
+            self.env.ref("l10n_py_account.demo_authorization_credit_note"),
+        )
+
+    def test_demo_company_vendor_documents_have_number(self):
+        """Posted vendor documents of the PY demo company carry the number of
+        the supplier document"""
+        company = _ref_or_skip(self, "l10n_py_account.demo_company_py")
+        bills = self.env["account.move"].search(
+            [
+                ("company_id", "=", company.id),
+                ("move_type", "in", ("in_invoice", "in_refund")),
+                ("state", "=", "posted"),
+            ]
+        )
+        self.assertEqual(len(bills), 4)
+        for bill in bills:
+            self.assertTrue(bill.l10n_latam_document_number, bill.id)
+            self.assertTrue(bill.name, bill.id)
+
     def test_demo_partners_exist(self):
         """Partners demo foram criados com dados corretos"""
         partner = _ref_or_skip(self, "l10n_py_account.partner_contribuyente_general")

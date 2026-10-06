@@ -23,11 +23,13 @@
         "views/account_journal_views.xml",
         "views/account_move_views.xml",
     ],
-    # Order matters: the demo company (and its chart of accounts) first
+    # Order matters: the demo company and its timbrados first, then its chart
+    # of accounts (which posts the core demo invoices)
     "demo": [
         "demo/res_company_demo.xml",
         "demo/res_partner_demo.xml",
         "demo/account_authorization_demo.xml",
+        "demo/account_chart_template_demo.xml",
         "demo/product_product_demo.xml",
         "demo/account_customer_invoice_demo.xml",
         "demo/account_supplier_invoice_demo.xml",

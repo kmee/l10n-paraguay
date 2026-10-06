@@ -1,0 +1,93 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_py_maquila_inter_company
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-06 06:01+0000\n"
+"PO-Revision-Date: 2026-10-06 05:54+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_sale_order__l10n_py_maquila_agreement_id
+msgid "CNIME Contract"
+msgstr "Contrato CNIME"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model,name:l10n_py_maquila_inter_company.model_account_move
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model,name:l10n_py_maquila_inter_company.model_account_move_line
+msgid "Journal Item"
+msgstr "Apunte contable"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_account_move_line__l10n_py_source_ncm_code
+msgid "NCM (supplier)"
+msgstr "NCM (proveedor)"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_account_move_line__l10n_py_source_ncm_code
+msgid "NCM code of the product as declared in the Paraguayan document that generated this inter-company line."
+msgstr "Código NCM del producto, tal como fue declarado en el documento paraguayo que generó esta línea intercompañía."
+
+#. module: l10n_py_maquila_inter_company
+#. odoo-python
+#: code:addons/l10n_py_maquila_inter_company/models/sale_order.py:0
+msgid "No active maquila program of %(company)s has %(matrix)s as foreign matrix. Set the program manually before exporting."
+msgstr "Ningún programa de maquila activo de %(company)s tiene a %(matrix)s como matriz extranjera. Defina el programa manualmente antes de exportar."
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_account_bank_statement_line__l10n_py_source_document_number
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_account_move__l10n_py_source_document_number
+msgid "Number (establishment-point-number) of the Paraguayan document that generated this inter-company bill."
+msgstr "Número (establecimiento-punto-número) del documento paraguayo que generó esta factura intercompañía."
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_sale_order__l10n_py_maquila_agreement_id
+msgid "OCA Agreement linked to CNIME contract"
+msgstr "Convenio OCA vinculado al contrato CNIME"
+
+#. module: l10n_py_maquila_inter_company
+#. odoo-python
+#: code:addons/l10n_py_maquila_inter_company/models/sale_order.py:0
+msgid "Products not listed in maquila program %(program)s:"
+msgstr "Productos no incluidos en el programa de maquila %(program)s:"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model,name:l10n_py_maquila_inter_company.model_purchase_order
+msgid "Purchase Order"
+msgstr "Orden de compra"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_account_bank_statement_line__l10n_py_source_cdc
+#: model:ir.model.fields,help:l10n_py_maquila_inter_company.field_account_move__l10n_py_source_cdc
+msgid "SIFEN control code of the Paraguayan document that generated this inter-company bill. Empty until the document is sent to SIFEN."
+msgstr "Código de control SIFEN del documento paraguayo que generó esta factura intercompañía. Vacío hasta que el documento sea enviado al SIFEN."
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model,name:l10n_py_maquila_inter_company.model_sale_order
+msgid "Sales Order"
+msgstr "Orden de venta"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_account_bank_statement_line__l10n_py_source_cdc
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_account_move__l10n_py_source_cdc
+msgid "Supplier CDC (PY)"
+msgstr "CDC del proveedor (PY)"
+
+#. module: l10n_py_maquila_inter_company
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_account_bank_statement_line__l10n_py_source_document_number
+#: model:ir.model.fields,field_description:l10n_py_maquila_inter_company.field_account_move__l10n_py_source_document_number
+msgid "Supplier Document Number (PY)"
+msgstr "Número de documento del proveedor (PY)"

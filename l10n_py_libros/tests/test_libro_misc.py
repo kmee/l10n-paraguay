@@ -103,6 +103,14 @@ class TestLibroMisc(LibroCommonCase):
         self.assertNotIn("oe_chatter", arch)
         self.assertIn('name="action_download_zip"', arch)
 
+    def test_display_name(self):
+        """The record title names the register and the period, not the
+        technical model name and id."""
+        libro = self._create_libro("ventas", year=2026, month=3)
+        self.assertEqual(libro.display_name, "Ventas 03/2026")
+        libro.write({"obligacion": "956", "month": 0})
+        self.assertEqual(libro.display_name, "Ventas 2026")
+
     def test_no_ai_attribution(self):
         module_dir = Path(__file__).resolve().parent.parent
         self_file = Path(__file__).resolve()

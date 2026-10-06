@@ -139,6 +139,16 @@ class L10nPyLibro(models.Model):
                 libro.date_start = False
                 libro.date_end = False
 
+    @api.depends("tipo_registro", "obligacion", "year", "month")
+    def _compute_display_name(self):
+        labels = dict(self._fields["tipo_registro"]._description_selection(self.env))
+        for libro in self:
+            period = str(libro.year or "")
+            if libro.obligacion != "956" and libro.month:
+                period = f"{libro.month:02d}/{period}"
+            parts = [labels.get(libro.tipo_registro, ""), period]
+            libro.display_name = " ".join(part for part in parts if part)
+
     @api.depends("line_ids.state")
     def _compute_error_line_count(self):
         for libro in self:

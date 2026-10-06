@@ -1295,8 +1295,9 @@ class AccountMove(models.Model):
         if not self.l10n_py_edi_xml:
             raise UserError(_("No hay XML disponible para generar el KuDE"))
 
-        from pykude import auto_kude
         from pykude.kude_fe.config import KudeFeConfig
+
+        from ..services.kude_pdf import build_kude
 
         xml_content = base64.b64decode(self.l10n_py_edi_xml).decode("utf-8")
 
@@ -1304,7 +1305,7 @@ class AccountMove(models.Model):
         if self.company_id.logo:
             config.logo = base64.b64decode(self.company_id.logo)
 
-        kude = auto_kude(xml=xml_content, config=config)
+        kude = build_kude(xml=xml_content, config=config)
         pdf_bytes = kude.output()
 
         attachment = self.env["ir.attachment"].create(
@@ -1532,8 +1533,9 @@ class AccountMove(models.Model):
         self.ensure_one()
         if not self.l10n_py_edi_xml:
             return
-        from pykude import auto_kude
         from pykude.kude_fe.config import KudeFeConfig
+
+        from ..services.kude_pdf import build_kude
 
         xml_content = base64.b64decode(self.l10n_py_edi_xml).decode("utf-8")
 
@@ -1541,7 +1543,7 @@ class AccountMove(models.Model):
         if self.company_id.logo:
             config.logo = base64.b64decode(self.company_id.logo)
 
-        kude = auto_kude(xml=xml_content, config=config)
+        kude = build_kude(xml=xml_content, config=config)
         pdf_bytes = kude.output()
         self.l10n_py_kude_pdf = base64.b64encode(pdf_bytes)
         self.l10n_py_kude_filename = f"KUDE_{self.l10n_py_cdc}.pdf"

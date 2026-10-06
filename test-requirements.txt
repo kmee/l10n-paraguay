@@ -1,0 +1,1 @@
+odoo-addon-l10n_py_maquila_ops @ git+https://github.com/OCA/l10n-paraguay.git@refs/pull/22/head#subdirectory=l10n_py_maquila_ops

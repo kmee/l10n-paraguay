@@ -1,0 +1,477 @@
+# Copyright 2026 KMEE
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+
+from dateutil.relativedelta import relativedelta
+
+from odoo import fields
+from odoo.exceptions import UserError
+from odoo.tests import tagged
+from odoo.tests.common import TransactionCase
+
+
+@tagged("post_install", "-at_install")
+class TestMaquilaOps(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.company = cls.env.company
+        cls.py = cls.env.ref("base.py")
+        cls.matriz = cls.env["res.partner"].create({"name": "Ops Matriz"})
+        cls.program = cls.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Ops Program",
+                "code": "RES-BIM-OPS-001",
+                "maquila_type": "pura",
+                "matriz_partner_id": cls.matriz.id,
+                "company_id": cls.company.id,
+                "state": "active",
+                "internal_sale_pct": 10.0,
+            }
+        )
+        cls.product = cls.env["product.product"].create(
+            {"name": "Ops Product", "is_storable": True, "list_price": 100.0}
+        )
+
+    # ---------- admission ----------
+    def _admission(self, cif=40000, guarantee=None, cert="CN-1"):
+        return self.env["l10n_py.maquila.admission"].create(
+            {
+                "name": f"DI-OPS-{cert}",
+                "program_id": self.program.id,
+                "guarantee_id": guarantee and guarantee.id,
+                "cnime_certificate": cert,
+                "amount_cif": cif,
+                "line_ids": [(0, 0, {"product_id": self.product.id, "quantity": 100})],
+            }
+        )
+
+    def test_admission_deadline(self):
+        adm = self._admission()
+        expected = adm.date_admission + relativedelta(months=12)
+        self.assertEqual(adm.date_deadline, expected)
+
+    def test_admission_qty_remaining_no_outflow(self):
+        adm = self._admission()
+        line = adm.line_ids
+        # No stock has left the admission location yet.
+        self.assertEqual(line.qty_consumed, 0.0)
+        self.assertEqual(line.qty_remaining, line.quantity)
+
+    def test_admission_requires_cnime(self):
+        adm = self._admission(cert="")
+        adm.cnime_certificate = False
+        with self.assertRaises(UserError):
+            adm.action_admit()
+
+    def test_admission_extend_once(self):
+        adm = self._admission()
+        adm.action_admit()
+        adm.action_extend()
+        self.assertEqual(
+            adm.date_extended, adm.date_deadline + relativedelta(months=12)
+        )
+        with self.assertRaises(UserError):
+            adm.action_extend()
+
+    # ---------- guarantee ----------
+    def test_guarantee_amounts(self):
+        guar = self.env["l10n_py.maquila.guarantee"].create(
+            {
+                "name": "Ops Guar",
+                "program_id": self.program.id,
+                "guarantee_type": "bank",
+                "amount": 100000,
+                "date_start": fields.Date.today(),
+                "date_end": fields.Date.today() + relativedelta(years=1),
+            }
+        )
+        self.assertEqual(guar.amount_available, 100000)
+        adm = self._admission(cif=40000, guarantee=guar)
+        adm.action_admit()
+        self.assertEqual(guar.amount_available, 60000)
+
+    def test_admission_guarantee_insufficient(self):
+        guar = self.env["l10n_py.maquila.guarantee"].create(
+            {
+                "name": "Ops Guar2",
+                "program_id": self.program.id,
+                "guarantee_type": "bank",
+                "amount": 30000,
+                "date_start": fields.Date.today(),
+                "date_end": fields.Date.today() + relativedelta(years=1),
+            }
+        )
+        adm = self._admission(cif=90000, guarantee=guar, cert="CN-X")
+        with self.assertRaises(UserError):
+            adm.action_admit()
+
+    # ---------- export ----------
+    def test_export_traceability(self):
+        exp = self.env["l10n_py.maquila.export"].create(
+            {"name": "EXP-OPS-1", "program_id": self.program.id}
+        )
+        with self.assertRaises(UserError):
+            exp.action_confirm()
+        adm = self._admission(cert="CN-EXP")
+        exp.admission_ids = [(6, 0, [adm.id])]
+        exp.action_confirm()
+        self.assertEqual(exp.state, "confirmed")
+
+    # ---------- TUM wizard ----------
+    def _accounts(self):
+        journal = self.env["account.journal"].search(
+            [("type", "=", "general"), ("company_id", "=", self.company.id)], limit=1
+        )
+        if not journal:
+            journal = self.env["account.journal"].create(
+                {"name": "Misc", "code": "MISC", "type": "general"}
+            )
+        exp_acc = self.env["account.account"].search(
+            [("account_type", "=", "expense")], limit=1
+        ) or self.env["account.account"].create(
+            {"name": "Exp", "code": "EXP1", "account_type": "expense"}
+        )
+        pay_acc = self.env["account.account"].search(
+            [("account_type", "=", "liability_current")], limit=1
+        ) or self.env["account.account"].create(
+            {"name": "Pay", "code": "PAY1", "account_type": "liability_current"}
+        )
+        return journal, exp_acc, pay_acc
+
+    def test_tum_wizard(self):
+        _j, exp_acc, pay_acc = self._accounts()
+        wiz = self.env["l10n_py.maquila.tum.wizard"].create(
+            {
+                "program_id": self.program.id,
+                "period_start": "2026-01-01",
+                "period_end": "2026-12-31",
+                "van_amount": 30000,
+                "export_invoice_amount": 50000,
+                "tum_rate": 1.0,
+                "debit_account_id": exp_acc.id,
+                "credit_account_id": pay_acc.id,
+            }
+        )
+        self.assertEqual(wiz.tum_base, 50000)
+        self.assertEqual(wiz.tum_amount, 500)
+        res = wiz.action_generate_move()
+        move = self.env["account.move"].browse(res["res_id"])
+        self.assertEqual(move.l10n_py_maquila_program_id, self.program)
+        self.assertEqual(len(move.line_ids), 2)
+
+    def test_tax_credit_wizard(self):
+        _j, exp_acc, pay_acc = self._accounts()
+        wiz = self.env["l10n_py.maquila.tax.credit.wizard"].create(
+            {
+                "program_id": self.program.id,
+                "action_type": "compensate",
+                "amount": 1000,
+                "debit_account_id": exp_acc.id,
+                "credit_account_id": pay_acc.id,
+            }
+        )
+        res = wiz.action_execute()
+        move = self.env["account.move"].browse(res["res_id"])
+        self.assertEqual(move.l10n_py_maquila_program_id, self.program)
+
+    # ---------- domestic sales cap (Ley 7547/2025 Art. 18) ----------
+    def _prior_year_export(self, fob, program=None):
+        year = fields.Date.today().year - 1
+        self.env["l10n_py.maquila.export"].create(
+            {
+                "name": "EXP-PRIOR",
+                "program_id": (program or self.program).id,
+                "currency_id": self.company.currency_id.id,
+                "date_export": f"{year}-06-01",
+                "line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": self.product.id,
+                            "quantity": 1,
+                            "fob_value": fob,
+                        },
+                    )
+                ],
+            }
+        )
+
+    def _domestic_sale(self, qty, program=None):
+        customer = self.env["res.partner"].create(
+            {"name": "PY Customer", "country_id": self.py.id}
+        )
+        return self.env["sale.order"].create(
+            {
+                "partner_id": customer.id,
+                "l10n_py_maquila_program_id": (program or self.program).id,
+                "order_line": [
+                    (0, 0, {"product_id": self.product.id, "product_uom_qty": qty})
+                ],
+            }
+        )
+
+    def test_domestic_sale_within_cap(self):
+        self._prior_year_export(100000)  # cap = 10% = 10000
+        order = self._domestic_sale(50)  # 50 * 100 = 5000
+        order.action_confirm()
+        self.assertEqual(order.state, "sale")
+
+    def test_domestic_sale_exceeds_cap(self):
+        self._prior_year_export(100000)  # cap = 10000
+        order = self._domestic_sale(200)  # 200 * 100 = 20000 > 10000
+        with self.assertRaises(UserError):
+            order.action_confirm()
+
+    def test_domestic_sale_no_prior_export_allowed(self):
+        # New maquiladora with no prior-year exports: no cap to enforce.
+        order = self._domestic_sale(200)
+        order.action_confirm()
+        self.assertEqual(order.state, "sale")
+
+    def test_domestic_cap_skipped_for_non_pura(self):
+        # A separate program so it does not affect the shared "pura" one.
+        prog = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Ops Ociosidad",
+                "code": "RES-BIM-OPS-OCI",
+                "maquila_type": "ociosidad",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": self.company.id,
+                "state": "active",
+            }
+        )
+        self._prior_year_export(100000, program=prog)  # cap would be 10000 if pura
+        order = self._domestic_sale(500, program=prog)  # 50000, over — but not pura
+        order.action_confirm()
+        self.assertEqual(order.state, "sale")
+
+    # ---------- fiscal position on export orders ----------
+    def _py_chart_company(self, name):
+        """A company with the real l10n_py chart loaded (fiscal positions,
+        including the auto_apply "Ventas - Exportación" one, and taxes)."""
+        company = self.env["res.company"].create({"name": name})
+        self.env["account.chart.template"].try_loading(
+            "py", company=company, install_demo=False
+        )
+        return company
+
+    def _foreign_partner(self, name="Foreign Matriz"):
+        return self.env["res.partner"].create(
+            {"name": name, "country_id": self.env.ref("base.br").id}
+        )
+
+    def _maquila_export_order(self, company, program):
+        foreign = self._foreign_partner()
+        order = self.env["sale.order"].create(
+            {"partner_id": foreign.id, "company_id": company.id}
+        )
+        # Simulate what Odoo's own onchange machinery does when the
+        # quotation partner is set: auto-detect the fiscal position first.
+        order.fiscal_position_id = (
+            self.env["account.fiscal.position"]
+            .with_company(company)
+            ._get_fiscal_position(foreign)
+        )
+        order.l10n_py_maquila_program_id = program
+        order._onchange_maquila_program()
+        return order
+
+    def test_maquila_export_keeps_auto_detected_exoneration(self):
+        """A maquila export order for a foreign partner must not lose the
+        chart's auto-detected "Ventas - Exportación" fiscal position (which
+        maps VAT to exonerado) in favor of the maquila position, which has
+        no tax mapping of its own."""
+        company = self._py_chart_company("PY Maquila Export Co")
+        program = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Export FP Program",
+                "code": "RES-BIM-OPS-FP1",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": company.id,
+                "state": "active",
+            }
+        )
+        vat10 = (
+            self.env["account.tax"]
+            .with_company(company)
+            .search(
+                [
+                    ("company_id", "=", company.id),
+                    ("type_tax_use", "=", "sale"),
+                    ("amount", "=", 10),
+                ],
+                limit=1,
+            )
+        )
+        self.assertTrue(vat10, "the l10n_py chart must provide a 10% sale tax")
+
+        order = self._maquila_export_order(company, program)
+
+        self.assertEqual(
+            order.fiscal_position_id.name,
+            "Ventas - Exportación",
+            "the export order must keep the chart's auto-detected fiscal "
+            "position, not the maquila one",
+        )
+        mapped = order.fiscal_position_id.map_tax(vat10)
+        self.assertNotEqual(
+            mapped,
+            vat10,
+            "the fiscal position has no mapping for the 10%% VAT tax, so "
+            "map_tax returned it unchanged instead of the exonerated tax",
+        )
+        self.assertEqual(
+            mapped.l10n_py_iva_affectation,
+            "2",
+            "a maquila export must end with exonerated VAT, not 10%",
+        )
+
+    def test_maquila_export_fiscal_position_per_company(self):
+        """The maquila onchange must not crash with "Incompatible companies"
+        for a second company, and must resolve exonerated VAT for it too."""
+        company1 = self._py_chart_company("PY Maquila Export Co A")
+        company2 = self._py_chart_company("PY Maquila Export Co B")
+        program1 = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Export FP Program A",
+                "code": "RES-BIM-OPS-FP2",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": company1.id,
+                "state": "active",
+            }
+        )
+        program2 = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Export FP Program B",
+                "code": "RES-BIM-OPS-FP3",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": company2.id,
+                "state": "active",
+            }
+        )
+
+        # First company claims/uses the maquila fiscal position...
+        self._maquila_export_order(company1, program1)
+        # ...a second company must not raise "Incompatible companies" and
+        # must resolve its own exonerated VAT mapping.
+        vat10_c2 = (
+            self.env["account.tax"]
+            .with_company(company2)
+            .search(
+                [
+                    ("company_id", "=", company2.id),
+                    ("type_tax_use", "=", "sale"),
+                    ("amount", "=", 10),
+                ],
+                limit=1,
+            )
+        )
+        order2 = self._maquila_export_order(company2, program2)
+
+        self.assertEqual(
+            order2.fiscal_position_id.name,
+            "Ventas - Exportación",
+            "company2's export order must resolve its own auto-detected "
+            "fiscal position",
+        )
+        mapped = order2.fiscal_position_id.map_tax(vat10_c2)
+        self.assertNotEqual(
+            mapped,
+            vat10_c2,
+            "company2's fiscal position has no mapping for its 10%% VAT "
+            "tax, so map_tax returned it unchanged instead of the "
+            "exonerated tax",
+        )
+        self.assertEqual(mapped.l10n_py_iva_affectation, "2")
+
+    def _domestic_partner(self):
+        return self.env["res.partner"].create(
+            {"name": "PY Domestic Customer", "country_id": self.py.id}
+        )
+
+    def test_maquila_domestic_sale_gets_maquila_position_with_exoneration(self):
+        """A domestic maquila sale (non-foreign partner, no auto-detected
+        export position) must be assigned the chart-provided "Maquila -
+        Exportacion Exenta" fiscal position, with its VAT -> exonerado
+        mapping already in place."""
+        company = self._py_chart_company("PY Maquila Domestic Co")
+        program = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "Domestic FP Program",
+                "code": "RES-BIM-OPS-FP4",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": company.id,
+                "state": "active",
+            }
+        )
+        vat10 = (
+            self.env["account.tax"]
+            .with_company(company)
+            .search(
+                [
+                    ("company_id", "=", company.id),
+                    ("type_tax_use", "=", "sale"),
+                    ("amount", "=", 10),
+                ],
+                limit=1,
+            )
+        )
+        order = self.env["sale.order"].create(
+            {"partner_id": self._domestic_partner().id, "company_id": company.id}
+        )
+        order.l10n_py_maquila_program_id = program
+        order._onchange_maquila_program()
+
+        self.assertEqual(
+            order.fiscal_position_id.name,
+            "Maquila - Exportacion Exenta",
+            "a domestic maquila sale must get the chart's maquila position",
+        )
+        mapped = order.fiscal_position_id.map_tax(vat10)
+        self.assertEqual(mapped.l10n_py_iva_affectation, "2")
+
+    def test_onchange_maquila_program_creates_no_fiscal_position(self):
+        """The onchange must never create account.fiscal.position or
+        account.fiscal.position.tax records: it can only read/assign
+        records already provided by the chart template data."""
+        company = self._py_chart_company("PY Maquila No Create Co")
+        program = self.env["l10n_py.maquila.program"].create(
+            {
+                "name": "No Create FP Program",
+                "code": "RES-BIM-OPS-FP5",
+                "maquila_type": "pura",
+                "matriz_partner_id": self.matriz.id,
+                "company_id": company.id,
+                "state": "active",
+            }
+        )
+        order = self.env["sale.order"].create(
+            {"partner_id": self._domestic_partner().id, "company_id": company.id}
+        )
+        order.l10n_py_maquila_program_id = program
+
+        fp_count_before = self.env["account.fiscal.position"].search_count([])
+        fpt_count_before = self.env["account.fiscal.position.tax"].search_count([])
+        order._onchange_maquila_program()
+        fp_count_after = self.env["account.fiscal.position"].search_count([])
+        fpt_count_after = self.env["account.fiscal.position.tax"].search_count([])
+
+        self.assertEqual(
+            fp_count_before,
+            fp_count_after,
+            "the onchange must not create any account.fiscal.position",
+        )
+        self.assertEqual(
+            fpt_count_before,
+            fpt_count_after,
+            "the onchange must not create any account.fiscal.position.tax",
+        )
+        self.assertTrue(
+            order.fiscal_position_id,
+            "the maquila position must still be assigned from chart data",
+        )

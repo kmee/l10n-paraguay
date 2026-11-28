@@ -1,0 +1,3 @@
+"id","name","country_id","auto_apply","tax_ids/tax_src_id","tax_ids/tax_dest_id"
+"py_maquila_fiscal_position_export","Maquila - Exportacion Exenta","","","py_tax_vat_10_ventas","py_tax_vat_exonerado_ventas"
+"","","","","py_tax_vat_5_ventas","py_tax_vat_exonerado_ventas"
